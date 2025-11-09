@@ -1,0 +1,1558 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Panel de Control</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="dashboard.css">
+</head>
+<body>
+    <!-- Sidebar Desktop -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <img src="https://cdn.shopify.com/s/files/1/0763/5392/9451/files/03_TEOTIHUACAN_-_Fuerzas_Basicas.png?v=1749841591" 
+                 alt="Logo" 
+                 class="sidebar-logo">
+            <h2 class="sidebar-title">Panel de Control</h2>
+            <p class="sidebar-subtitle">Casa Club</p>
+        </div>
+
+        <nav class="sidebar-nav">
+            <a href="#" class="nav-item active" data-page="dashboard">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="3" y="3" width="7" height="7"></rect>
+                    <rect x="14" y="3" width="7" height="7"></rect>
+                    <rect x="14" y="14" width="7" height="7"></rect>
+                    <rect x="3" y="14" width="7" height="7"></rect>
+                </svg>
+                <span>Dashboard</span>
+            </a>
+
+            <a href="#" class="nav-item" data-page="jugadores">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                    <circle cx="9" cy="7" r="4"></circle>
+                    <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                    <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                </svg>
+                <span>Jugadores</span>
+            </a>
+
+            <a href="#" class="nav-item" data-page="comedor">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M18 8h1a4 4 0 0 1 0 8h-1"></path>
+                    <path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"></path>
+                    <line x1="6" y1="1" x2="6" y2="4"></line>
+                    <line x1="10" y1="1" x2="10" y2="4"></line>
+                    <line x1="14" y1="1" x2="14" y2="4"></line>
+                </svg>
+                <span>Comedor</span>
+            </a>
+
+            <a href="#" class="nav-item" data-page="casaclub">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                    <polyline points="9 22 9 12 15 12 15 22"></polyline>
+                </svg>
+                <span>Casa Club</span>
+            </a>
+
+            <a href="#" class="nav-item" data-page="permisos">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                    <polyline points="14 2 14 8 20 8"></polyline>
+                    <line x1="12" y1="18" x2="12" y2="12"></line>
+                    <line x1="9" y1="15" x2="15" y2="15"></line>
+                </svg>
+                <span>Permisos</span>
+            </a>
+
+            <a href="#" class="nav-item" data-page="lesionados">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                    <circle cx="12" cy="7" r="4"></circle>
+                    <line x1="12" y1="17" x2="12" y2="17"></line>
+                </svg>
+                <span>Lesionados</span>
+            </a>
+
+            <a href="#" class="nav-item" data-page="mensualidades">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="2" y="5" width="20" height="14" rx="2"></rect>
+                    <line x1="2" y1="10" x2="22" y2="10"></line>
+                </svg>
+                <span>Mensualidades</span>
+            </a>
+
+            <a href="#" class="nav-item" data-page="exportar">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                    <polyline points="7 10 12 15 17 10"></polyline>
+                    <line x1="12" y1="15" x2="12" y2="3"></line>
+                </svg>
+                <span>Exportar</span>
+            </a>
+
+            <a href="#" class="nav-item" data-page="balance">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="12" y1="2" x2="12" y2="22"></line>
+                    <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+                </svg>
+                <span>Balance</span>
+            </a>
+
+            <a href="#" class="nav-item" data-page="altas">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                    <circle cx="8.5" cy="7" r="4"></circle>
+                    <line x1="20" y1="8" x2="20" y2="14"></line>
+                    <line x1="23" y1="11" x2="17" y2="11"></line>
+                </svg>
+                <span>Altas</span>
+            </a>
+
+            <a href="#" class="nav-item" data-page="bajas">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                    <circle cx="8.5" cy="7" r="4"></circle>
+                    <line x1="23" y1="11" x2="17" y2="11"></line>
+                </svg>
+                <span>Bajas</span>
+            </a>
+        </nav>
+
+        <div class="sidebar-footer">
+            <button class="btn-logout" id="btnLogout">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                    <polyline points="16 17 21 12 16 7"></polyline>
+                    <line x1="21" y1="12" x2="9" y2="12"></line>
+                </svg>
+                <span>Cerrar Sesión</span>
+            </button>
+        </div>
+    </aside>
+
+    <!-- Overlay para móvil -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <!-- Contenedor Principal -->
+    <main class="main-content">
+        <!-- Navbar Superior -->
+        <nav class="navbar">
+            <div class="navbar-left">
+                <button class="btn-menu" id="btnMenu">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="3" y1="12" x2="21" y2="12"></line>
+                        <line x1="3" y1="6" x2="21" y2="6"></line>
+                        <line x1="3" y1="18" x2="21" y2="18"></line>
+                    </svg>
+                </button>
+                <div class="navbar-title">
+                    <h1 id="pageTitle">Dashboard</h1>
+                    <p id="pageSubtitle">Resumen general del sistema</p>
+                </div>
+            </div>
+
+            <div class="navbar-right">
+                <!-- Selector de Tema -->
+                <div class="theme-selector">
+                    <button class="theme-btn" id="themeBtn" title="Cambiar tema">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="5"></circle>
+                            <line x1="12" y1="1" x2="12" y2="3"></line>
+                            <line x1="12" y1="21" x2="12" y2="23"></line>
+                            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                            <line x1="1" y1="12" x2="3" y2="12"></line>
+                            <line x1="21" y1="12" x2="23" y2="12"></line>
+                            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                        </svg>
+                    </button>
+                    <div class="theme-dropdown" id="themeDropdown">
+                        <button class="theme-option" data-theme="light">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="12" cy="12" r="5"></circle>
+                                <line x1="12" y1="1" x2="12" y2="3"></line>
+                                <line x1="12" y1="21" x2="12" y2="23"></line>
+                                <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                                <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                                <line x1="1" y1="12" x2="3" y2="12"></line>
+                                <line x1="21" y1="12" x2="23" y2="12"></line>
+                                <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                                <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                            </svg>
+                            <span>Claro</span>
+                        </button>
+                        <button class="theme-option" data-theme="dark">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                            </svg>
+                            <span>Oscuro</span>
+                        </button>
+                        <button class="theme-option active" data-theme="auto">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
+                                <line x1="8" y1="21" x2="16" y2="21"></line>
+                                <line x1="12" y1="17" x2="12" y2="21"></line>
+                            </svg>
+                            <span>Automático</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Usuario -->
+                <div class="user-info">
+                    <div class="user-avatar">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                            <circle cx="12" cy="7" r="4"></circle>
+                        </svg>
+                    </div>
+                    <div class="user-details">
+                        <span class="user-name" id="userName">Administrador</span>
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Contenido del Dashboard -->
+        <div class="dashboard-content">
+            <!-- Mensaje de Bienvenida -->
+            <div class="welcome-banner" id="welcomeBanner" style="display: none;">
+                <div class="welcome-content">
+                    <div class="welcome-main">
+                        <h2 class="welcome-title">Bienvenido, <span id="welcomeUserName">Usuario</span></h2>
+                        <div class="welcome-time-container">
+                            <span class="welcome-time" id="welcomeTime">
+                                <span class="time-hours" id="timeHours">--</span>
+                                <span class="time-separator">:</span>
+                                <span class="time-minutes" id="timeMinutes">--</span>
+                                <span class="time-period" id="timePeriod">--</span>
+                            </span>
+                        </div>
+                    </div>
+                    <div class="welcome-icon">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                            <circle cx="12" cy="7" r="4"></circle>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Resumen Balance (Compacto) -->
+            <div class="dashboard-balance-compact" id="dashboardBalanceCompact" style="display: none;">
+                <div class="balance-compact-content">
+                    <div class="balance-compact-info">
+                        <div class="balance-compact-label">Ingresos del Mes</div>
+                        <div class="balance-compact-value" id="balanceCompactValue">$0.00</div>
+                    </div>
+                    <div class="balance-compact-details" id="balanceCompactDetails">
+                        <span class="balance-compact-period">Cargando...</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Tarjetas Informativas -->
+            <div class="cards-grid" id="cardsGrid">
+                <!-- Tarjeta Adeudos -->
+                <div class="info-card card-adeudos">
+                    <div class="card-icon">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="2" y="5" width="20" height="14" rx="2"></rect>
+                            <line x1="2" y1="10" x2="22" y2="10"></line>
+                        </svg>
+                    </div>
+                    <div class="card-content">
+                        <h3 class="card-title">Adeudos</h3>
+                        <p class="card-value" id="adeudosCount">0</p>
+                        <p class="card-description">Pagos pendientes</p>
+                    </div>
+                    <div class="card-badge badge-critico">Alto</div>
+                </div>
+
+                <!-- Tarjeta Lesionados -->
+                <div class="info-card card-lesionados">
+                    <div class="card-icon">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                            <circle cx="12" cy="7" r="4"></circle>
+                            <line x1="12" y1="17" x2="12" y2="17"></line>
+                        </svg>
+                    </div>
+                    <div class="card-content">
+                        <h3 class="card-title">Lesionados</h3>
+                        <p class="card-value" id="lesionadosCount">0</p>
+                        <p class="card-description">Lesiones activas</p>
+                    </div>
+                    <div class="card-badge badge-medio">Medio</div>
+                </div>
+
+                <!-- Tarjeta Permisos -->
+                <div class="info-card card-permisos">
+                    <div class="card-icon">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                            <polyline points="14 2 14 8 20 8"></polyline>
+                            <line x1="12" y1="18" x2="12" y2="12"></line>
+                            <line x1="9" y1="15" x2="15" y2="15"></line>
+                        </svg>
+                    </div>
+                    <div class="card-content">
+                        <h3 class="card-title">Permisos</h3>
+                        <p class="card-value" id="permisosCount">0</p>
+                        <p class="card-description">Solicitudes pendientes</p>
+                    </div>
+                    <div class="card-badge badge-bajo">Bajo</div>
+                </div>
+
+                <!-- Tarjeta Comedor -->
+                <div class="info-card card-comedor">
+                    <div class="card-icon">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M18 8h1a4 4 0 0 1 0 8h-1"></path>
+                            <path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"></path>
+                            <line x1="6" y1="1" x2="6" y2="4"></line>
+                            <line x1="10" y1="1" x2="10" y2="4"></line>
+                            <line x1="14" y1="1" x2="14" y2="4"></line>
+                        </svg>
+                    </div>
+                    <div class="card-content">
+                        <h3 class="card-title">Comedor</h3>
+                        <p class="card-value" id="comedorCount">0</p>
+                        <p class="card-description">No pasaron al comedor</p>
+                    </div>
+                    <div class="card-badge badge-info">Info</div>
+                </div>
+            </div>
+
+            <!-- Resumen General del Dashboard -->
+            <div class="dashboard-summary" id="dashboardSummary" style="display: none;">
+                <!-- Resumen Comedor -->
+                <div class="summary-section" id="summary-comedor">
+                    <div class="summary-header">
+                        <div class="summary-title-wrapper">
+                            <h3 class="summary-title">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M18 8h1a4 4 0 0 1 0 8h-1"></path>
+                                    <path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"></path>
+                                    <line x1="6" y1="1" x2="6" y2="4"></line>
+                                    <line x1="10" y1="1" x2="10" y2="4"></line>
+                                    <line x1="14" y1="1" x2="14" y2="4"></line>
+                                </svg>
+                                Comedor
+                            </h3>
+                            <p class="summary-subtitle">Jugadores que no pasaron al comedor</p>
+                        </div>
+                        <span class="summary-count" id="summaryComedorCount">0 jugadores</span>
+                    </div>
+                    <div class="summary-cards-grid" id="summaryComedorCards">
+                        <p style="text-align: center; color: var(--gris-label); padding: 40px; grid-column: 1 / -1;">Cargando...</p>
+                    </div>
+                </div>
+
+                <!-- Resumen Casa Club -->
+                <div class="summary-section" id="summary-casaclub">
+                    <div class="summary-header">
+                        <div class="summary-title-wrapper">
+                            <h3 class="summary-title">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                                    <polyline points="9 22 9 12 15 12 15 22"></polyline>
+                                </svg>
+                                Casa Club
+                            </h3>
+                            <p class="summary-subtitle">Jugadores que no estan en Casa Club</p>
+                        </div>
+                        <span class="summary-count" id="summaryCasaClubCount">0 jugadores</span>
+                    </div>
+                    <div class="summary-cards-grid" id="summaryCasaClubCards">
+                        <p style="text-align: center; color: var(--gris-label); padding: 40px; grid-column: 1 / -1;">Cargando...</p>
+                    </div>
+                </div>
+
+                <!-- Resumen Permisos -->
+                <div class="summary-section" id="summary-permisos">
+                    <div class="summary-header">
+                        <div class="summary-title-wrapper">
+                            <h3 class="summary-title">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                    <polyline points="14 2 14 8 20 8"></polyline>
+                                    <line x1="12" y1="18" x2="12" y2="12"></line>
+                                    <line x1="9" y1="15" x2="15" y2="15"></line>
+                                </svg>
+                                Permisos
+                            </h3>
+                            <p class="summary-subtitle">Solicitudes de permisos activas</p>
+                        </div>
+                        <span class="summary-count" id="summaryPermisosCount">0 jugadores</span>
+                    </div>
+                    <div class="summary-cards-grid" id="summaryPermisosCards">
+                        <p style="text-align: center; color: var(--gris-label); padding: 40px; grid-column: 1 / -1;">Cargando...</p>
+                    </div>
+                </div>
+
+                <!-- Resumen Lesionados -->
+                <div class="summary-section" id="summary-lesionados">
+                    <div class="summary-header">
+                        <div class="summary-title-wrapper">
+                            <h3 class="summary-title">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                                    <circle cx="12" cy="7" r="4"></circle>
+                                    <line x1="12" y1="17" x2="12" y2="17"></line>
+                                </svg>
+                                Lesionados
+                            </h3>
+                            <p class="summary-subtitle">Jugadores con lesiones activas</p>
+                        </div>
+                        <span class="summary-count" id="summaryLesionadosCount">0 jugadores</span>
+                    </div>
+                    <div class="summary-cards-grid" id="summaryLesionadosCards">
+                        <p style="text-align: center; color: var(--gris-label); padding: 40px; grid-column: 1 / -1;">Cargando...</p>
+                    </div>
+                </div>
+
+                <!-- Resumen Adeudos -->
+                <div class="summary-section" id="summary-adeudos">
+                    <div class="summary-header">
+                        <div class="summary-title-wrapper">
+                            <h3 class="summary-title">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <rect x="2" y="5" width="20" height="14" rx="2"></rect>
+                                    <line x1="2" y1="10" x2="22" y2="10"></line>
+                                </svg>
+                                Mensualidades
+                            </h3>
+                            <p class="summary-subtitle">Jugadores con pagos pendientes</p>
+                        </div>
+                        <span class="summary-count" id="summaryAdeudosCount">0 jugadores</span>
+                    </div>
+                    <div class="summary-cards-grid" id="summaryAdeudosCards">
+                        <p style="text-align: center; color: var(--gris-label); padding: 40px; grid-column: 1 / -1;">Cargando...</p>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Sección Adeudos/Mensualidades -->
+            <section class="dashboard-section" id="section-adeudos" style="display: none;">
+                <div class="section-header">
+                    <div class="section-title-wrapper">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="2" y="5" width="20" height="14" rx="2"></rect>
+                            <line x1="2" y1="10" x2="22" y2="10"></line>
+                        </svg>
+                        <div>
+                            <h2 class="section-title">Mensualidades - Control de Pagos</h2>
+                            <p class="section-subtitle">Gestión de pagos y adeudos mensuales</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Filtros -->
+                <div class="filters-card" style="margin-bottom: 25px;">
+                    <div class="filter-item">
+                        <label for="mensualidadesSearchInput">BUSCAR POR NOMBRE</label>
+                        <div class="input-icon">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="11" cy="11" r="8"></circle>
+                                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                            </svg>
+                            <input type="text" id="mensualidadesSearchInput" placeholder="Nombre del jugador">
+                        </div>
+                    </div>
+                    <div class="filter-item">
+                        <label for="mensualidadesCategoryFilter">FILTRAR POR CATEGORÍA</label>
+                        <select id="mensualidadesCategoryFilter" class="select-clean">
+                            <option value="all">Todas las categorías</option>
+                            <option value="Sub-14">Sub-14</option>
+                            <option value="Sub-16">Sub-16</option>
+                            <option value="Sub-18">Sub-18</option>
+                            <option value="Soles TDP">Soles TDP</option>
+                            <option value="Alebrijes TDP">Alebrijes TDP</option>
+                        </select>
+                    </div>
+                    <div class="filter-item">
+                        <label for="mensualidadesMesFilter">FILTRAR POR MES</label>
+                        <select id="mensualidadesMesFilter" class="select-clean">
+                            <option value="all">Todos los meses</option>
+                            <option value="Enero">Enero</option>
+                            <option value="Febrero">Febrero</option>
+                            <option value="Marzo">Marzo</option>
+                            <option value="Abril">Abril</option>
+                            <option value="Mayo">Mayo</option>
+                            <option value="Junio">Junio</option>
+                            <option value="Julio">Julio</option>
+                            <option value="Agosto">Agosto</option>
+                            <option value="Septiembre">Septiembre</option>
+                            <option value="Octubre">Octubre</option>
+                            <option value="Noviembre">Noviembre</option>
+                            <option value="Diciembre">Diciembre</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Jugadores con Adeudos -->
+                <div class="section-subheader" style="margin-bottom: 20px;">
+                    <h3 style="font-size: 1.2rem; font-weight: 700; color: var(--negro); margin-bottom: 5px;">Jugadores con Adeudos</h3>
+                    <p style="color: var(--gris-label); font-size: 0.9rem;">Jugadores que no han registrado su pago de mensualidad</p>
+                    <span class="section-count" id="adeudosTotal" style="display: inline-block; margin-top: 8px; padding: 6px 12px; background: #FEE2E2; color: #DC2626; border-radius: 8px; font-size: 0.9rem; font-weight: 600;">0 jugadores</span>
+                </div>
+                <div class="carousel-container">
+                    <button class="carousel-btn carousel-btn-prev" data-carousel="adeudos">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="15 18 9 12 15 6"></polyline>
+                        </svg>
+                    </button>
+                    <div class="carousel-wrapper">
+                        <div class="carousel" id="carousel-adeudos">
+                            <!-- Las tarjetas se cargarán dinámicamente -->
+                        </div>
+                    </div>
+                    <button class="carousel-btn carousel-btn-next" data-carousel="adeudos">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="9 18 15 12 9 6"></polyline>
+                        </svg>
+                    </button>
+                </div>
+                <div class="carousel-indicators" id="indicators-adeudos"></div>
+
+                <!-- Jugadores que Pagaron -->
+                <div class="section-subheader" style="margin-top: 40px; margin-bottom: 20px;">
+                    <h3 style="font-size: 1.2rem; font-weight: 700; color: var(--negro); margin-bottom: 5px;">Jugadores que Pagaron</h3>
+                    <p style="color: var(--gris-label); font-size: 0.9rem;">Jugadores que han registrado su pago de mensualidad</p>
+                </div>
+                <div id="mensualidadesPagaronContainer">
+                    <!-- Se cargarán dinámicamente por categoría -->
+                </div>
+            </section>
+
+            <!-- Sección Lesionados -->
+            <section class="dashboard-section" id="section-lesionados" style="display: none;">
+                <div class="section-header">
+                    <div class="section-title-wrapper">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                            <circle cx="12" cy="7" r="4"></circle>
+                            <line x1="12" y1="17" x2="12" y2="17"></line>
+                        </svg>
+                        <div>
+                            <h2 class="section-title">Lesionados - Control Médico</h2>
+                            <p class="section-subtitle">Gestión de lesiones y seguimiento médico</p>
+                        </div>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 15px;">
+                        <div style="display: flex; align-items: center; gap: 8px; padding: 8px 16px; background: #FEE2E2; border-radius: 8px; font-size: 0.9rem; font-weight: 600; color: #DC2626;">
+                            <div style="width: 8px; height: 8px; background: #EF4444; border-radius: 50%;"></div>
+                            <span id="lesionadosTotal">0 lesiones</span>
+                </div>
+                        <select id="lesionadosViewLimit" style="padding: 8px 12px; border: 1px solid #E1E8ED; border-radius: 8px; font-size: 0.9rem; background: white; cursor: pointer;">
+                            <option value="100">Ver últimos 100</option>
+                            <option value="50">Ver últimos 50</option>
+                            <option value="200">Ver últimos 200</option>
+                            <option value="500">Ver últimos 500</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Filtros -->
+                <div class="filters-card" style="margin-bottom: 25px;">
+                    <div class="filter-item">
+                        <label for="lesionadosSearchInput">BUSCAR POR NOMBRE</label>
+                        <div class="input-icon">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="11" cy="11" r="8"></circle>
+                                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                        </svg>
+                            <input type="text" id="lesionadosSearchInput" placeholder="Nombre del jugador">
+                        </div>
+                    </div>
+                    <div class="filter-item">
+                        <label for="lesionadosCategoryFilter">FILTRAR POR CATEGORÍA</label>
+                        <select id="lesionadosCategoryFilter" class="select-clean">
+                            <option value="all">Todas las categorías</option>
+                            <option value="Sub-14">Sub-14</option>
+                            <option value="Sub-16">Sub-16</option>
+                            <option value="Sub-18">Sub-18</option>
+                            <option value="Soles TDP">Soles TDP</option>
+                            <option value="Alebrijes TDP">Alebrijes TDP</option>
+                        </select>
+                    </div>
+                    <div class="filter-item">
+                        <label for="lesionadosEstadoFilter">FILTRAR POR ESTADO</label>
+                        <select id="lesionadosEstadoFilter" class="select-clean">
+                            <option value="all">Todos los estados</option>
+                            <option value="activa">Activa</option>
+                            <option value="recuperada">Recuperada</option>
+                        </select>
+                    </div>
+                    <div class="filter-item">
+                        <label for="lesionadosAtendidoFilter">FILTRAR POR ATENCIÓN</label>
+                        <select id="lesionadosAtendidoFilter" class="select-clean">
+                            <option value="all">Todos</option>
+                            <option value="atendido">Atendido</option>
+                            <option value="no_atendido">No Atendido</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Tabla de lesionados -->
+                <div class="table-card">
+                    <table class="table-modern">
+                        <thead>
+                            <tr>
+                                <th>JUGADOR</th>
+                                <th>CATEGORÍA</th>
+                                <th>CONTACTO</th>
+                                <th>TIPO LESION</th>
+                                <th>ZONA AFECTADA</th>
+                                <th>NIVEL DOLOR</th>
+                                <th>ESTADO</th>
+                                <th>ATENCIÓN</th>
+                                <th>COMENTARIOS</th>
+                                <th>ACCIONES</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody id="lesionadosTableBody">
+                            <tr>
+                                <td colspan="11" class="table-empty">
+                                    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <circle cx="12" cy="12" r="10"></circle>
+                                        <line x1="12" y1="8" x2="12" y2="12"></line>
+                                        <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                        </svg>
+                                    <p>Cargando lesiones...</p>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Sección Permisos -->
+            <section class="dashboard-section" id="section-permisos" style="display: none;">
+                <div class="section-header">
+                    <div class="section-title-wrapper">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                            <polyline points="14 2 14 8 20 8"></polyline>
+                            <line x1="12" y1="18" x2="12" y2="12"></line>
+                            <line x1="9" y1="15" x2="15" y2="15"></line>
+                        </svg>
+                        <div>
+                            <h2 class="section-title">Permisos - Gestión de Ausencias</h2>
+                            <p class="section-subtitle">Control de permisos y ausencias de jugadores</p>
+                        </div>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 15px;">
+                        <div style="display: flex; align-items: center; gap: 8px; padding: 8px 16px; background: #DBEAFE; border-radius: 8px; font-size: 0.9rem; font-weight: 600; color: #1E40AF;">
+                            <div style="width: 8px; height: 8px; background: #3B82F6; border-radius: 50%;"></div>
+                            <span id="permisosTotal">0 permisos</span>
+                        </div>
+                        <select id="permisosViewLimit" style="padding: 8px 12px; border: 1px solid #E1E8ED; border-radius: 8px; font-size: 0.9rem; background: white; cursor: pointer;">
+                            <option value="100">Ver últimos 100</option>
+                            <option value="50">Ver últimos 50</option>
+                            <option value="200">Ver últimos 200</option>
+                            <option value="500">Ver últimos 500</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Filtros -->
+                <div class="filters-card" style="margin-bottom: 25px;">
+                    <div class="filter-item">
+                        <label for="permisosSearchInput">BUSCAR POR NOMBRE</label>
+                        <div class="input-icon">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="11" cy="11" r="8"></circle>
+                                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                        </svg>
+                            <input type="text" id="permisosSearchInput" placeholder="Nombre del jugador">
+                        </div>
+                    </div>
+                    <div class="filter-item">
+                        <label for="permisosCategoryFilter">FILTRAR POR CATEGORÍA</label>
+                        <select id="permisosCategoryFilter" class="select-clean">
+                            <option value="all">Todas las categorías</option>
+                            <option value="Sub-14">Sub-14</option>
+                            <option value="Sub-16">Sub-16</option>
+                            <option value="Sub-18">Sub-18</option>
+                            <option value="Soles TDP">Soles TDP</option>
+                            <option value="Alebrijes TDP">Alebrijes TDP</option>
+                        </select>
+                    </div>
+                    <div class="filter-item">
+                        <label for="permisosEstadoFilter">FILTRAR POR ESTADO</label>
+                        <select id="permisosEstadoFilter" class="select-clean">
+                            <option value="all">Todos los estados</option>
+                            <option value="activo">Activos</option>
+                            <option value="finalizado">Finalizados</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Tabla de permisos -->
+                <div class="table-card">
+                    <table class="table-modern">
+                        <thead>
+                            <tr>
+                                <th>JUGADOR</th>
+                                <th>CATEGORÍA</th>
+                                <th>CONTACTO</th>
+                                <th>MOTIVO</th>
+                                <th>FECHA INICIO</th>
+                                <th>FECHA FIN</th>
+                                <th>DÍAS</th>
+                                <th>ESTADO</th>
+                                <th>APROBACIÓN</th>
+                                <th>ACCIONES</th>
+                            </tr>
+                        </thead>
+                        <tbody id="permisosTableBody">
+                            <tr>
+                                <td colspan="10" class="table-empty">
+                                    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <circle cx="12" cy="12" r="10"></circle>
+                                        <line x1="12" y1="8" x2="12" y2="12"></line>
+                                        <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                                    </svg>
+                                    <p>Cargando permisos...</p>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Sección Comedor -->
+            <section class="dashboard-section" id="section-comedor" style="display: none;">
+                <div class="section-header">
+                    <div class="section-title-wrapper">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M18 8h1a4 4 0 0 1 0 8h-1"></path>
+                            <path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"></path>
+                            <line x1="6" y1="1" x2="6" y2="4"></line>
+                            <line x1="10" y1="1" x2="10" y2="4"></line>
+                            <line x1="14" y1="1" x2="14" y2="4"></line>
+                        </svg>
+                        <div>
+                            <h2 class="section-title">Comedor - Control de Acceso</h2>
+                            <p class="section-subtitle">Registro de entradas al comedor</p>
+                        </div>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 15px;">
+                        <div style="display: flex; align-items: center; gap: 8px; padding: 8px 16px; background: #D1FAE5; border-radius: 8px; font-size: 0.9rem; font-weight: 600; color: #059669;">
+                            <div style="width: 8px; height: 8px; background: #10B981; border-radius: 50%;"></div>
+                            <span id="comedorTotal">0 registros</span>
+                        </div>
+                        <select id="comedorViewLimit" style="padding: 8px 12px; border: 1px solid #E1E8ED; border-radius: 8px; font-size: 0.9rem; background: white; cursor: pointer;">
+                            <option value="100">Ver últimos 100</option>
+                            <option value="50">Ver últimos 50</option>
+                            <option value="200">Ver últimos 200</option>
+                            <option value="500">Ver últimos 500</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Filtros -->
+                <div class="filters-card" style="margin-bottom: 25px;">
+                    <div class="filter-item">
+                        <label for="comedorSearchInput">BUSCAR POR NOMBRE</label>
+                        <div class="input-icon">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="11" cy="11" r="8"></circle>
+                                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                            </svg>
+                            <input type="text" id="comedorSearchInput" placeholder="Nombre del jugador">
+                        </div>
+                    </div>
+                    <div class="filter-item">
+                        <label for="comedorCategoryFilter">FILTRAR POR CATEGORÍA</label>
+                        <select id="comedorCategoryFilter" class="select-clean">
+                            <option value="all">Todas las categorías</option>
+                            <option value="Sub-14">Sub-14</option>
+                            <option value="Sub-16">Sub-16</option>
+                            <option value="Sub-18">Sub-18</option>
+                            <option value="Soles TDP">Soles TDP</option>
+                            <option value="Alebrijes TDP">Alebrijes TDP</option>
+                        </select>
+                    </div>
+                    <div class="filter-item">
+                        <label for="comedorDateFilter">FILTRAR POR DÍA</label>
+                        <input type="date" id="comedorDateFilter" class="select-clean" style="padding: 12px 14px;">
+                    </div>
+                </div>
+
+                <!-- Sección: Jugadores que NO pasaron al comedor -->
+                <div class="section-subheader" style="margin-bottom: 20px;">
+                    <h3 style="font-size: 1.2rem; font-weight: 700; color: var(--negro); margin-bottom: 5px;">Jugadores que no pasaron al comedor</h3>
+                    <p style="color: var(--gris-label); font-size: 0.9rem;">Jugadores que no asistieron hoy</p>
+                    <span class="section-count" id="comedorNoPasaronTotal" style="display: inline-block; margin-top: 8px; padding: 6px 12px; background: #FEE2E2; color: #DC2626; border-radius: 8px; font-size: 0.9rem; font-weight: 600;">0 jugadores</span>
+                </div>
+                <div class="carousel-container">
+                    <button class="carousel-btn carousel-btn-prev" data-carousel="comedor-no-pasaron">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="15 18 9 12 15 6"></polyline>
+                        </svg>
+                    </button>
+                    <div class="carousel-wrapper">
+                        <div class="carousel" id="carousel-comedor-no-pasaron">
+                            <!-- Las tarjetas se cargarán dinámicamente -->
+                        </div>
+                    </div>
+                    <button class="carousel-btn carousel-btn-next" data-carousel="comedor-no-pasaron">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="9 18 15 12 9 6"></polyline>
+                        </svg>
+                    </button>
+                </div>
+                <div class="carousel-indicators" id="indicators-comedor-no-pasaron"></div>
+
+                <!-- Sección: Jugadores que SÍ pasaron al comedor (Tabla) -->
+                <div class="section-subheader" style="margin-top: 40px; margin-bottom: 20px;">
+                    <h3 style="font-size: 1.2rem; font-weight: 700; color: var(--negro); margin-bottom: 5px;">Registros de asistencia al comedor</h3>
+                    <p style="color: var(--gris-label); font-size: 0.9rem;">Jugadores que asistieron al comedor</p>
+                    <span class="section-count" id="comedorPasaronTotal" style="display: inline-block; margin-top: 8px; padding: 6px 12px; background: #DBEAFE; border-radius: 8px; font-size: 0.9rem; font-weight: 600; color: #1E40AF;">0 jugadores</span>
+                </div>
+                
+                <!-- Tabla de registros -->
+                <div class="table-card">
+                    <table class="table-modern">
+                        <thead>
+                            <tr>
+                                <th>JUGADOR</th>
+                                <th>CATEGORÍA</th>
+                                <th>HORA DE ENTRADA</th>
+                                <th>ACCIONES</th>
+                            </tr>
+                        </thead>
+                        <tbody id="comedorTableBody">
+                            <tr>
+                                <td colspan="4" class="table-empty">
+                                    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <circle cx="12" cy="12" r="10"></circle>
+                                        <line x1="12" y1="8" x2="12" y2="12"></line>
+                                        <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                                    </svg>
+                                    <p>Cargando registros...</p>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Sección Casa Club -->
+            <section class="dashboard-section" id="section-casaclub" style="display: none;">
+                <div class="section-header">
+                    <div class="section-title-wrapper">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                            <polyline points="9 22 9 12 15 12 15 22"></polyline>
+                        </svg>
+                        <div>
+                            <h2 class="section-title">Casa Club - Entradas y Salidas</h2>
+                            <p class="section-subtitle">Gestión de accesos a instalaciones</p>
+                        </div>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 15px;">
+                        <div style="display: flex; align-items: center; gap: 8px; padding: 8px 16px; background: #D1FAE5; border-radius: 8px; font-size: 0.9rem; font-weight: 600; color: #059669;">
+                            <div style="width: 8px; height: 8px; background: #10B981; border-radius: 50%;"></div>
+                            <span id="casaclubTotal">0 registros</span>
+                        </div>
+                        <select id="casaclubViewLimit" style="padding: 8px 12px; border: 1px solid #E1E8ED; border-radius: 8px; font-size: 0.9rem; background: white; cursor: pointer;">
+                            <option value="100">Ver últimos 100</option>
+                            <option value="50">Ver últimos 50</option>
+                            <option value="200">Ver últimos 200</option>
+                            <option value="500">Ver últimos 500</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Filtros -->
+                <div class="filters-card" style="margin-bottom: 25px;">
+                    <div class="filter-item">
+                        <label for="casaclubSearchInput">BUSCAR POR NOMBRE</label>
+                        <div class="input-icon">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="11" cy="11" r="8"></circle>
+                                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                            </svg>
+                            <input type="text" id="casaclubSearchInput" placeholder="Nombre del jugador">
+                        </div>
+                    </div>
+                    <div class="filter-item">
+                        <label for="casaclubCategoryFilter">FILTRAR POR CATEGORÍA</label>
+                        <select id="casaclubCategoryFilter" class="select-clean">
+                            <option value="all">Todas las categorías</option>
+                            <option value="Sub-14">Sub-14</option>
+                            <option value="Sub-16">Sub-16</option>
+                            <option value="Sub-18">Sub-18</option>
+                            <option value="Soles TDP">Soles TDP</option>
+                            <option value="Alebrijes TDP">Alebrijes TDP</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Tabla de registros -->
+                <div class="table-card">
+                    <table class="table-modern">
+                        <thead>
+                            <tr>
+                                <th>JUGADOR</th>
+                                <th>CATEGORÍA</th>
+                                <th>CONTACTO</th>
+                                <th>DESTINO</th>
+                                <th>SALIDA</th>
+                                <th>LLEGADA</th>
+                                <th>ESTADO</th>
+                                <th>ACCIONES</th>
+                            </tr>
+                        </thead>
+                        <tbody id="casaclubTableBody">
+                            <tr>
+                                <td colspan="8" class="table-empty">
+                                    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <circle cx="12" cy="12" r="10"></circle>
+                                        <line x1="12" y1="8" x2="12" y2="12"></line>
+                                        <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                                    </svg>
+                                    <p>Cargando registros...</p>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Sección Jugadores -->
+            <section class="dashboard-section" id="section-jugadores" style="display: none;">
+                <div class="section-header">
+                    <div class="section-title-wrapper">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                            <circle cx="9" cy="7" r="4"></circle>
+                            <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                            <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                        </svg>
+                        <div>
+                            <h2 class="section-title">Todos los Jugadores</h2>
+                            <p class="section-subtitle">Lista completa de jugadores registrados</p>
+                        </div>
+                    </div>
+                    <span class="section-count" id="jugadoresTotal">0 jugadores</span>
+                </div>
+                <div class="jugadores-toolbar">
+                    <div class="jugadores-search">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="11" cy="11" r="8"></circle>
+                            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                        </svg>
+                        <input type="text" id="jugadoresSearch" placeholder="Buscar jugador por nombre">
+                    </div>
+                    <select id="jugadoresCategoryFilter">
+                        <option value="all">Todas las categorías</option>
+                    </select>
+                </div>
+                <div class="jugadores-grid" id="jugadoresGrid">
+                    <!-- Los jugadores se cargarán dinámicamente -->
+                </div>
+            </section>
+
+            <!-- Sección Altas (Formulario) -->
+            <section class="dashboard-section" id="section-altas" style="display: none;">
+                <div class="section-header">
+                    <div class="section-title-wrapper">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                            <circle cx="8.5" cy="7" r="4"></circle>
+                            <line x1="20" y1="8" x2="20" y2="14"></line>
+                            <line x1="23" y1="11" x2="17" y2="11"></line>
+                        </svg>
+                        <div>
+                            <h2 class="section-title">Registro de Altas</h2>
+                            <p class="section-subtitle">Formulario para dar de alta a nuevos jugadores</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="altas-form-container">
+                    <form id="altasForm" class="altas-form">
+                        <!-- Sección: Información Personal -->
+                        <div class="altas-form-section">
+                            <div class="altas-section-title">Información Personal</div>
+                            
+                            <div class="altas-form-row">
+                                <div class="altas-form-field">
+                                    <label for="apellidoPaterno">
+                                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                                            <circle cx="12" cy="7" r="4"></circle>
+                                        </svg>
+                                        Apellido Paterno
+                                    </label>
+                                    <input type="text" id="apellidoPaterno" required class="altas-form-input" placeholder="Apellido paterno">
+                                </div>
+
+                                <div class="altas-form-field">
+                                    <label for="apellidoMaterno">
+                                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                                            <circle cx="12" cy="7" r="4"></circle>
+                                        </svg>
+                                        Apellido Materno
+                                    </label>
+                                    <input type="text" id="apellidoMaterno" required class="altas-form-input" placeholder="Apellido materno">
+                                </div>
+                            </div>
+
+                            <div class="altas-form-field altas-full-width">
+                                <label for="nombres">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                                        <circle cx="12" cy="7" r="4"></circle>
+                                    </svg>
+                                    Nombre(s)
+                                </label>
+                                <input type="text" id="nombres" required class="altas-form-input" placeholder="Nombre completo">
+                            </div>
+
+                            <div class="altas-form-row">
+                                <div class="altas-form-field">
+                                    <label for="lugarNacimiento">
+                                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                                            <circle cx="12" cy="10" r="3"></circle>
+                                        </svg>
+                                        Lugar de Nacimiento
+                                    </label>
+                                    <input type="text" id="lugarNacimiento" required class="altas-form-input" placeholder="Ciudad, Estado">
+                                </div>
+
+                                <div class="altas-form-field">
+                                    <label for="telefono">
+                                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
+                                        </svg>
+                                        Teléfono
+                                    </label>
+                                    <input type="tel" id="telefono" required class="altas-form-input" placeholder="10 dígitos" maxlength="10" pattern="[0-9]{10}">
+                                </div>
+                            </div>
+
+                            <div class="altas-form-row">
+                                <div class="altas-form-field">
+                                    <label for="fechaNacimiento">
+                                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                                            <line x1="16" y1="2" x2="16" y2="6"></line>
+                                            <line x1="8" y1="2" x2="8" y2="6"></line>
+                                            <line x1="3" y1="10" x2="21" y2="10"></line>
+                                        </svg>
+                                        Fecha de Nacimiento
+                                    </label>
+                                    <input type="date" id="fechaNacimiento" required class="altas-form-input">
+                                </div>
+
+                                <div class="altas-form-field">
+                                    <label for="edad">
+                                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <circle cx="12" cy="12" r="10"></circle>
+                                            <polyline points="12 6 12 12 16 14"></polyline>
+                                        </svg>
+                                        Edad (Años)
+                                    </label>
+                                    <input type="text" id="edad" readonly class="altas-form-input altas-calculated" placeholder="Se calcula automáticamente">
+                                    <small class="altas-field-hint">Se calcula automáticamente</small>
+                                </div>
+                            </div>
+
+                            <div class="altas-form-field">
+                                <label for="meses">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                                        <line x1="16" y1="2" x2="16" y2="6"></line>
+                                        <line x1="8" y1="2" x2="8" y2="6"></line>
+                                        <line x1="3" y1="10" x2="21" y2="10"></line>
+                                    </svg>
+                                    Edad (Meses)
+                                </label>
+                                <input type="text" id="meses" readonly class="altas-form-input altas-calculated" placeholder="Se calcula automáticamente">
+                                <small class="altas-field-hint">Se calcula automáticamente</small>
+                            </div>
+                        </div>
+
+                        <!-- Sección: Información Deportiva -->
+                        <div class="altas-form-section">
+                            <div class="altas-section-title">Información Deportiva</div>
+                            
+                            <div class="altas-form-row">
+                                <div class="altas-form-field">
+                                    <label for="categoria">
+                                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <path d="M8 6 L8 20 C8 20.5 8.5 21 9 21 H15 C15.5 21 16 20.5 16 20 V6"/>
+                                            <path d="M8 6 L5 8 L4 11 L6 12 L8 10"/>
+                                            <path d="M16 6 L19 8 L20 11 L18 12 L16 10"/>
+                                            <path d="M8 6 L9 4 L12 6 L15 4 L16 6"/>
+                                        </svg>
+                                        Categoría
+                                    </label>
+                                    <select id="categoria" required class="altas-form-select">
+                                        <option value="">Selecciona categoría</option>
+                                        <option value="Alebrijes TDP">Alebrijes TDP</option>
+                                        <option value="Soles TDP">Soles TDP</option>
+                                        <option value="Sub-18">Sub-18</option>
+                                        <option value="Sub-16">Sub-16</option>
+                                        <option value="Sub-14">Sub-14</option>
+                                    </select>
+                                </div>
+
+                                <div class="altas-form-field">
+                                    <label for="posicion">
+                                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <circle cx="12" cy="12" r="10"></circle>
+                                            <path d="M12 2v20M2 12h20"></path>
+                                        </svg>
+                                        Posición de Juego
+                                    </label>
+                                    <input type="text" id="posicion" required class="altas-form-input" placeholder="Ej: Delantero, Medio, Defensa">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Sección: Información Administrativa -->
+                        <div class="altas-form-section">
+                            <div class="altas-section-title">Información Administrativa</div>
+                            
+                            <div class="altas-form-row">
+                                <div class="altas-form-field">
+                                    <label for="fechaRegistro">
+                                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                                            <line x1="16" y1="2" x2="16" y2="6"></line>
+                                            <line x1="8" y1="2" x2="8" y2="6"></line>
+                                            <line x1="3" y1="10" x2="21" y2="10"></line>
+                                        </svg>
+                                        Fecha de Registro
+                                    </label>
+                                    <input type="date" id="fechaRegistro" required class="altas-form-input">
+                                </div>
+
+                                <div class="altas-form-field">
+                                    <label for="diasClub">
+                                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <circle cx="12" cy="12" r="10"></circle>
+                                            <polyline points="12 6 12 12 16 14"></polyline>
+                                        </svg>
+                                        Días en el Club
+                                    </label>
+                                    <input type="text" id="diasClub" readonly class="altas-form-input altas-calculated" placeholder="Se calcula automáticamente">
+                                    <small class="altas-field-hint">Se calcula desde la fecha de registro</small>
+                                </div>
+                            </div>
+
+                            <div class="altas-form-row">
+                                <div class="altas-form-field">
+                                    <label for="fechaPago">
+                                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                                            <line x1="16" y1="2" x2="16" y2="6"></line>
+                                            <line x1="8" y1="2" x2="8" y2="6"></line>
+                                            <line x1="3" y1="10" x2="21" y2="10"></line>
+                                        </svg>
+                                        Fecha de Pago Mensual
+                                    </label>
+                                    <select id="fechaPago" required class="altas-form-select">
+                                        <option value="">Selecciona día de pago</option>
+                                        <option value="1">Día 1 de cada mes</option>
+                                        <option value="15">Día 15 de cada mes</option>
+                                    </select>
+                                </div>
+
+                                <div class="altas-form-field">
+                                    <label for="montoMensualidad">
+                                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <line x1="12" y1="1" x2="12" y2="23"></line>
+                                            <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+                                        </svg>
+                                        Monto Mensualidad
+                                    </label>
+                                    <input type="number" id="montoMensualidad" required class="altas-form-input" placeholder="$0.00" step="0.01" min="0">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Botón de Envío -->
+                        <div class="altas-button-group">
+                            <button type="submit" class="altas-btn-submit" id="btnRegistrar">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
+                                    <polyline points="17 21 17 13 7 13 7 21"></polyline>
+                                    <polyline points="7 3 7 8 15 8"></polyline>
+                                </svg>
+                                <span>Registrar Alta</span>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </section>
+
+            <!-- Sección Bajas -->
+            <section class="dashboard-section" id="section-bajas" style="display: none;">
+                <div class="section-header">
+                    <div class="section-title-wrapper">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                            <circle cx="8.5" cy="7" r="4"></circle>
+                            <line x1="23" y1="11" x2="17" y2="11"></line>
+                        </svg>
+                        <div>
+                            <h2 class="section-title">Bajas</h2>
+                            <p class="section-subtitle">Jugadores dados de baja - Eliminar permanentemente o recuperar</p>
+                        </div>
+                    </div>
+                    <span class="section-count" id="bajasTotal">0 jugadores</span>
+                </div>
+                <div class="jugadores-toolbar">
+                    <div class="jugadores-search">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="11" cy="11" r="8"></circle>
+                            <path d="m21 21-4.35-4.35"></path>
+                        </svg>
+                        <input type="text" id="bajasSearch" placeholder="Buscar jugador por nombre">
+                    </div>
+                    <select id="bajasCategoryFilter" class="select-clean">
+                        <option value="all">✓ Todas las categorías</option>
+                    </select>
+                </div>
+                <div class="jugadores-grid" id="bajasGrid">
+                    <!-- Los jugadores dados de baja se cargarán dinámicamente -->
+                </div>
+            </section>
+
+            <!-- Sección Exportar -->
+            <section class="dashboard-section" id="section-exportar" style="display: none;">
+                <div class="section-header">
+                    <div class="section-title-wrapper">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                            <polyline points="7 10 12 15 17 10"></polyline>
+                            <line x1="12" y1="15" x2="12" y2="3"></line>
+                        </svg>
+                        <div>
+                            <h2 class="section-title">Exportar</h2>
+                            <p class="section-subtitle">Generar reportes en PDF del sistema</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="exportar-container" style="max-width: 800px; margin: 0 auto; padding: 30px;">
+                    <div class="exportar-card" style="background: var(--blanco); border-radius: var(--radius); padding: 32px; box-shadow: var(--shadow);">
+                        <h3 style="font-size: 1.3rem; font-weight: 700; color: var(--negro); margin-bottom: 24px;">Configurar Reporte</h3>
+                        
+                        <div class="exportar-form">
+                            <div class="exportar-field" style="margin-bottom: 24px;">
+                                <label style="display: block; font-size: 0.9rem; font-weight: 600; color: var(--negro); margin-bottom: 8px;">
+                                    Tipo de Reporte
+                                </label>
+                                <select id="exportarTipo" class="select-clean" style="width: 100%;">
+                                    <option value="">Selecciona un tipo de reporte</option>
+                                    <option value="adeudos">Adeudos</option>
+                                    <option value="jugadores">Jugadores</option>
+                                    <option value="permisos">Permisos</option>
+                                    <option value="lesionados">Lesionados</option>
+                                    <option value="comedor">Comedor</option>
+                                    <option value="casaclub">Casa Club</option>
+                                </select>
+                            </div>
+                            
+                            <div class="exportar-field-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 24px;">
+                                <div class="exportar-field">
+                                    <label style="display: block; font-size: 0.9rem; font-weight: 600; color: var(--negro); margin-bottom: 8px;">
+                                        Fecha Inicial
+                                    </label>
+                                    <input type="date" id="exportarFechaInicio" class="select-clean" style="width: 100%; padding: 12px 14px;">
+                                </div>
+                                
+                                <div class="exportar-field">
+                                    <label style="display: block; font-size: 0.9rem; font-weight: 600; color: var(--negro); margin-bottom: 8px;">
+                                        Fecha Final
+                                    </label>
+                                    <input type="date" id="exportarFechaFin" class="select-clean" style="width: 100%; padding: 12px 14px;">
+                                </div>
+                            </div>
+                            
+                            <button id="btnGenerarPDF" class="btn btn-primary" style="width: 100%; padding: 14px; font-size: 16px; display: flex; align-items: center; justify-content: center; gap: 8px;">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                    <polyline points="7 10 12 15 17 10"></polyline>
+                                    <line x1="12" y1="15" x2="12" y2="3"></line>
+                                </svg>
+                                <span>Generar PDF</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Sección Balance -->
+            <section class="dashboard-section" id="section-balance" style="display: none;">
+                <div class="section-header">
+                    <div class="section-title-wrapper">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="12" y1="2" x2="12" y2="22"></line>
+                            <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+                        </svg>
+                        <div>
+                            <h2 class="section-title">Balance</h2>
+                            <p class="section-subtitle">Desglose de ingresos por mensualidades</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Filtros -->
+                <div class="balance-filters-container">
+                    <div class="balance-filters-header">
+                        <div class="balance-filters-header-bar"></div>
+                        <h3 class="balance-filters-header-title">Filtros de Búsqueda</h3>
+                    </div>
+                    <div class="balance-filters-grid">
+                        <div class="balance-filter-group">
+                            <label class="balance-filter-label">
+                                <div class="balance-filter-icon blue">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5">
+                                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                                        <line x1="16" y1="2" x2="16" y2="6"></line>
+                                        <line x1="8" y1="2" x2="8" y2="6"></line>
+                                        <line x1="3" y1="10" x2="21" y2="10"></line>
+                                    </svg>
+                                </div>
+                                <span>Filtrar por Fecha</span>
+                            </label>
+                            <input type="date" id="balanceFiltroFecha" class="balance-filter-input" />
+                        </div>
+                        <div class="balance-filter-group">
+                            <label class="balance-filter-label">
+                                <div class="balance-filter-icon green">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5">
+                                        <circle cx="12" cy="12" r="10"></circle>
+                                        <polyline points="12 6 12 12 16 14"></polyline>
+                                    </svg>
+                                </div>
+                                <span>Filtrar por Mes</span>
+                            </label>
+                            <select id="balanceFiltroMes" class="balance-filter-select">
+                                <option value="all">Todos los meses</option>
+                                <option value="01">Enero</option>
+                                <option value="02">Febrero</option>
+                                <option value="03">Marzo</option>
+                                <option value="04">Abril</option>
+                                <option value="05">Mayo</option>
+                                <option value="06">Junio</option>
+                                <option value="07">Julio</option>
+                                <option value="08">Agosto</option>
+                                <option value="09">Septiembre</option>
+                                <option value="10">Octubre</option>
+                                <option value="11">Noviembre</option>
+                                <option value="12">Diciembre</option>
+                            </select>
+                        </div>
+                        <div class="balance-filter-group">
+                            <label class="balance-filter-label-spacer">Acción</label>
+                            <button id="balanceLimpiarFiltros" class="balance-btn-clear">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                                    <polyline points="3 6 5 6 21 6"></polyline>
+                                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                                    <line x1="10" y1="11" x2="10" y2="17"></line>
+                                    <line x1="14" y1="11" x2="14" y2="17"></line>
+                                </svg>
+                                Limpiar Filtros
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Resumen General -->
+                <div class="balance-summary" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; margin-bottom: 30px; padding: 0 30px;">
+                    <div class="balance-card" style="background: linear-gradient(135deg, var(--naranja) 0%, var(--naranja-dark) 100%); border-radius: var(--radius); padding: 28px; box-shadow: var(--shadow-lg); color: white;">
+                        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px;">
+                            <h3 style="font-size: 0.95rem; font-weight: 600; color: rgba(255,255,255,0.9); margin: 0;">Total Ingresos</h3>
+                            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+                                <line x1="12" y1="2" x2="12" y2="22"></line>
+                                <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+                            </svg>
+                        </div>
+                        <p id="balanceTotalIngresos" style="font-size: 2.2rem; font-weight: 800; color: white; margin: 0; text-shadow: 0 2px 4px rgba(0,0,0,0.1);">$0.00</p>
+                    </div>
+                    
+                    <div class="balance-card" style="background: linear-gradient(135deg, #10B981 0%, #059669 100%); border-radius: var(--radius); padding: 28px; box-shadow: var(--shadow-lg); color: white;">
+                        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px;">
+                            <h3 style="font-size: 0.95rem; font-weight: 600; color: rgba(255,255,255,0.9); margin: 0;">Total Registros</h3>
+                            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+                                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                                <line x1="16" y1="2" x2="16" y2="6"></line>
+                                <line x1="8" y1="2" x2="8" y2="6"></line>
+                                <line x1="3" y1="10" x2="21" y2="10"></line>
+                            </svg>
+                        </div>
+                        <p id="balanceTotalRegistros" style="font-size: 2.2rem; font-weight: 800; color: white; margin: 0; text-shadow: 0 2px 4px rgba(0,0,0,0.1);">0</p>
+                    </div>
+                    
+                    <div class="balance-card" style="background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%); border-radius: var(--radius); padding: 28px; box-shadow: var(--shadow-lg); color: white;">
+                        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px;">
+                            <h3 style="font-size: 0.95rem; font-weight: 600; color: rgba(255,255,255,0.9); margin: 0;">Promedio por Registro</h3>
+                            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+                                <line x1="12" y1="20" x2="12" y2="4"></line>
+                                <path d="M18 8l-6-6-6 6"></path>
+                            </svg>
+                        </div>
+                        <p id="balancePromedio" style="font-size: 2.2rem; font-weight: 800; color: white; margin: 0; text-shadow: 0 2px 4px rgba(0,0,0,0.1);">$0.00</p>
+                    </div>
+                </div>
+                
+                <!-- Gráficas Interactivas -->
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 30px; margin-bottom: 40px; padding: 0 30px;">
+                    <!-- Gráfica Tipo de Pago -->
+                    <div style="background: var(--blanco); border-radius: var(--radius); padding: 28px; box-shadow: var(--shadow-lg);">
+                        <h3 style="font-size: 1.2rem; font-weight: 700; color: var(--negro); margin-bottom: 24px; display: flex; align-items: center; gap: 10px;">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--naranja)" stroke-width="2">
+                                <rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect>
+                                <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
+                            </svg>
+                            Distribución por Tipo de Pago
+                        </h3>
+                        <div style="position: relative; height: 300px;">
+                            <canvas id="chartTipoPago"></canvas>
+                        </div>
+                    </div>
+                    
+                    <!-- Gráfica Concepto de Pago -->
+                    <div style="background: var(--blanco); border-radius: var(--radius); padding: 28px; box-shadow: var(--shadow-lg);">
+                        <h3 style="font-size: 1.2rem; font-weight: 700; color: var(--negro); margin-bottom: 24px; display: flex; align-items: center; gap: 10px;">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--naranja)" stroke-width="2">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <line x1="12" y1="8" x2="12" y2="12"></line>
+                                <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                            </svg>
+                            Distribución por Concepto
+                        </h3>
+                        <div style="position: relative; height: 300px;">
+                            <canvas id="chartConceptoPago"></canvas>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Gráfica Categorías (Full Width) -->
+                <div style="margin-bottom: 40px; padding: 0 30px;">
+                    <div style="background: var(--blanco); border-radius: var(--radius); padding: 28px; box-shadow: var(--shadow-lg);">
+                        <h3 style="font-size: 1.2rem; font-weight: 700; color: var(--negro); margin-bottom: 24px; display: flex; align-items: center; gap: 10px;">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--naranja)" stroke-width="2">
+                                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                                <circle cx="9" cy="7" r="4"></circle>
+                                <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                                <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                            </svg>
+                            Distribución por Categorías
+                        </h3>
+                        <div style="position: relative; height: 350px;">
+                            <canvas id="chartCategorias"></canvas>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Desglose Detallado -->
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(500px, 1fr)); gap: 30px; margin-bottom: 40px; padding: 0 30px;">
+                    <!-- Desglose por Tipo de Pago -->
+                    <div class="balance-section">
+                        <h3 style="font-size: 1.3rem; font-weight: 700; color: var(--negro); margin-bottom: 20px; display: flex; align-items: center; gap: 10px;">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--naranja)" stroke-width="2">
+                                <rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect>
+                                <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
+                            </svg>
+                            Detalle por Tipo de Pago
+                        </h3>
+                        <div id="balanceTipoPago" style="background: var(--blanco); border-radius: var(--radius); padding: 24px; box-shadow: var(--shadow); max-height: 500px; overflow-y: auto;">
+                            <p style="text-align: center; color: var(--gris-label); padding: 40px;">Cargando datos...</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Desglose por Concepto de Pago -->
+                    <div class="balance-section">
+                        <h3 style="font-size: 1.3rem; font-weight: 700; color: var(--negro); margin-bottom: 20px; display: flex; align-items: center; gap: 10px;">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--naranja)" stroke-width="2">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <line x1="12" y1="8" x2="12" y2="12"></line>
+                                <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                            </svg>
+                            Detalle por Concepto
+                        </h3>
+                        <div id="balanceConceptoPago" style="background: var(--blanco); border-radius: var(--radius); padding: 24px; box-shadow: var(--shadow); max-height: 500px; overflow-y: auto;">
+                            <p style="text-align: center; color: var(--gris-label); padding: 40px;">Cargando datos...</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Desglose por Categorías -->
+                <div class="balance-section" style="margin-bottom: 40px; padding: 0 30px;">
+                    <h3 style="font-size: 1.3rem; font-weight: 700; color: var(--negro); margin-bottom: 20px; display: flex; align-items: center; gap: 10px;">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--naranja)" stroke-width="2">
+                            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                            <circle cx="9" cy="7" r="4"></circle>
+                            <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                            <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                        </svg>
+                        Detalle por Categorías
+                    </h3>
+                    <div id="balanceCategorias" style="background: var(--blanco); border-radius: var(--radius); padding: 24px; box-shadow: var(--shadow);">
+                        <p style="text-align: center; color: var(--gris-label); padding: 40px;">Cargando datos...</p>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- Modal de Detalles del Jugador -->
+    <div class="modal" id="playerModal">
+        <div class="modal-overlay"></div>
+        <div class="modal-content">
+            <button class="modal-close" id="modalClose">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+            </button>
+            
+            <div class="modal-header">
+                <div class="modal-avatar" id="modalAvatar">
+                    <span id="modalAvatarText">JP</span>
+                </div>
+                <div class="modal-player-info">
+                    <h3 id="modalPlayerName">Nombre del Jugador</h3>
+                    <p id="modalPlayerCategory">Categoría</p>
+                </div>
+            </div>
+
+            <div class="modal-body" id="modalBody">
+                <!-- El contenido se cargará dinámicamente según el tipo -->
+            </div>
+
+            <div class="modal-footer">
+                <button class="btn btn-secondary" id="modalBtnClose">Cerrar</button>
+                <button class="btn btn-primary" id="modalBtnAction">Acción Principal</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script src="dashboard.js"></script>
+</body>
+</html>

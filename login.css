@@ -1,0 +1,617 @@
+/* ========================================
+   IMPORTAR FUENTE INTER
+======================================== */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+/* ========================================
+   VARIABLES CSS - Paleta Oficial
+======================================== */
+:root {
+    /* Colores principales */
+    --naranja: #f26522;
+    --naranja-dark: #e0561d;
+    --naranja-light: #ff8547;
+    --negro: #1c1c1c;
+    --gris: #f4f6f9;
+    --gris-light: #f9fafb;
+    --blanco: #ffffff;
+    --gris-texto: #555;
+    --gris-label: #6b7280;
+    --borde: #e1e8ed;
+    --borde-focus: #ddd;
+    --shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.08);
+    --shadow-xl: 0 16px 48px rgba(0, 0, 0, 0.12);
+    --radius: 12px;
+    --radius-sm: 8px;
+    --radius-lg: 16px;
+    --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-fast: all 0.15s ease;
+    --verde: #28a745;
+    --rojo: #dc3545;
+    --amarillo: #ffc107;
+    --azul: #007bff;
+}
+
+/* ========================================
+   RESET
+======================================== */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+    background: var(--gris);
+    min-height: 100vh;
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--negro);
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    position: relative;
+    overflow: hidden;
+}
+
+/* ========================================
+   DECORACIONES DE FONDO
+======================================== */
+.decoration {
+    position: fixed;
+    border-radius: 50%;
+    opacity: 0.05;
+    pointer-events: none;
+    z-index: 0;
+}
+
+.decoration-1 {
+    width: 600px;
+    height: 600px;
+    background: var(--naranja);
+    top: -300px;
+    right: -200px;
+    animation: float 20s ease-in-out infinite;
+}
+
+.decoration-2 {
+    width: 400px;
+    height: 400px;
+    background: var(--negro);
+    bottom: -200px;
+    left: -150px;
+    animation: float 25s ease-in-out infinite reverse;
+}
+
+@keyframes float {
+    0%, 100% {
+        transform: translate(0, 0) scale(1);
+    }
+    50% {
+        transform: translate(30px, 30px) scale(1.1);
+    }
+}
+
+/* ========================================
+   LOADER MEJORADO
+======================================== */
+.loader-wrapper {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: var(--blanco);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    opacity: 1;
+    visibility: visible;
+    transition: opacity 0.6s ease, visibility 0.6s ease;
+}
+
+.loader-wrapper.hidden {
+    opacity: 0;
+    visibility: hidden;
+}
+
+.loader {
+    text-align: center;
+}
+
+.logo-loader-container {
+    position: relative;
+    width: 180px;
+    height: 180px;
+    margin: 0 auto 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.loader-ring {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    border: 3px solid transparent;
+    border-top: 3px solid var(--naranja);
+    border-right: 3px solid var(--naranja);
+    border-radius: 50%;
+    animation: spinRing 1.2s cubic-bezier(0.5, 0, 0.5, 1) infinite;
+}
+
+.loader-ring::before {
+    content: '';
+    position: absolute;
+    top: -3px;
+    left: -3px;
+    right: -3px;
+    bottom: -3px;
+    border: 3px solid transparent;
+    border-bottom: 3px solid var(--negro);
+    border-left: 3px solid var(--negro);
+    border-radius: 50%;
+    animation: spinRing 1.8s cubic-bezier(0.5, 0, 0.5, 1) infinite reverse;
+}
+
+@keyframes spinRing {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+.loader-logo {
+    width: 140px;
+    height: 140px;
+    object-fit: contain;
+    position: relative;
+    z-index: 1;
+}
+
+.loader-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+}
+
+.loader-text {
+    font-size: 16px;
+    color: var(--negro);
+    font-weight: 600;
+    letter-spacing: -0.01em;
+}
+
+.loader-dots {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+}
+
+.loader-dots span {
+    width: 6px;
+    height: 6px;
+    background: var(--naranja);
+    border-radius: 50%;
+    animation: bounce 1.4s ease-in-out infinite;
+}
+
+.loader-dots span:nth-child(1) {
+    animation-delay: 0s;
+}
+
+.loader-dots span:nth-child(2) {
+    animation-delay: 0.2s;
+}
+
+.loader-dots span:nth-child(3) {
+    animation-delay: 0.4s;
+}
+
+@keyframes bounce {
+    0%, 60%, 100% {
+        transform: translateY(0);
+        opacity: 1;
+    }
+    30% {
+        transform: translateY(-10px);
+        opacity: 0.7;
+    }
+}
+
+/* ========================================
+   CONTENEDOR LOGIN
+======================================== */
+.login-container {
+    width: 100%;
+    max-width: 440px;
+    padding: 24px;
+    opacity: 0;
+    transform: translateY(10px);
+    animation: fadeInUp 0.6s ease forwards;
+    animation-delay: 0.1s;
+    position: relative;
+    z-index: 1;
+}
+
+@keyframes fadeInUp {
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ========================================
+   CAJA DE LOGIN
+======================================== */
+.login-box {
+    background: var(--blanco);
+    border-radius: var(--radius-lg);
+    padding: 48px 40px;
+    box-shadow: var(--shadow-xl);
+    border: 1px solid var(--borde);
+    position: relative;
+}
+
+/* ========================================
+   LOGO
+======================================== */
+.logo-container {
+    text-align: center;
+    margin-bottom: 24px;
+}
+
+.logo {
+    width: 110px;
+    height: 110px;
+    object-fit: contain;
+}
+
+/* ========================================
+   BADGE
+======================================== */
+.login-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    background: linear-gradient(135deg, #fff5ed 0%, #ffe8d9 100%);
+    border: 1px solid #ffd4b8;
+    border-radius: 8px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--naranja-dark);
+    margin: 0 auto 24px;
+    display: flex;
+    width: fit-content;
+    letter-spacing: 0.3px;
+    text-transform: uppercase;
+}
+
+.login-badge svg {
+    color: var(--naranja);
+}
+
+/* ========================================
+   TÍTULOS
+======================================== */
+.login-title {
+    font-size: 26px;
+    font-weight: 700;
+    color: var(--negro);
+    text-align: center;
+    margin-bottom: 8px;
+    letter-spacing: -0.03em;
+}
+
+.login-subtitle {
+    font-size: 14px;
+    color: var(--gris-label);
+    text-align: center;
+    margin-bottom: 32px;
+    font-weight: 400;
+    line-height: 1.5;
+}
+
+/* ========================================
+   FORMULARIO
+======================================== */
+.login-form {
+    width: 100%;
+}
+
+.form-group {
+    margin-bottom: 24px;
+}
+
+.form-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--negro);
+    margin-bottom: 10px;
+    letter-spacing: 0.3px;
+    text-transform: uppercase;
+}
+
+.form-label svg {
+    color: var(--gris-label);
+    flex-shrink: 0;
+}
+
+.input-wrapper {
+    position: relative;
+}
+
+.form-input {
+    width: 100%;
+    padding: 14px 16px;
+    font-size: 15px;
+    border: none;
+    border-bottom: 2px solid var(--borde);
+    border-radius: 0;
+    background: transparent;
+    color: var(--negro);
+    transition: border-color 0.25s ease;
+    outline: none;
+    font-family: 'Inter', sans-serif;
+    font-weight: 400;
+}
+
+.form-input:focus {
+    border-bottom-color: var(--naranja);
+}
+
+.form-input::placeholder {
+    color: #9ca3af;
+    font-weight: 400;
+}
+
+/* Input con icono de ojo */
+.input-wrapper .form-input {
+    padding-right: 48px;
+}
+
+.toggle-password {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--gris-label);
+    transition: var(--transition-fast);
+    border-radius: 6px;
+}
+
+.toggle-password:hover {
+    color: var(--naranja);
+    background: rgba(242, 101, 34, 0.08);
+}
+
+.eye-icon {
+    display: block;
+}
+
+/* ========================================
+   MENSAJE DE ERROR
+======================================== */
+.error-message {
+    display: none;
+    align-items: center;
+    gap: 10px;
+    background: #fef2f2;
+    color: var(--rojo);
+    padding: 14px 16px;
+    border-radius: var(--radius-sm);
+    font-size: 13px;
+    margin-bottom: 24px;
+    border: 1px solid #fecaca;
+    font-weight: 500;
+}
+
+.error-message svg {
+    flex-shrink: 0;
+    color: var(--rojo);
+}
+
+.error-message.show {
+    display: flex;
+    animation: slideDown 0.3s ease;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-8px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ========================================
+   BOTÓN SUBMIT - ANIMACIONES MEJORADAS
+======================================== */
+.btn-submit {
+    width: 100%;
+    padding: 14px 24px;
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--blanco);
+    background: var(--naranja);
+    border: none;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: var(--transition-fast);
+    position: relative;
+    font-family: 'Inter', sans-serif;
+    letter-spacing: 0.02em;
+    box-shadow: 0 2px 8px rgba(242, 101, 34, 0.2);
+}
+
+.btn-submit:hover {
+    background: var(--naranja-dark);
+    box-shadow: 0 4px 12px rgba(242, 101, 34, 0.3);
+    transform: translateY(-1px);
+}
+
+/* SIN animación active conflictiva */
+.btn-submit:active {
+    transform: translateY(0);
+    transition: transform 0.05s ease;
+}
+
+.btn-submit:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.btn-text {
+    display: inline-block;
+    transition: opacity var(--transition-fast);
+}
+
+.btn-loader {
+    display: none;
+    width: 18px;
+    height: 18px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-top: 2px solid var(--blanco);
+    border-radius: 50%;
+    animation: spin 0.6s linear infinite;
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+}
+
+@keyframes spin {
+    to { 
+        transform: translate(-50%, -50%) rotate(360deg); 
+    }
+}
+
+.btn-submit.loading .btn-text {
+    opacity: 0;
+}
+
+.btn-submit.loading .btn-loader {
+    display: block;
+}
+
+/* ========================================
+   FOOTER
+======================================== */
+.login-footer {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 32px;
+    padding-top: 24px;
+    border-top: 1px solid var(--borde);
+}
+
+.login-footer svg {
+    color: var(--gris-label);
+    flex-shrink: 0;
+}
+
+.login-footer p {
+    font-size: 12px;
+    color: var(--gris-label);
+    font-weight: 500;
+    margin: 0;
+}
+
+/* ========================================
+   RESPONSIVE
+======================================== */
+@media (max-width: 480px) {
+    .login-container {
+        padding: 16px;
+    }
+    
+    .login-box {
+        padding: 36px 28px;
+        border-radius: var(--radius);
+    }
+    
+    .logo {
+        width: 95px;
+        height: 95px;
+    }
+    
+    .login-title {
+        font-size: 23px;
+    }
+    
+    .login-subtitle {
+        font-size: 13px;
+    }
+    
+    .form-input {
+        font-size: 16px; /* Previene zoom en iOS */
+        padding: 13px 15px;
+    }
+    
+    .logo-loader-container {
+        width: 140px;
+        height: 140px;
+    }
+    
+    .loader-logo {
+        width: 100px;
+        height: 100px;
+    }
+    
+    .loader-text {
+        font-size: 15px;
+    }
+    
+    .decoration-1,
+    .decoration-2 {
+        display: none;
+    }
+}
+
+/* ========================================
+   ANIMACIONES DE ENTRADA
+======================================== */
+.form-group {
+    opacity: 0;
+    animation: fadeIn 0.4s ease forwards;
+}
+
+.form-group:nth-child(1) { animation-delay: 0.15s; }
+.form-group:nth-child(2) { animation-delay: 0.25s; }
+
+.btn-submit { 
+    opacity: 0;
+    animation: fadeIn 0.4s ease forwards;
+    animation-delay: 0.35s;
+}
+
+@keyframes fadeIn {
+    to {
+        opacity: 1;
+    }
+}
