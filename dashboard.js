@@ -809,6 +809,12 @@ function loadDashboardData() {
         }
     }
     
+    // Ocultar balance compacto (ingresos del mes) si no tiene acceso completo
+    const dashboardBalanceCompact = document.getElementById('dashboardBalanceCompact');
+    if (dashboardBalanceCompact) {
+        dashboardBalanceCompact.style.display = hasFullAccess ? 'block' : 'none';
+    }
+    
     // Cargar datos según permisos
     if (hasFullAccess) {
         // Cargar todos los datos
@@ -1241,10 +1247,12 @@ function loadSummaryBalance() {
         `;
     }
     
-    // Mostrar el balance compacto
+    // Mostrar el balance compacto solo si tiene acceso completo
     const dashboardBalanceCompact = document.getElementById('dashboardBalanceCompact');
     if (dashboardBalanceCompact) {
-        dashboardBalanceCompact.style.display = 'block';
+        const dashboardPermissions = currentUser?.permissions?.dashboard || [];
+        const hasFullAccess = dashboardPermissions.includes('all');
+        dashboardBalanceCompact.style.display = hasFullAccess ? 'block' : 'none';
     }
 }
 
@@ -2995,10 +3003,10 @@ function showPageContent(page) {
         document.getElementById('section-permisos').style.display = 'none';
         document.getElementById('section-comedor').style.display = 'none';
         
-        // Mostrar balance compacto
+        // Mostrar balance compacto solo si tiene acceso completo
         const dashboardBalanceCompact = document.getElementById('dashboardBalanceCompact');
         if (dashboardBalanceCompact) {
-            dashboardBalanceCompact.style.display = 'block';
+            dashboardBalanceCompact.style.display = hasFullAccess ? 'block' : 'none';
         }
         
         // Mostrar resumen general del dashboard
