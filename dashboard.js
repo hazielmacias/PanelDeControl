@@ -9,7 +9,7 @@ let getFirestore = null;
 
 // Cargar Firebase cuando sea necesario
 async function initFirebase() {
-    if (db) return; // Ya está inicializado
+    if (db) return;
     
     try {
         const { initializeApp } = await import("https://www.gstatic.com/firebasejs/12.5.0/firebase-app.js");
