@@ -222,38 +222,138 @@
 
         <!-- Contenido del Dashboard -->
         <div class="dashboard-content">
-            <!-- Mensaje de Bienvenida -->
-            <div class="welcome-banner" id="welcomeBanner" style="display: none;">
-                <div class="welcome-content">
-                    <div class="welcome-main">
-                        <h2 class="welcome-title">Bienvenido, <span id="welcomeUserName">Usuario</span></h2>
-                        <div class="welcome-time-container">
-                            <span class="welcome-time" id="welcomeTime">
-                                <span class="time-hours" id="timeHours">--</span>
-                                <span class="time-separator">:</span>
-                                <span class="time-minutes" id="timeMinutes">--</span>
-                                <span class="time-period" id="timePeriod">--</span>
-                            </span>
+            <!-- Fila Superior: Bienvenida, Calendario y Balance -->
+            <div class="dashboard-top-row" id="dashboardTopRow" style="display: none;">
+                <!-- Tarjeta de Bienvenida -->
+                <div class="dashboard-card welcome-card" id="welcomeCard">
+                    <div class="welcome-card-top">
+                        <div class="dashboard-card-icon welcome-icon">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                                <circle cx="12" cy="7" r="4"></circle>
+                            </svg>
                         </div>
                     </div>
-                    <div class="welcome-icon">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-                            <circle cx="12" cy="7" r="4"></circle>
-                        </svg>
+                    <div class="dashboard-card-body">
+                        <div class="welcome-content">
+                            <div class="welcome-greeting" id="welcomeGreeting">Buenas tardes</div>
+                            <div class="welcome-name-wrapper">
+                                <div class="welcome-name" id="welcomeName">Juan Manuel</div>
+                                <div class="welcome-status">
+                                    <svg width="8" height="8" viewBox="0 0 24 24" fill="currentColor">
+                                        <circle cx="12" cy="12" r="12"></circle>
+                                    </svg>
+                                    <span>Activo</span>
+                                </div>
+                            </div>
+                            
+                            <div class="welcome-divider"></div>
+                            
+                            <div class="welcome-time-section">
+                                <div class="welcome-time-label">Hora actual</div>
+                                <div class="welcome-time" id="welcomeTime">
+                                    <span class="time-hours" id="timeHours">--</span>
+                                    <span class="time-separator">:</span>
+                                    <span class="time-minutes" id="timeMinutes">--</span>
+                                    <span class="time-period" id="timePeriod">--</span>
+                                </div>
+                            </div>
+                            
+                            <div class="welcome-date-section">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                                    <line x1="16" y1="2" x2="16" y2="6"></line>
+                                    <line x1="8" y1="2" x2="8" y2="6"></line>
+                                    <line x1="3" y1="10" x2="21" y2="10"></line>
+                                </svg>
+                                <div class="welcome-date" id="welcomeDate"></div>
+                            </div>
+                            
+                            <div class="welcome-reminders-section">
+                                <div class="reminders-header">
+                                    <div class="reminders-title">
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"></path>
+                                            <path d="m9 12 2 2 4-4"></path>
+                                        </svg>
+                                        <span>Recordatorios</span>
+                                    </div>
+                                    <button class="add-reminder-btn" id="addReminderBtn">
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                                            <line x1="12" y1="5" x2="12" y2="19"></line>
+                                            <line x1="5" y1="12" x2="19" y2="12"></line>
+                                        </svg>
+                                    </button>
+                                </div>
+                                <div class="reminders-list" id="remindersList">
+                                    <div class="no-reminders" id="noReminders">
+                                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                            <circle cx="12" cy="12" r="10"></circle>
+                                            <line x1="12" y1="8" x2="12" y2="12"></line>
+                                            <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                                        </svg>
+                                        <span>No hay recordatorios</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
-            </div>
-            
-            <!-- Resumen Balance (Compacto) -->
-            <div class="dashboard-balance-compact" id="dashboardBalanceCompact" style="display: none;">
-                <div class="balance-compact-content">
-                    <div class="balance-compact-info">
-                        <div class="balance-compact-label">Ingresos del Mes</div>
-                        <div class="balance-compact-value" id="balanceCompactValue">$0.00</div>
+
+                <!-- Tarjeta de Balance -->
+                <div class="dashboard-card balance-card" id="dashboardBalanceCompact" style="display: none;">
+                    <div class="dashboard-card-header">
+                        <div class="dashboard-card-title">Ingresos del Mes</div>
+                        <div class="dashboard-card-icon balance-icon">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <line x1="12" y1="1" x2="12" y2="23"></line>
+                                <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+                            </svg>
+                        </div>
                     </div>
-                    <div class="balance-compact-details" id="balanceCompactDetails">
-                        <span class="balance-compact-period">Cargando...</span>
+                    <div class="dashboard-card-body">
+                        <div class="balance-header-info">
+                            <div class="balance-value" id="balanceCompactValue">$0.00</div>
+                            <div class="balance-period" id="balancePeriod">Cargando...</div>
+                        </div>
+                        <div class="balance-chart-wrapper">
+                            <div class="balance-chart-title">Distribución por tipo de pago</div>
+                            <div class="balance-chart-container">
+                                <canvas id="balanceChartTipoPago"></canvas>
+                            </div>
+                            <div class="balance-chart-description">Efectivo, transferencia y otros métodos</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tarjeta de Calendario -->
+                <div class="dashboard-card calendar-card" id="calendarCard">
+                    <div class="dashboard-card-header">
+                        <div class="dashboard-card-title">Calendario</div>
+                        <div class="dashboard-card-icon calendar-icon">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                                <line x1="16" y1="2" x2="16" y2="6"></line>
+                                <line x1="8" y1="2" x2="8" y2="6"></line>
+                                <line x1="3" y1="10" x2="21" y2="10"></line>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="dashboard-card-body">
+                        <div class="calendar-controls">
+                            <button class="calendar-nav-btn" id="prevMonthBtn">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                                    <polyline points="15 18 9 12 15 6"></polyline>
+                                </svg>
+                            </button>
+                            <div class="calendar-month" id="calendarMonth"></div>
+                            <button class="calendar-nav-btn" id="nextMonthBtn">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                                    <polyline points="9 18 15 12 9 6"></polyline>
+                                </svg>
+                            </button>
+                        </div>
+                        <div class="calendar-days" id="calendarDays"></div>
                     </div>
                 </div>
             </div>
@@ -351,9 +451,22 @@
                         </div>
                         <span class="summary-count" id="summaryComedorCount">0 jugadores</span>
                     </div>
-                    <div class="summary-cards-grid" id="summaryComedorCards">
-                        <p style="text-align: center; color: var(--gris-label); padding: 40px; grid-column: 1 / -1;">Cargando...</p>
+                    <div class="carousel-container">
+                        <button class="carousel-btn carousel-btn-prev" data-carousel="comedor">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                                <polyline points="15 18 9 12 15 6"></polyline>
+                            </svg>
+                        </button>
+                        <div class="summary-cards-grid" id="summaryComedorCards">
+                            <p class="loading-text">Cargando...</p>
+                        </div>
+                        <button class="carousel-btn carousel-btn-next" data-carousel="comedor">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                                <polyline points="9 18 15 12 9 6"></polyline>
+                            </svg>
+                        </button>
                     </div>
+                    <div class="carousel-dots" id="carouselDotsComedor"></div>
                 </div>
 
                 <!-- Resumen Casa Club -->
@@ -371,9 +484,22 @@
                         </div>
                         <span class="summary-count" id="summaryCasaClubCount">0 jugadores</span>
                     </div>
-                    <div class="summary-cards-grid" id="summaryCasaClubCards">
-                        <p style="text-align: center; color: var(--gris-label); padding: 40px; grid-column: 1 / -1;">Cargando...</p>
+                    <div class="carousel-container">
+                        <button class="carousel-btn carousel-btn-prev" data-carousel="casaclub">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                                <polyline points="15 18 9 12 15 6"></polyline>
+                            </svg>
+                        </button>
+                        <div class="summary-cards-grid" id="summaryCasaClubCards">
+                            <p class="loading-text">Cargando...</p>
+                        </div>
+                        <button class="carousel-btn carousel-btn-next" data-carousel="casaclub">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                                <polyline points="9 18 15 12 9 6"></polyline>
+                            </svg>
+                        </button>
                     </div>
+                    <div class="carousel-dots" id="carouselDotsCasaClub"></div>
                 </div>
 
                 <!-- Resumen Permisos -->
@@ -393,9 +519,22 @@
                         </div>
                         <span class="summary-count" id="summaryPermisosCount">0 jugadores</span>
                     </div>
-                    <div class="summary-cards-grid" id="summaryPermisosCards">
-                        <p style="text-align: center; color: var(--gris-label); padding: 40px; grid-column: 1 / -1;">Cargando...</p>
+                    <div class="carousel-container">
+                        <button class="carousel-btn carousel-btn-prev" data-carousel="permisos">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                                <polyline points="15 18 9 12 15 6"></polyline>
+                            </svg>
+                        </button>
+                        <div class="summary-cards-grid" id="summaryPermisosCards">
+                            <p class="loading-text">Cargando...</p>
+                        </div>
+                        <button class="carousel-btn carousel-btn-next" data-carousel="permisos">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                                <polyline points="9 18 15 12 9 6"></polyline>
+                            </svg>
+                        </button>
                     </div>
+                    <div class="carousel-dots" id="carouselDotsPermisos"></div>
                 </div>
 
                 <!-- Resumen Lesionados -->
@@ -414,9 +553,22 @@
                         </div>
                         <span class="summary-count" id="summaryLesionadosCount">0 jugadores</span>
                     </div>
-                    <div class="summary-cards-grid" id="summaryLesionadosCards">
-                        <p style="text-align: center; color: var(--gris-label); padding: 40px; grid-column: 1 / -1;">Cargando...</p>
+                    <div class="carousel-container">
+                        <button class="carousel-btn carousel-btn-prev" data-carousel="lesionados">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                                <polyline points="15 18 9 12 15 6"></polyline>
+                            </svg>
+                        </button>
+                        <div class="summary-cards-grid" id="summaryLesionadosCards">
+                            <p class="loading-text">Cargando...</p>
+                        </div>
+                        <button class="carousel-btn carousel-btn-next" data-carousel="lesionados">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                                <polyline points="9 18 15 12 9 6"></polyline>
+                            </svg>
+                        </button>
                     </div>
+                    <div class="carousel-dots" id="carouselDotsLesionados"></div>
                 </div>
 
                 <!-- Resumen Adeudos -->
@@ -434,9 +586,22 @@
                         </div>
                         <span class="summary-count" id="summaryAdeudosCount">0 jugadores</span>
                     </div>
-                    <div class="summary-cards-grid" id="summaryAdeudosCards">
-                        <p style="text-align: center; color: var(--gris-label); padding: 40px; grid-column: 1 / -1;">Cargando...</p>
+                    <div class="carousel-container">
+                        <button class="carousel-btn carousel-btn-prev" data-carousel="adeudos">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                                <polyline points="15 18 9 12 15 6"></polyline>
+                            </svg>
+                        </button>
+                        <div class="summary-cards-grid" id="summaryAdeudosCards">
+                            <p class="loading-text">Cargando...</p>
+                        </div>
+                        <button class="carousel-btn carousel-btn-next" data-carousel="adeudos">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                                <polyline points="9 18 15 12 9 6"></polyline>
+                            </svg>
+                        </button>
                     </div>
+                    <div class="carousel-dots" id="carouselDotsAdeudos"></div>
                 </div>
 
             </div>
@@ -457,7 +622,7 @@
                 </div>
 
                 <!-- Filtros -->
-                <div class="filters-card" style="margin-bottom: 25px;">
+                <div class="filters-card">
                     <div class="filter-item">
                         <label for="mensualidadesSearchInput">BUSCAR POR NOMBRE</label>
                         <div class="input-icon">
@@ -500,10 +665,10 @@
                 </div>
 
                 <!-- Jugadores con Adeudos -->
-                <div class="section-subheader" style="margin-bottom: 20px;">
-                    <h3 style="font-size: 1.2rem; font-weight: 700; color: var(--negro); margin-bottom: 5px;">Jugadores con Adeudos</h3>
-                    <p style="color: var(--gris-label); font-size: 0.9rem;">Jugadores que no han registrado su pago de mensualidad</p>
-                    <span class="section-count" id="adeudosTotal" style="display: inline-block; margin-top: 8px; padding: 6px 12px; background: #FEE2E2; color: #DC2626; border-radius: 8px; font-size: 0.9rem; font-weight: 600;">0 jugadores</span>
+                <div class="section-subheader">
+                    <h3 class="section-subheader-title">Jugadores con Adeudos</h3>
+                    <p class="section-subheader-subtitle">Jugadores que no han registrado su pago de mensualidad</p>
+                    <span class="count-badge red" id="adeudosTotal">0 jugadores</span>
                 </div>
                 <div class="carousel-container">
                     <button class="carousel-btn carousel-btn-prev" data-carousel="adeudos">
@@ -525,9 +690,9 @@
                 <div class="carousel-indicators" id="indicators-adeudos"></div>
 
                 <!-- Jugadores que Pagaron -->
-                <div class="section-subheader" style="margin-top: 40px; margin-bottom: 20px;">
-                    <h3 style="font-size: 1.2rem; font-weight: 700; color: var(--negro); margin-bottom: 5px;">Jugadores que Pagaron</h3>
-                    <p style="color: var(--gris-label); font-size: 0.9rem;">Jugadores que han registrado su pago de mensualidad</p>
+                <div class="section-subheader mt-40">
+                    <h3 class="section-subheader-title">Jugadores que Pagaron</h3>
+                    <p class="section-subheader-subtitle">Jugadores que han registrado su pago de mensualidad</p>
                 </div>
                 <div id="mensualidadesPagaronContainer">
                     <!-- Se cargarán dinámicamente por categoría -->
@@ -548,12 +713,12 @@
                             <p class="section-subtitle">Gestión de lesiones y seguimiento médico</p>
                         </div>
                     </div>
-                    <div style="display: flex; align-items: center; gap: 15px;">
-                        <div style="display: flex; align-items: center; gap: 8px; padding: 8px 16px; background: #FEE2E2; border-radius: 8px; font-size: 0.9rem; font-weight: 600; color: #DC2626;">
-                            <div style="width: 8px; height: 8px; background: #EF4444; border-radius: 50%;"></div>
+                    <div class="header-stats">
+                        <div class="stat-badge red">
+                            <div class="stat-dot red"></div>
                             <span id="lesionadosTotal">0 lesiones</span>
-                </div>
-                        <select id="lesionadosViewLimit" style="padding: 8px 12px; border: 1px solid #E1E8ED; border-radius: 8px; font-size: 0.9rem; background: white; cursor: pointer;">
+                        </div>
+                        <select id="lesionadosViewLimit" class="view-limit-select">
                             <option value="100">Ver últimos 100</option>
                             <option value="50">Ver últimos 50</option>
                             <option value="200">Ver últimos 200</option>
@@ -563,7 +728,7 @@
                 </div>
 
                 <!-- Filtros -->
-                <div class="filters-card" style="margin-bottom: 25px;">
+                <div class="filters-card">
                     <div class="filter-item">
                         <label for="lesionadosSearchInput">BUSCAR POR NOMBRE</label>
                         <div class="input-icon">
@@ -652,12 +817,12 @@
                             <p class="section-subtitle">Control de permisos y ausencias de jugadores</p>
                         </div>
                     </div>
-                    <div style="display: flex; align-items: center; gap: 15px;">
-                        <div style="display: flex; align-items: center; gap: 8px; padding: 8px 16px; background: #DBEAFE; border-radius: 8px; font-size: 0.9rem; font-weight: 600; color: #1E40AF;">
-                            <div style="width: 8px; height: 8px; background: #3B82F6; border-radius: 50%;"></div>
+                    <div class="header-stats">
+                        <div class="stat-badge blue">
+                            <div class="stat-dot blue"></div>
                             <span id="permisosTotal">0 permisos</span>
                         </div>
-                        <select id="permisosViewLimit" style="padding: 8px 12px; border: 1px solid #E1E8ED; border-radius: 8px; font-size: 0.9rem; background: white; cursor: pointer;">
+                        <select id="permisosViewLimit" class="view-limit-select">
                             <option value="100">Ver últimos 100</option>
                             <option value="50">Ver últimos 50</option>
                             <option value="200">Ver últimos 200</option>
@@ -667,7 +832,7 @@
                 </div>
 
                 <!-- Filtros -->
-                <div class="filters-card" style="margin-bottom: 25px;">
+                <div class="filters-card">
                     <div class="filter-item">
                         <label for="permisosSearchInput">BUSCAR POR NOMBRE</label>
                         <div class="input-icon">
@@ -748,12 +913,12 @@
                             <p class="section-subtitle">Registro de entradas al comedor</p>
                         </div>
                     </div>
-                    <div style="display: flex; align-items: center; gap: 15px;">
-                        <div style="display: flex; align-items: center; gap: 8px; padding: 8px 16px; background: #D1FAE5; border-radius: 8px; font-size: 0.9rem; font-weight: 600; color: #059669;">
-                            <div style="width: 8px; height: 8px; background: #10B981; border-radius: 50%;"></div>
+                    <div class="header-stats">
+                        <div class="stat-badge green">
+                            <div class="stat-dot green"></div>
                             <span id="comedorTotal">0 registros</span>
                         </div>
-                        <select id="comedorViewLimit" style="padding: 8px 12px; border: 1px solid #E1E8ED; border-radius: 8px; font-size: 0.9rem; background: white; cursor: pointer;">
+                        <select id="comedorViewLimit" class="view-limit-select">
                             <option value="100">Ver últimos 100</option>
                             <option value="50">Ver últimos 50</option>
                             <option value="200">Ver últimos 200</option>
@@ -763,7 +928,7 @@
                 </div>
 
                 <!-- Filtros -->
-                <div class="filters-card" style="margin-bottom: 25px;">
+                <div class="filters-card">
                     <div class="filter-item">
                         <label for="comedorSearchInput">BUSCAR POR NOMBRE</label>
                         <div class="input-icon">
@@ -787,15 +952,15 @@
                     </div>
                     <div class="filter-item">
                         <label for="comedorDateFilter">FILTRAR POR DÍA</label>
-                        <input type="date" id="comedorDateFilter" class="select-clean" style="padding: 12px 14px;">
+                        <input type="date" id="comedorDateFilter" class="select-clean">
                     </div>
                 </div>
 
                 <!-- Sección: Jugadores que NO pasaron al comedor -->
-                <div class="section-subheader" style="margin-bottom: 20px;">
-                    <h3 style="font-size: 1.2rem; font-weight: 700; color: var(--negro); margin-bottom: 5px;">Jugadores que no pasaron al comedor</h3>
-                    <p style="color: var(--gris-label); font-size: 0.9rem;">Jugadores que no asistieron hoy</p>
-                    <span class="section-count" id="comedorNoPasaronTotal" style="display: inline-block; margin-top: 8px; padding: 6px 12px; background: #FEE2E2; color: #DC2626; border-radius: 8px; font-size: 0.9rem; font-weight: 600;">0 jugadores</span>
+                <div class="section-subheader">
+                    <h3 class="section-subheader-title">Jugadores que no pasaron al comedor</h3>
+                    <p class="section-subheader-subtitle">Jugadores que no asistieron hoy</p>
+                    <span class="count-badge red" id="comedorNoPasaronTotal">0 jugadores</span>
                 </div>
                 <div class="carousel-container">
                     <button class="carousel-btn carousel-btn-prev" data-carousel="comedor-no-pasaron">
@@ -817,10 +982,10 @@
                 <div class="carousel-indicators" id="indicators-comedor-no-pasaron"></div>
 
                 <!-- Sección: Jugadores que SÍ pasaron al comedor (Tabla) -->
-                <div class="section-subheader" style="margin-top: 40px; margin-bottom: 20px;">
-                    <h3 style="font-size: 1.2rem; font-weight: 700; color: var(--negro); margin-bottom: 5px;">Registros de asistencia al comedor</h3>
-                    <p style="color: var(--gris-label); font-size: 0.9rem;">Jugadores que asistieron al comedor</p>
-                    <span class="section-count" id="comedorPasaronTotal" style="display: inline-block; margin-top: 8px; padding: 6px 12px; background: #DBEAFE; border-radius: 8px; font-size: 0.9rem; font-weight: 600; color: #1E40AF;">0 jugadores</span>
+                <div class="section-subheader mt-40">
+                    <h3 class="section-subheader-title">Registros de asistencia al comedor</h3>
+                    <p class="section-subheader-subtitle">Jugadores que asistieron al comedor</p>
+                    <span class="count-badge blue" id="comedorPasaronTotal">0 jugadores</span>
                 </div>
                 
                 <!-- Tabla de registros -->
@@ -863,12 +1028,12 @@
                             <p class="section-subtitle">Gestión de accesos a instalaciones</p>
                         </div>
                     </div>
-                    <div style="display: flex; align-items: center; gap: 15px;">
-                        <div style="display: flex; align-items: center; gap: 8px; padding: 8px 16px; background: #D1FAE5; border-radius: 8px; font-size: 0.9rem; font-weight: 600; color: #059669;">
-                            <div style="width: 8px; height: 8px; background: #10B981; border-radius: 50%;"></div>
+                    <div class="header-stats">
+                        <div class="stat-badge green">
+                            <div class="stat-dot green"></div>
                             <span id="casaclubTotal">0 registros</span>
                         </div>
-                        <select id="casaclubViewLimit" style="padding: 8px 12px; border: 1px solid #E1E8ED; border-radius: 8px; font-size: 0.9rem; background: white; cursor: pointer;">
+                        <select id="casaclubViewLimit" class="view-limit-select">
                             <option value="100">Ver últimos 100</option>
                             <option value="50">Ver últimos 50</option>
                             <option value="200">Ver últimos 200</option>
@@ -878,7 +1043,7 @@
                 </div>
 
                 <!-- Filtros -->
-                <div class="filters-card" style="margin-bottom: 25px;">
+                <div class="filters-card">
                     <div class="filter-item">
                         <label for="casaclubSearchInput">BUSCAR POR NOMBRE</label>
                         <div class="input-icon">
@@ -1254,16 +1419,14 @@
                     </div>
                 </div>
                 
-                <div class="exportar-container" style="max-width: 800px; margin: 0 auto; padding: 30px;">
-                    <div class="exportar-card" style="background: var(--blanco); border-radius: var(--radius); padding: 32px; box-shadow: var(--shadow);">
-                        <h3 style="font-size: 1.3rem; font-weight: 700; color: var(--negro); margin-bottom: 24px;">Configurar Reporte</h3>
+                <div class="exportar-container">
+                    <div class="exportar-card">
+                        <h3 class="exportar-card-title">Configurar Reporte</h3>
                         
                         <div class="exportar-form">
-                            <div class="exportar-field" style="margin-bottom: 24px;">
-                                <label style="display: block; font-size: 0.9rem; font-weight: 600; color: var(--negro); margin-bottom: 8px;">
-                                    Tipo de Reporte
-                                </label>
-                                <select id="exportarTipo" class="select-clean" style="width: 100%;">
+                            <div class="exportar-field">
+                                <label>Tipo de Reporte</label>
+                                <select id="exportarTipo" class="select-clean">
                                     <option value="">Selecciona un tipo de reporte</option>
                                     <option value="adeudos">Adeudos</option>
                                     <option value="jugadores">Jugadores</option>
@@ -1274,23 +1437,19 @@
                                 </select>
                             </div>
                             
-                            <div class="exportar-field-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 24px;">
+                            <div class="exportar-field-row">
                                 <div class="exportar-field">
-                                    <label style="display: block; font-size: 0.9rem; font-weight: 600; color: var(--negro); margin-bottom: 8px;">
-                                        Fecha Inicial
-                                    </label>
-                                    <input type="date" id="exportarFechaInicio" class="select-clean" style="width: 100%; padding: 12px 14px;">
+                                    <label>Fecha Inicial</label>
+                                    <input type="date" id="exportarFechaInicio" class="select-clean">
                                 </div>
                                 
                                 <div class="exportar-field">
-                                    <label style="display: block; font-size: 0.9rem; font-weight: 600; color: var(--negro); margin-bottom: 8px;">
-                                        Fecha Final
-                                    </label>
-                                    <input type="date" id="exportarFechaFin" class="select-clean" style="width: 100%; padding: 12px 14px;">
+                                    <label>Fecha Final</label>
+                                    <input type="date" id="exportarFechaFin" class="select-clean">
                                 </div>
                             </div>
                             
-                            <button id="btnGenerarPDF" class="btn btn-primary" style="width: 100%; padding: 14px; font-size: 16px; display: flex; align-items: center; justify-content: center; gap: 8px;">
+                            <button id="btnGenerarPDF" class="btn btn-primary btn-full-width">
                                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                     <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
                                     <polyline points="7 10 12 15 17 10"></polyline>
@@ -1381,21 +1540,21 @@
                 </div>
                 
                 <!-- Resumen General -->
-                <div class="balance-summary" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; margin-bottom: 30px; padding: 0 30px;">
-                    <div class="balance-card" style="background: linear-gradient(135deg, var(--naranja) 0%, var(--naranja-dark) 100%); border-radius: var(--radius); padding: 28px; box-shadow: var(--shadow-lg); color: white;">
-                        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px;">
-                            <h3 style="font-size: 0.95rem; font-weight: 600; color: rgba(255,255,255,0.9); margin: 0;">Total Ingresos</h3>
+                <div class="balance-summary-grid">
+                    <div class="balance-summary-card orange">
+                        <div class="balance-summary-card-header">
+                            <h3 class="balance-summary-card-title">Total Ingresos</h3>
                             <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
                                 <line x1="12" y1="2" x2="12" y2="22"></line>
                                 <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
                             </svg>
                         </div>
-                        <p id="balanceTotalIngresos" style="font-size: 2.2rem; font-weight: 800; color: white; margin: 0; text-shadow: 0 2px 4px rgba(0,0,0,0.1);">$0.00</p>
+                        <p id="balanceTotalIngresos" class="balance-summary-card-value">$0.00</p>
                     </div>
                     
-                    <div class="balance-card" style="background: linear-gradient(135deg, #10B981 0%, #059669 100%); border-radius: var(--radius); padding: 28px; box-shadow: var(--shadow-lg); color: white;">
-                        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px;">
-                            <h3 style="font-size: 0.95rem; font-weight: 600; color: rgba(255,255,255,0.9); margin: 0;">Total Registros</h3>
+                    <div class="balance-summary-card green">
+                        <div class="balance-summary-card-header">
+                            <h3 class="balance-summary-card-title">Total Registros</h3>
                             <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
                                 <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
                                 <line x1="16" y1="2" x2="16" y2="6"></line>
@@ -1403,40 +1562,40 @@
                                 <line x1="3" y1="10" x2="21" y2="10"></line>
                             </svg>
                         </div>
-                        <p id="balanceTotalRegistros" style="font-size: 2.2rem; font-weight: 800; color: white; margin: 0; text-shadow: 0 2px 4px rgba(0,0,0,0.1);">0</p>
+                        <p id="balanceTotalRegistros" class="balance-summary-card-value">0</p>
                     </div>
                     
-                    <div class="balance-card" style="background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%); border-radius: var(--radius); padding: 28px; box-shadow: var(--shadow-lg); color: white;">
-                        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px;">
-                            <h3 style="font-size: 0.95rem; font-weight: 600; color: rgba(255,255,255,0.9); margin: 0;">Promedio por Registro</h3>
+                    <div class="balance-summary-card blue">
+                        <div class="balance-summary-card-header">
+                            <h3 class="balance-summary-card-title">Promedio por Registro</h3>
                             <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
                                 <line x1="12" y1="20" x2="12" y2="4"></line>
                                 <path d="M18 8l-6-6-6 6"></path>
                             </svg>
                         </div>
-                        <p id="balancePromedio" style="font-size: 2.2rem; font-weight: 800; color: white; margin: 0; text-shadow: 0 2px 4px rgba(0,0,0,0.1);">$0.00</p>
+                        <p id="balancePromedio" class="balance-summary-card-value">$0.00</p>
                     </div>
                 </div>
                 
                 <!-- Gráficas Interactivas -->
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 30px; margin-bottom: 40px; padding: 0 30px;">
+                <div class="balance-charts-grid">
                     <!-- Gráfica Tipo de Pago -->
-                    <div style="background: var(--blanco); border-radius: var(--radius); padding: 28px; box-shadow: var(--shadow-lg);">
-                        <h3 style="font-size: 1.2rem; font-weight: 700; color: var(--negro); margin-bottom: 24px; display: flex; align-items: center; gap: 10px;">
+                    <div class="balance-chart-card">
+                        <h3 class="balance-chart-title">
                             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--naranja)" stroke-width="2">
                                 <rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect>
                                 <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
                             </svg>
                             Distribución por Tipo de Pago
                         </h3>
-                        <div style="position: relative; height: 300px;">
+                        <div class="balance-chart-container-large">
                             <canvas id="chartTipoPago"></canvas>
                         </div>
                     </div>
                     
                     <!-- Gráfica Concepto de Pago -->
-                    <div style="background: var(--blanco); border-radius: var(--radius); padding: 28px; box-shadow: var(--shadow-lg);">
-                        <h3 style="font-size: 1.2rem; font-weight: 700; color: var(--negro); margin-bottom: 24px; display: flex; align-items: center; gap: 10px;">
+                    <div class="balance-chart-card">
+                        <h3 class="balance-chart-title">
                             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--naranja)" stroke-width="2">
                                 <circle cx="12" cy="12" r="10"></circle>
                                 <line x1="12" y1="8" x2="12" y2="12"></line>
@@ -1444,16 +1603,16 @@
                             </svg>
                             Distribución por Concepto
                         </h3>
-                        <div style="position: relative; height: 300px;">
+                        <div class="balance-chart-container-large">
                             <canvas id="chartConceptoPago"></canvas>
                         </div>
                     </div>
                 </div>
                 
                 <!-- Gráfica Categorías (Full Width) -->
-                <div style="margin-bottom: 40px; padding: 0 30px;">
-                    <div style="background: var(--blanco); border-radius: var(--radius); padding: 28px; box-shadow: var(--shadow-lg);">
-                        <h3 style="font-size: 1.2rem; font-weight: 700; color: var(--negro); margin-bottom: 24px; display: flex; align-items: center; gap: 10px;">
+                <div class="balance-detail-section">
+                    <div class="balance-chart-card">
+                        <h3 class="balance-chart-title">
                             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--naranja)" stroke-width="2">
                                 <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
                                 <circle cx="9" cy="7" r="4"></circle>
@@ -1462,31 +1621,31 @@
                             </svg>
                             Distribución por Categorías
                         </h3>
-                        <div style="position: relative; height: 350px;">
+                        <div class="balance-chart-container-xl">
                             <canvas id="chartCategorias"></canvas>
                         </div>
                     </div>
                 </div>
                 
                 <!-- Desglose Detallado -->
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(500px, 1fr)); gap: 30px; margin-bottom: 40px; padding: 0 30px;">
+                <div class="balance-details-grid">
                     <!-- Desglose por Tipo de Pago -->
-                    <div class="balance-section">
-                        <h3 style="font-size: 1.3rem; font-weight: 700; color: var(--negro); margin-bottom: 20px; display: flex; align-items: center; gap: 10px;">
+                    <div>
+                        <h3 class="balance-chart-title">
                             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--naranja)" stroke-width="2">
                                 <rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect>
                                 <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
                             </svg>
                             Detalle por Tipo de Pago
                         </h3>
-                        <div id="balanceTipoPago" style="background: var(--blanco); border-radius: var(--radius); padding: 24px; box-shadow: var(--shadow); max-height: 500px; overflow-y: auto;">
-                            <p style="text-align: center; color: var(--gris-label); padding: 40px;">Cargando datos...</p>
+                        <div id="balanceTipoPago" class="balance-detail-card">
+                            <p class="loading-text">Cargando datos...</p>
                         </div>
                     </div>
                     
                     <!-- Desglose por Concepto de Pago -->
-                    <div class="balance-section">
-                        <h3 style="font-size: 1.3rem; font-weight: 700; color: var(--negro); margin-bottom: 20px; display: flex; align-items: center; gap: 10px;">
+                    <div>
+                        <h3 class="balance-chart-title">
                             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--naranja)" stroke-width="2">
                                 <circle cx="12" cy="12" r="10"></circle>
                                 <line x1="12" y1="8" x2="12" y2="12"></line>
@@ -1494,15 +1653,15 @@
                             </svg>
                             Detalle por Concepto
                         </h3>
-                        <div id="balanceConceptoPago" style="background: var(--blanco); border-radius: var(--radius); padding: 24px; box-shadow: var(--shadow); max-height: 500px; overflow-y: auto;">
-                            <p style="text-align: center; color: var(--gris-label); padding: 40px;">Cargando datos...</p>
+                        <div id="balanceConceptoPago" class="balance-detail-card">
+                            <p class="loading-text">Cargando datos...</p>
                         </div>
                     </div>
                 </div>
                 
                 <!-- Desglose por Categorías -->
-                <div class="balance-section" style="margin-bottom: 40px; padding: 0 30px;">
-                    <h3 style="font-size: 1.3rem; font-weight: 700; color: var(--negro); margin-bottom: 20px; display: flex; align-items: center; gap: 10px;">
+                <div class="balance-detail-section">
+                    <h3 class="balance-chart-title">
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--naranja)" stroke-width="2">
                             <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
                             <circle cx="9" cy="7" r="4"></circle>
@@ -1511,8 +1670,8 @@
                         </svg>
                         Detalle por Categorías
                     </h3>
-                    <div id="balanceCategorias" style="background: var(--blanco); border-radius: var(--radius); padding: 24px; box-shadow: var(--shadow);">
-                        <p style="text-align: center; color: var(--gris-label); padding: 40px;">Cargando datos...</p>
+                    <div id="balanceCategorias" class="balance-detail-card">
+                        <p class="loading-text">Cargando datos...</p>
                     </div>
                 </div>
             </section>
@@ -1548,6 +1707,36 @@
                 <button class="btn btn-secondary" id="modalBtnClose">Cerrar</button>
                 <button class="btn btn-primary" id="modalBtnAction">Acción Principal</button>
             </div>
+        </div>
+    </div>
+
+    <!-- Modal de Agregar Recordatorio -->
+    <div class="reminder-modal" id="reminderModal">
+        <div class="reminder-modal-overlay"></div>
+        <div class="reminder-modal-content">
+            <div class="reminder-modal-header">
+                <h3>Nuevo Recordatorio</h3>
+                <button class="reminder-modal-close" id="reminderModalClose">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                </button>
+            </div>
+            <form class="reminder-form" id="reminderForm">
+                <div class="form-group">
+                    <label for="reminderText">Descripción</label>
+                    <textarea id="reminderText" placeholder="Escribe tu recordatorio..." rows="3" required></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="reminderDate">Fecha</label>
+                    <input type="date" id="reminderDate" required>
+                </div>
+                <div class="reminder-form-actions">
+                    <button type="button" class="btn-cancel" id="reminderCancelBtn">Cancelar</button>
+                    <button type="submit" class="btn-save">Guardar</button>
+                </div>
+            </form>
         </div>
     </div>
 
