@@ -414,6 +414,116 @@ body {
     margin-top: 48px;
 }
 
+/* Texto de cargando */
+.loading-text {
+    text-align: center;
+    color: var(--gris-label);
+    padding: 40px;
+    grid-column: 1 / -1;
+}
+
+/* Subheader de sección */
+.section-subheader {
+    margin-bottom: 20px;
+}
+
+.section-subheader.mt-40 {
+    margin-top: 40px;
+}
+
+.section-subheader-title {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--negro);
+    margin-bottom: 5px;
+}
+
+.section-subheader-subtitle {
+    color: var(--gris-label);
+    font-size: 0.9rem;
+}
+
+/* Badge contador con diferentes colores */
+.count-badge {
+    display: inline-block;
+    margin-top: 8px;
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+.count-badge.red {
+    background: #FEE2E2;
+    color: #DC2626;
+}
+
+.count-badge.blue {
+    background: #DBEAFE;
+    color: #1E40AF;
+}
+
+/* Header stats container */
+.header-stats {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.stat-badge {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+.stat-badge.red {
+    background: #FEE2E2;
+    color: #DC2626;
+}
+
+.stat-badge.blue {
+    background: #DBEAFE;
+    color: #1E40AF;
+}
+
+.stat-badge.green {
+    background: #D1FAE5;
+    color: #059669;
+}
+
+.stat-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+}
+
+.stat-dot.red {
+    background: #EF4444;
+}
+
+.stat-dot.blue {
+    background: #3B82F6;
+}
+
+.stat-dot.green {
+    background: #10B981;
+}
+
+/* Select de límite de vista */
+.view-limit-select {
+    padding: 8px 12px;
+    border: 1px solid var(--borde);
+    border-radius: 8px;
+    font-size: 0.9rem;
+    background: var(--blanco);
+    cursor: pointer;
+    font-family: inherit;
+}
+
 .summary-section {
     margin-bottom: 48px;
     background: var(--blanco);
@@ -473,20 +583,175 @@ body {
     border-radius: var(--radius-sm);
 }
 
+.carousel-container {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    box-sizing: border-box;
+    overflow: visible;
+    max-width: 100%;
+}
+
+.carousel-container > * {
+    flex-shrink: 0;
+}
+
+.carousel-btn {
+    width: 40px;
+    height: 40px;
+    min-width: 40px;
+    max-width: 40px;
+    min-height: 40px;
+    max-height: 40px;
+    border-radius: 8px;
+    background: white !important;
+    border: 2px solid var(--borde) !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    cursor: pointer;
+    transition: background-color 0.2s ease, border-color 0.2s ease;
+    flex-shrink: 0;
+    z-index: 100;
+    position: relative;
+    box-sizing: border-box;
+    padding: 0 !important;
+    margin: 0 !important;
+    overflow: visible;
+    vertical-align: middle;
+    color: var(--gris-label) !important;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.carousel-btn::before,
+.carousel-btn::after {
+    display: none;
+    content: none;
+}
+
+.carousel-btn:hover {
+    background: var(--naranja);
+    border-color: var(--naranja);
+    width: 40px;
+    height: 40px;
+    color: white;
+}
+
+.carousel-btn:hover svg {
+    stroke: white;
+    color: white;
+}
+
+.carousel-btn:active {
+    background: var(--naranja);
+    border-color: var(--naranja);
+    width: 40px;
+    height: 40px;
+    color: white;
+}
+
+.carousel-btn:active svg {
+    stroke: white;
+    color: white;
+}
+
+.carousel-btn:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(242, 101, 34, 0.2);
+    width: 40px;
+    height: 40px;
+}
+
+.carousel-btn:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+}
+
+.carousel-btn:disabled:hover {
+    background: white;
+    border-color: var(--borde);
+}
+
+.carousel-btn:disabled:hover svg {
+    stroke: var(--gris-label);
+}
+
+.carousel-btn svg {
+    stroke: currentColor;
+    fill: none;
+    transition: stroke 0.2s ease, color 0.2s ease;
+    width: 20px !important;
+    height: 20px !important;
+    min-width: 20px !important;
+    max-width: 20px !important;
+    min-height: 20px !important;
+    max-height: 20px !important;
+    flex-shrink: 0;
+    display: block !important;
+    box-sizing: border-box;
+    pointer-events: none;
+    visibility: visible !important;
+    opacity: 1 !important;
+}
+
 .summary-cards-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    display: flex;
+    flex-direction: row;
     gap: 20px;
+    overflow-x: hidden;
+    overflow-y: hidden;
+    padding: 4px 0;
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+    flex: 1;
+    position: relative;
 }
 
 .summary-cards-grid .player-card {
     cursor: pointer;
     transition: var(--transition);
     margin: 0;
+    min-width: 280px;
+    max-width: 280px;
+    flex-shrink: 0;
 }
 
 .summary-cards-grid .player-card:hover {
     border-color: var(--gris-label);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.carousel-dots {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    margin-top: 20px;
+    padding: 0;
+}
+
+.carousel-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--borde);
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.2s ease, width 0.2s ease;
+    padding: 0;
+}
+
+.carousel-dot:hover {
+    background: var(--gris-label);
+}
+
+.carousel-dot.active {
+    background: var(--naranja);
+    width: 24px;
+    border-radius: 4px;
 }
 
 /* ========================================
@@ -562,8 +827,96 @@ body {
         padding: 24px 16px;
     }
     
+    .carousel-container {
+        gap: 8px;
+    }
+    
+    .carousel-btn {
+        width: 40px !important;
+        height: 40px !important;
+        min-width: 40px !important;
+        max-width: 40px !important;
+        min-height: 40px !important;
+        max-height: 40px !important;
+        border-radius: 8px !important;
+        background: white !important;
+        border: 2px solid var(--borde) !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
+        color: var(--gris-label) !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        overflow: visible !important;
+    }
+    
+    .carousel-btn svg {
+        width: 18px !important;
+        height: 18px !important;
+        min-width: 18px !important;
+        max-width: 18px !important;
+        min-height: 18px !important;
+        max-height: 18px !important;
+        stroke: currentColor !important;
+        fill: none !important;
+        display: block !important;
+        flex-shrink: 0 !important;
+        pointer-events: none !important;
+        color: inherit !important;
+    }
+    
+    .carousel-btn:hover {
+        background: var(--naranja) !important;
+        border-color: var(--naranja) !important;
+        color: white !important;
+    }
+    
+    .carousel-btn:hover svg {
+        stroke: currentColor !important;
+        color: white !important;
+    }
+    
+    .carousel-btn:active {
+        background: var(--naranja) !important;
+        border-color: var(--naranja) !important;
+        transform: scale(0.95) !important;
+        color: white !important;
+    }
+    
+    .carousel-btn:active svg {
+        stroke: currentColor !important;
+        color: white !important;
+    }
+    
+    .carousel-btn:disabled {
+        opacity: 0.4 !important;
+        background: white !important;
+        border-color: var(--borde) !important;
+        color: var(--gris-label) !important;
+    }
+    
+    .carousel-btn:disabled svg {
+        stroke: currentColor !important;
+        color: var(--gris-label) !important;
+    }
+    
     .summary-cards-grid {
-        grid-template-columns: 1fr;
+        gap: 16px;
+        padding: 4px 0;
+    }
+    
+    .summary-cards-grid .player-card {
+        min-width: 260px;
+        max-width: 260px;
+    }
+    
+    .carousel-dots {
+        display: none !important;
+    }
+    
+    .carousel-dot {
+        display: none !important;
     }
     
     .summary-header {
@@ -1047,6 +1400,11 @@ body {
     background: #007bff;
 }
 
+/* Colores de avatar para Casa Club */
+.player-avatar.casaclub {
+    background: #8B4513;
+}
+
 /* Colores de avatar para adeudos/mensualidades */
 .player-avatar.adeudo {
     background: #EF4444;
@@ -1260,6 +1618,48 @@ body {
     border: 4px solid var(--blanco);
     box-shadow: var(--shadow-lg);
     flex-shrink: 0;
+}
+
+/* Colores de avatar del modal para prioridades de adeudos */
+.modal-avatar.priority-critico {
+    background: var(--adeudo-critico);
+}
+
+.modal-avatar.priority-alto {
+    background: var(--adeudo-alto);
+}
+
+.modal-avatar.priority-medio {
+    background: var(--adeudo-medio);
+}
+
+.modal-avatar.priority-bajo {
+    background: var(--adeudo-bajo);
+}
+
+/* Colores de avatar del modal para lesionados */
+.modal-avatar.lesion {
+    background: var(--adeudo-alto);
+}
+
+/* Colores de avatar del modal para permisos */
+.modal-avatar.permiso {
+    background: var(--adeudo-medio);
+}
+
+/* Colores de avatar del modal para comedor */
+.modal-avatar.comedor {
+    background: #007bff;
+}
+
+/* Colores de avatar del modal para Casa Club */
+.modal-avatar.casaclub {
+    background: #8B4513;
+}
+
+/* Colores de avatar del modal para adeudos/mensualidades */
+.modal-avatar.adeudo {
+    background: #EF4444;
 }
 
 .modal-player-info h3 {
@@ -1577,6 +1977,66 @@ body {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
     gap: 20px;
+}
+
+/* Contenedor de exportar */
+.exportar-container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 30px;
+}
+
+.exportar-card {
+    background: var(--blanco);
+    border-radius: var(--radius);
+    padding: 32px;
+    box-shadow: var(--shadow);
+}
+
+.exportar-card-title {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: var(--negro);
+    margin-bottom: 24px;
+}
+
+.exportar-field {
+    margin-bottom: 24px;
+}
+
+.exportar-field label {
+    display: block;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--negro);
+    margin-bottom: 8px;
+}
+
+.exportar-field .select-clean {
+    width: 100%;
+}
+
+.exportar-field-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin-bottom: 24px;
+}
+
+.exportar-field-row .select-clean,
+.exportar-field-row input[type="date"] {
+    width: 100%;
+    padding: 12px 14px;
+}
+
+.btn-full-width {
+    width: 100%;
+    padding: 14px;
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
 }
 
 .filter-item label {
@@ -2443,6 +2903,115 @@ body {
     border: 1px solid rgba(0, 0, 0, 0.05);
 }
 
+/* Balance summary */
+.balance-summary-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 20px;
+    margin-bottom: 30px;
+    padding: 0 30px;
+}
+
+.balance-summary-card {
+    border-radius: var(--radius);
+    padding: 28px;
+    box-shadow: var(--shadow-lg);
+    color: white;
+}
+
+.balance-summary-card.orange {
+    background: linear-gradient(135deg, var(--naranja) 0%, var(--naranja-dark) 100%);
+}
+
+.balance-summary-card.green {
+    background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+}
+
+.balance-summary-card.blue {
+    background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%);
+}
+
+.balance-summary-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+}
+
+.balance-summary-card-title {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: rgba(255,255,255,0.9);
+    margin: 0;
+}
+
+.balance-summary-card-value {
+    font-size: 2.2rem;
+    font-weight: 800;
+    color: white;
+    margin: 0;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+/* Balance charts grid */
+.balance-charts-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+    gap: 30px;
+    margin-bottom: 40px;
+    padding: 0 30px;
+}
+
+.balance-chart-card {
+    background: var(--blanco);
+    border-radius: var(--radius);
+    padding: 28px;
+    box-shadow: var(--shadow-lg);
+}
+
+.balance-chart-title {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--negro);
+    margin-bottom: 24px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.balance-chart-container-large {
+    position: relative;
+    height: 300px;
+}
+
+.balance-chart-container-xl {
+    position: relative;
+    height: 350px;
+}
+
+/* Balance detail sections */
+.balance-details-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+    gap: 30px;
+    margin-bottom: 40px;
+    padding: 0 30px;
+}
+
+.balance-detail-card {
+    background: var(--blanco);
+    border-radius: var(--radius);
+    padding: 24px;
+    box-shadow: var(--shadow);
+    max-height: 500px;
+    overflow-y: auto;
+}
+
+.balance-detail-section {
+    margin-bottom: 40px;
+    padding: 0 30px;
+}
+
 .balance-filters-header {
     display: flex;
     align-items: center;
@@ -2604,146 +3173,1751 @@ body {
 }
 
 /* ========================================
-   BANNER DE BIENVENIDA
+   FILA SUPERIOR DASHBOARD (Bienvenida, Calendario, Balance)
 ======================================== */
-.welcome-banner {
-    background: linear-gradient(135deg, rgba(242, 101, 34, 0.08) 0%, rgba(224, 86, 29, 0.05) 100%);
-    border: 1px solid rgba(242, 101, 34, 0.15);
-    border-radius: var(--radius-lg);
-    padding: 28px 32px;
-    margin-bottom: 32px;
-    position: relative;
-    overflow: hidden;
-    backdrop-filter: blur(10px);
+.dashboard-top-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+    margin-bottom: 24px;
 }
 
-.welcome-banner::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 3px;
-    background: linear-gradient(90deg, var(--naranja) 0%, var(--naranja-light) 100%);
+/* Cuando el balance está oculto, mostrar solo 2 columnas */
+.dashboard-top-row .balance-card[style*="display: none"] ~ *,
+.dashboard-top-row:has(.balance-card[style*="display: none"]) {
+    grid-template-columns: repeat(2, 1fr);
+}
+
+/* Fallback para navegadores sin soporte para :has() */
+.dashboard-top-row.without-balance {
+    grid-template-columns: repeat(2, 1fr);
+}
+
+.dashboard-card {
+    background: var(--blanco);
+    border: 1px solid var(--borde);
+    border-radius: 16px;
+    padding: 24px;
+    position: relative;
+    overflow: hidden;
+    transition: var(--transition-fast);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    min-height: 380px;
+}
+
+.dashboard-card:hover {
+    border-color: var(--naranja);
+    box-shadow: 0 6px 20px rgba(242, 101, 34, 0.18);
+    transform: translateY(-3px);
+}
+
+.dashboard-card-body {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    justify-content: space-between;
+}
+
+.dashboard-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+}
+
+.dashboard-card-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--gris-label);
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+}
+
+.dashboard-card-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--naranja);
+    background: rgba(242, 101, 34, 0.1);
+    flex-shrink: 0;
+}
+
+.dashboard-card-icon svg {
+    width: 22px;
+    height: 22px;
+}
+
+/* Tarjeta de Bienvenida - Rediseño Profesional */
+.welcome-card-top {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 24px;
 }
 
 .welcome-content {
     display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 24px;
-    position: relative;
-    z-index: 1;
-}
-
-.welcome-main {
+    flex-direction: column;
     flex: 1;
 }
 
-.welcome-title {
-    font-size: 1.875rem;
-    font-weight: 700;
+.welcome-greeting {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--gris-label);
+    margin-bottom: 8px;
+    text-transform: capitalize;
+    letter-spacing: 0.5px;
+    line-height: 1;
+}
+
+.welcome-name-wrapper {
+    margin-bottom: 20px;
+}
+
+.welcome-name {
+    font-size: 32px;
+    font-weight: 800;
     color: var(--negro);
-    margin: 0 0 8px 0;
+    margin-bottom: 8px;
     letter-spacing: -0.02em;
-    line-height: 1.2;
+    line-height: 1;
 }
 
-.welcome-title span {
-    color: var(--naranja);
-    font-weight: 600;
-}
-
-.welcome-time-container {
-    display: flex;
+.welcome-status {
+    display: inline-flex;
     align-items: center;
-    margin-top: 6px;
+    gap: 6px;
+    padding: 4px 10px;
+    background: rgba(16, 185, 129, 0.1);
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 600;
+    color: #10B981;
+}
+
+.welcome-status svg {
+    color: #10B981;
+}
+
+.welcome-divider {
+    width: 100%;
+    height: 1px;
+    background: linear-gradient(to right, var(--naranja), transparent);
+    margin-bottom: 20px;
+}
+
+.welcome-time-section {
+    margin-bottom: 20px;
+}
+
+.welcome-time-label {
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--gris-label);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 8px;
 }
 
 .welcome-time {
     display: inline-flex;
-    align-items: center;
+    align-items: baseline;
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-    font-size: 0.95rem;
-    font-weight: 500;
-    color: var(--gris-label);
+    font-size: 52px;
+    font-weight: 800;
+    color: var(--naranja);
     font-variant-numeric: tabular-nums;
-    letter-spacing: 0.3px;
+    line-height: 1;
+    letter-spacing: -0.04em;
 }
 
 .time-hours,
 .time-minutes {
-    color: var(--negro);
-    font-weight: 600;
+    color: var(--naranja);
+    font-weight: 800;
 }
 
 .time-separator {
-    color: var(--gris-label);
-    font-weight: 400;
-    margin: 0 4px;
+    color: var(--naranja);
+    font-weight: 700;
+    margin: 0 2px;
+    opacity: 0.6;
 }
 
 .time-period {
-    color: var(--gris-label);
-    font-weight: 500;
-    margin-left: 6px;
-    font-size: 0.9em;
+    color: var(--negro);
+    font-weight: 700;
+    margin-left: 8px;
+    font-size: 16px;
     text-transform: uppercase;
     letter-spacing: 0.5px;
 }
 
-.welcome-icon {
-    width: 56px;
-    height: 56px;
-    background: linear-gradient(135deg, var(--naranja) 0%, var(--naranja-dark) 100%);
-    border-radius: 14px;
+.welcome-date-section {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 16px;
+    background: var(--gris-fondo);
+    border-radius: 10px;
+    border-left: 3px solid var(--naranja);
+}
+
+.welcome-date-section svg {
+    stroke: var(--naranja);
+    flex-shrink: 0;
+}
+
+.welcome-date {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--negro);
+    text-transform: capitalize;
+    line-height: 1.3;
+}
+
+/* Sección de Recordatorios */
+.welcome-reminders-section {
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px solid var(--borde);
+}
+
+.reminders-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+}
+
+.reminders-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--negro);
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+}
+
+.reminders-title svg {
+    stroke: var(--naranja);
+}
+
+.add-reminder-btn {
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
+    background: var(--naranja);
+    border: none;
     display: flex;
     align-items: center;
     justify-content: center;
-    color: white;
-    flex-shrink: 0;
-    box-shadow: 0 4px 12px rgba(242, 101, 34, 0.25);
-    transition: var(--transition);
+    cursor: pointer;
+    transition: all 0.2s ease;
 }
 
-.welcome-icon:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 16px rgba(242, 101, 34, 0.35);
+.add-reminder-btn:hover {
+    background: #e05a1e;
+    transform: scale(1.05);
 }
 
-.welcome-icon svg {
-    width: 24px;
-    height: 24px;
+.add-reminder-btn svg {
+    stroke: white;
 }
 
-@media (max-width: 768px) {
-    .welcome-banner {
-        padding: 24px 20px;
+.reminders-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    max-height: 160px;
+    overflow-y: auto;
+}
+
+.reminders-list::-webkit-scrollbar {
+    width: 4px;
+}
+
+.reminders-list::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.reminders-list::-webkit-scrollbar-thumb {
+    background: var(--naranja);
+    border-radius: 4px;
+}
+
+.no-reminders {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 20px 10px;
+    gap: 8px;
+    color: var(--gris-label);
+}
+
+.no-reminders svg {
+    stroke: var(--gris-claro);
+    opacity: 0.5;
+}
+
+.no-reminders span {
+    font-size: 11px;
+    font-weight: 500;
+}
+
+.reminder-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 10px 12px;
+    background: var(--gris-fondo);
+    border-radius: 8px;
+    border-left: 3px solid var(--naranja);
+    transition: all 0.2s ease;
+}
+
+.reminder-item:hover {
+    background: rgba(242, 101, 34, 0.05);
+}
+
+.reminder-checkbox {
+    width: 16px;
+    height: 16px;
+    min-width: 16px;
+    border: 2px solid var(--gris-label);
+    border-radius: 4px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+}
+
+.reminder-checkbox:hover {
+    border-color: var(--naranja);
+}
+
+.reminder-checkbox.checked {
+    background: var(--naranja);
+    border-color: var(--naranja);
+}
+
+.reminder-checkbox.checked svg {
+    stroke: white;
+    width: 10px;
+    height: 10px;
+}
+
+.reminder-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.reminder-text {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--negro);
+    line-height: 1.4;
+}
+
+.reminder-text.completed {
+    text-decoration: line-through;
+    color: var(--gris-label);
+}
+
+.reminder-date {
+    font-size: 10px;
+    font-weight: 500;
+    color: var(--gris-label);
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.reminder-date svg {
+    width: 10px;
+    height: 10px;
+    stroke: var(--gris-label);
+}
+
+.reminder-delete {
+    width: 20px;
+    height: 20px;
+    min-width: 20px;
+    border-radius: 4px;
+    background: transparent;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    opacity: 0.5;
+    transition: all 0.2s ease;
+}
+
+.reminder-delete:hover {
+    opacity: 1;
+    background: rgba(239, 68, 68, 0.1);
+}
+
+.reminder-delete svg {
+    stroke: #EF4444;
+    width: 14px;
+    height: 14px;
+}
+
+/* Modal de Recordatorios */
+.reminder-modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 10000;
+    animation: fadeIn 0.2s ease;
+}
+
+.reminder-modal.active {
+    display: block;
+}
+
+.reminder-modal-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(4px);
+}
+
+.reminder-modal-content {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: white;
+    border-radius: 16px;
+    padding: 24px;
+    width: 90%;
+    max-width: 450px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    animation: slideUp 0.3s ease;
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translate(-50%, -40%);
     }
-    
-    .welcome-content {
+    to {
+        opacity: 1;
+        transform: translate(-50%, -50%);
+    }
+}
+
+.reminder-modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+}
+
+.reminder-modal-header h3 {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--negro);
+    margin: 0;
+}
+
+.reminder-modal-close {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    background: transparent;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.reminder-modal-close:hover {
+    background: var(--gris-fondo);
+}
+
+.reminder-modal-close svg {
+    stroke: var(--gris-label);
+}
+
+.reminder-form {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.reminder-form .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.reminder-form label {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--negro);
+}
+
+.reminder-form textarea,
+.reminder-form input {
+    padding: 12px;
+    border: 2px solid var(--borde);
+    border-radius: 10px;
+    font-size: 14px;
+    font-family: inherit;
+    color: var(--negro);
+    transition: all 0.2s ease;
+}
+
+.reminder-form textarea:focus,
+.reminder-form input:focus {
+    outline: none;
+    border-color: var(--naranja);
+    box-shadow: 0 0 0 3px rgba(242, 101, 34, 0.1);
+}
+
+.reminder-form textarea {
+    resize: vertical;
+    min-height: 80px;
+}
+
+.reminder-form-actions {
+    display: flex;
+    gap: 12px;
+    margin-top: 8px;
+}
+
+.reminder-form-actions button {
+    flex: 1;
+    padding: 12px 20px;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-cancel {
+    background: var(--gris-fondo);
+    border: 2px solid var(--borde);
+    color: var(--negro);
+}
+
+.btn-cancel:hover {
+    background: var(--borde);
+}
+
+.btn-save {
+    background: var(--naranja);
+    border: 2px solid var(--naranja);
+    color: white;
+}
+
+.btn-save:hover {
+    background: #e05a1e;
+    border-color: #e05a1e;
+}
+
+/* Tarjeta de Calendario */
+.calendar-controls {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+.calendar-nav-btn {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    background: transparent;
+    border: 1px solid var(--borde);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+}
+
+.calendar-nav-btn:hover {
+    background: var(--naranja);
+    border-color: var(--naranja);
+}
+
+.calendar-nav-btn:hover svg {
+    stroke: white;
+}
+
+.calendar-nav-btn svg {
+    stroke: var(--gris-label);
+    transition: all 0.2s ease;
+}
+
+.calendar-month {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--negro);
+    text-align: center;
+    text-transform: capitalize;
+    line-height: 1.2;
+    flex: 1;
+}
+
+.calendar-days {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 8px;
+}
+
+.calendar-day {
+    aspect-ratio: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--gris-label);
+    border-radius: 8px;
+    transition: var(--transition);
+    cursor: default;
+    position: relative;
+}
+
+.calendar-day.other-month {
+    color: var(--gris-claro);
+    opacity: 0.25;
+}
+
+.calendar-day.today {
+    background: var(--naranja);
+    color: white;
+    font-weight: 700;
+    font-size: 15px;
+    box-shadow: 0 4px 12px rgba(242, 101, 34, 0.4);
+}
+
+.calendar-day.weekend {
+    color: var(--gris-label);
+}
+
+.calendar-day.has-reminder {
+    background: rgba(242, 101, 34, 0.05);
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.calendar-day.today.has-reminder {
+    background: var(--naranja);
+}
+
+.reminder-dot {
+    position: absolute;
+    bottom: 3px;
+    width: 4px;
+    height: 4px;
+    background: var(--naranja);
+    border-radius: 50%;
+}
+
+.calendar-day.today .reminder-dot {
+    background: white;
+}
+
+/* Tooltip de Recordatorios */
+.reminder-tooltip {
+    position: absolute;
+    bottom: calc(100% + 10px);
+    left: 50%;
+    transform: translateX(-50%);
+    background: white;
+    border: 1px solid var(--borde);
+    border-radius: 10px;
+    padding: 12px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+    min-width: 200px;
+    max-width: 280px;
+    z-index: 1000;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: opacity 0.2s ease, visibility 0.2s ease, transform 0.2s ease;
+    transform: translateX(-50%) translateY(-4px);
+    white-space: normal;
+    word-wrap: break-word;
+}
+
+.calendar-day.has-reminder:hover .reminder-tooltip {
+    opacity: 1;
+    visibility: visible;
+    transform: translateX(-50%) translateY(0);
+    pointer-events: auto;
+}
+
+
+.reminder-tooltip::after {
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 0;
+    height: 0;
+    border-left: 6px solid transparent;
+    border-right: 6px solid transparent;
+    border-top: 6px solid white;
+}
+
+.reminder-tooltip::before {
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 0;
+    height: 0;
+    border-left: 7px solid transparent;
+    border-right: 7px solid transparent;
+    border-top: 7px solid var(--borde);
+    margin-top: 1px;
+}
+
+.reminder-tooltip-header {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--naranja);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 8px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid var(--borde);
+}
+
+.reminder-tooltip-item {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 6px 0;
+}
+
+.reminder-tooltip-item:not(:last-child) {
+    border-bottom: 1px solid var(--gris-fondo);
+    margin-bottom: 4px;
+}
+
+.reminder-tooltip-text {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--negro);
+    line-height: 1.4;
+}
+
+.reminder-tooltip-status {
+    font-size: 10px;
+    font-weight: 600;
+    padding: 2px 6px;
+    border-radius: 4px;
+    width: fit-content;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+}
+
+.reminder-tooltip-status.completed {
+    background: rgba(16, 185, 129, 0.1);
+    color: #10B981;
+}
+
+.reminder-tooltip-status.pending {
+    background: rgba(242, 101, 34, 0.1);
+    color: var(--naranja);
+}
+
+.calendar-today {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--gris-label);
+    text-align: center;
+    padding-top: 12px;
+    border-top: 1px solid var(--borde);
+    line-height: 1.4;
+}
+
+/* Tarjeta de Balance */
+.balance-header-info {
+    text-align: center;
+    margin-bottom: 24px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+}
+
+.balance-value {
+    font-size: 48px;
+    font-weight: 800;
+    color: var(--naranja);
+    letter-spacing: -0.04em;
+    line-height: 1;
+}
+
+.balance-period {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--gris-label);
+    line-height: 1.2;
+    text-transform: capitalize;
+}
+
+.balance-chart-wrapper {
+    margin-top: 0;
+    padding-top: 20px;
+    border-top: 1px solid var(--borde);
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+}
+
+.balance-chart-title {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--negro);
+    margin-bottom: 16px;
+    text-align: center;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+}
+
+.balance-chart-container {
+    height: 200px;
+    position: relative;
+    flex: 1;
+    margin-bottom: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.balance-chart-container canvas {
+    max-height: 200px !important;
+    width: 100% !important;
+    height: 100% !important;
+}
+
+.balance-chart-description {
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--gris-label);
+    text-align: center;
+    line-height: 1.3;
+    padding: 12px 8px 0;
+    margin-top: 8px;
+}
+
+@media (max-width: 1024px) {
+    .dashboard-top-row {
+        grid-template-columns: 1fr;
         gap: 16px;
     }
     
-    .welcome-title {
-        font-size: 1.5rem;
+    .dashboard-card {
+        min-height: 350px;
+    }
+    
+    .welcome-name {
+        font-size: 28px;
     }
     
     .welcome-time {
-        font-size: 0.875rem;
+        font-size: 44px;
+    }
+    
+    .welcome-time-label {
+        font-size: 9px;
+    }
+    
+    .balance-header-info {
+        margin-bottom: 20px;
+    }
+    
+    .balance-value {
+        font-size: 42px;
+    }
+    
+    .balance-period {
+        font-size: 12px;
+    }
+    
+    .balance-chart-wrapper {
+        padding-top: 16px;
+    }
+    
+    .balance-chart-container {
+        height: 180px;
+    }
+    
+    .balance-chart-container canvas {
+        max-height: 180px !important;
+        height: 100% !important;
+    }
+}
+
+@media (max-width: 768px) {
+    .dashboard-top-row {
+        grid-template-columns: 1fr !important;
+        margin-bottom: 16px;
+        gap: 14px;
+    }
+    
+    .dashboard-card {
+        padding: 20px;
+        min-height: 320px;
+    }
+    
+    .dashboard-card-header {
+        margin-bottom: 16px;
+    }
+    
+    .dashboard-card-title {
+        font-size: 12px;
+    }
+    
+    .dashboard-card-icon {
+        width: 36px;
+        height: 36px;
+    }
+    
+    .dashboard-card-icon svg {
+        width: 20px;
+        height: 20px;
+    }
+    
+    .welcome-card-top {
+        margin-bottom: 18px;
+    }
+    
+    .welcome-badge {
+        font-size: 10px;
+        padding: 5px 10px;
+    }
+    
+    .welcome-greeting {
+        font-size: 12px;
+        margin-bottom: 6px;
+    }
+    
+    .welcome-name-wrapper {
+        margin-bottom: 16px;
+    }
+    
+    .welcome-name {
+        font-size: 24px;
+        margin-bottom: 6px;
+    }
+    
+    .welcome-status {
+        font-size: 10px;
+        padding: 3px 8px;
+    }
+    
+    .welcome-divider {
+        margin-bottom: 16px;
+    }
+    
+    .welcome-time-section {
+        margin-bottom: 16px;
+    }
+    
+    .welcome-time-label {
+        font-size: 9px;
+        margin-bottom: 6px;
+    }
+    
+    .welcome-time {
+        font-size: 40px;
     }
     
     .time-period {
-        font-size: 0.8rem;
+        font-size: 14px;
+        margin-left: 6px;
     }
     
-    .welcome-icon {
-        width: 48px;
-        height: 48px;
+    .welcome-date-section {
+        padding: 10px 12px;
+        gap: 8px;
     }
     
-    .welcome-icon svg {
-        width: 20px;
-        height: 20px;
+    .welcome-date-section svg {
+        width: 14px;
+        height: 14px;
+    }
+    
+    .welcome-date {
+        font-size: 13px;
+    }
+    
+    .welcome-reminders-section {
+        margin-top: 16px;
+        padding-top: 16px;
+    }
+    
+    .reminders-header {
+        margin-bottom: 10px;
+    }
+    
+    .reminders-title {
+        font-size: 10px;
+        gap: 6px;
+    }
+    
+    .add-reminder-btn {
+        width: 26px;
+        height: 26px;
+    }
+    
+    .reminders-list {
+        max-height: 140px;
+    }
+    
+    .reminder-item {
+        padding: 8px 10px;
+        gap: 8px;
+    }
+    
+    .reminder-text {
+        font-size: 11px;
+    }
+    
+    .reminder-date {
+        font-size: 9px;
+    }
+    
+    .balance-header-info {
+        margin-bottom: 18px;
+        gap: 6px;
+    }
+    
+    .balance-value {
+        font-size: 38px;
+    }
+    
+    .balance-period {
+        font-size: 12px;
+    }
+    
+    .balance-chart-wrapper {
+        padding-top: 16px;
+    }
+    
+    .calendar-controls {
+        margin-bottom: 12px;
+        gap: 8px;
+    }
+    
+    .calendar-nav-btn {
+        width: 28px;
+        height: 28px;
+    }
+    
+    .calendar-nav-btn svg {
+        width: 14px;
+        height: 14px;
+    }
+    
+    .calendar-month {
+        font-size: 13px;
+    }
+    
+    .calendar-days {
+        gap: 6px;
+    }
+    
+    .calendar-day {
+        font-size: 13px;
+    }
+    
+    .reminder-tooltip {
+        min-width: 180px;
+        max-width: 240px;
+        padding: 10px;
+        font-size: 11px;
+    }
+    
+    .reminder-tooltip-header {
+        font-size: 10px;
+        margin-bottom: 6px;
+        padding-bottom: 4px;
+    }
+    
+    .reminder-tooltip-text {
+        font-size: 11px;
+    }
+    
+    .reminder-tooltip-status {
+        font-size: 9px;
+        padding: 2px 5px;
+    }
+    
+    .calendar-today {
+        font-size: 12px;
+        padding-top: 10px;
+    }
+    
+    .balance-chart-title {
+        margin-bottom: 12px;
+    }
+    
+    .balance-chart-container {
+        height: 150px;
+    }
+    
+    .balance-chart-container canvas {
+        max-height: 150px !important;
+        height: 100% !important;
+    }
+    
+    .balance-chart-description {
+        font-size: 9px;
+        padding: 8px 4px 0;
+    }
+    
+    /* Tarjetas informativas */
+    .cards-grid {
+        grid-template-columns: 1fr;
+        gap: 16px;
+        margin-bottom: 32px;
+    }
+    
+    .info-card {
+        padding: 20px;
+    }
+    
+    /* Secciones de resumen */
+    .summary-section {
+        padding: 24px 12px;
+    }
+    
+    /* Player cards en carousels */
+    .player-card {
+        min-width: 250px;
+        max-width: 250px;
+    }
+    
+    /* Modales */
+    .modal-content {
+        max-width: 90%;
+        padding: 24px;
+        margin: 20px auto;
+        max-height: 85vh;
+    }
+    
+    .modal-header {
+        padding: 16px 20px;
+    }
+    
+    .modal-player-info {
+        gap: 12px;
+    }
+    
+    .modal-avatar {
+        width: 60px;
+        height: 60px;
+        font-size: 24px;
+    }
+    
+    .modal-player-info h3 {
+        font-size: 20px;
+    }
+    
+    .modal-player-info p {
+        font-size: 13px;
+    }
+}
+
+/* ========================================
+   RESPONSIVE - MÓVILES PEQUEÑOS (480px)
+======================================== */
+@media (max-width: 480px) {
+    .dashboard-top-row {
+        gap: 12px;
+        margin-bottom: 16px;
+    }
+    
+    .dashboard-card {
+        padding: 16px;
+        min-height: auto;
+        border-radius: 12px;
+    }
+    
+    .dashboard-card-header {
+        margin-bottom: 12px;
+    }
+    
+    .dashboard-card-title {
+        font-size: 11px;
+        letter-spacing: 0.8px;
+    }
+    
+    .dashboard-card-icon {
+        width: 32px;
+        height: 32px;
+        border-radius: 8px;
+    }
+    
+    .dashboard-card-icon svg {
+        width: 18px;
+        height: 18px;
+    }
+    
+    /* Bienvenida */
+    .welcome-card-top {
+        margin-bottom: 16px;
+    }
+    
+    .welcome-greeting {
+        font-size: 11px;
+        margin-bottom: 6px;
+    }
+    
+    .welcome-name-wrapper {
+        margin-bottom: 12px;
+    }
+    
+    .welcome-name {
+        font-size: 20px;
+        margin-bottom: 4px;
+    }
+    
+    .welcome-status {
+        font-size: 9px;
+        padding: 2px 6px;
+    }
+    
+    .welcome-divider {
+        margin-bottom: 12px;
+    }
+    
+    .welcome-time-section {
+        margin-bottom: 12px;
+    }
+    
+    .welcome-time-label {
+        font-size: 8px;
+        margin-bottom: 4px;
+    }
+    
+    .welcome-time {
+        font-size: 32px;
+    }
+    
+    .time-period {
+        font-size: 12px;
+        margin-left: 4px;
+    }
+    
+    .welcome-date-section {
+        padding: 8px 10px;
+        gap: 6px;
+    }
+    
+    .welcome-date-section svg {
+        width: 12px;
+        height: 12px;
+    }
+    
+    .welcome-date {
+        font-size: 12px;
+    }
+    
+    .welcome-reminders-section {
+        margin-top: 12px;
+        padding-top: 12px;
+    }
+    
+    .reminders-header {
+        margin-bottom: 8px;
+    }
+    
+    .reminders-title {
+        font-size: 9px;
+        gap: 4px;
+    }
+    
+    .add-reminder-btn {
+        width: 24px;
+        height: 24px;
+    }
+    
+    .reminders-list {
+        max-height: 120px;
+        gap: 6px;
+    }
+    
+    .reminder-item {
+        padding: 6px 8px;
+        gap: 6px;
+    }
+    
+    .reminder-text {
+        font-size: 10px;
+    }
+    
+    .reminder-date {
+        font-size: 8px;
+    }
+    
+    /* Balance */
+    .balance-header-info {
+        margin-bottom: 16px;
+        gap: 4px;
+    }
+    
+    .balance-value {
+        font-size: 32px;
+    }
+    
+    .balance-period {
+        font-size: 11px;
+    }
+    
+    .balance-chart-wrapper {
+        padding-top: 12px;
+    }
+    
+    .balance-chart-title {
+        font-size: 10px;
+        margin-bottom: 8px;
+    }
+    
+    .balance-chart-container {
+        height: 120px;
+    }
+    
+    .balance-chart-container canvas {
+        max-height: 120px !important;
+    }
+    
+    .balance-chart-description {
+        font-size: 8px;
+        padding: 6px 4px 0;
+    }
+    
+    /* Calendario */
+    .calendar-controls {
+        margin-bottom: 10px;
+        gap: 6px;
+    }
+    
+    .calendar-nav-btn {
+        width: 24px;
+        height: 24px;
+        border-radius: 6px;
+    }
+    
+    .calendar-nav-btn svg {
+        width: 12px;
+        height: 12px;
+    }
+    
+    .calendar-month {
+        font-size: 12px;
+    }
+    
+    .calendar-days {
+        gap: 4px;
+    }
+    
+    .calendar-day {
+        font-size: 11px;
+        padding: 4px;
+        border-radius: 6px;
+    }
+    
+    .calendar-today {
+        font-size: 11px;
+        padding-top: 8px;
+    }
+    
+    /* Tarjetas informativas */
+    .cards-grid {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+    
+    .info-card {
+        padding: 16px;
+    }
+    
+    /* Secciones de resumen */
+    .summary-section {
+        padding: 20px 12px;
+    }
+    
+    .summary-section-header {
+        margin-bottom: 16px;
+    }
+    
+    .summary-section-title {
+        font-size: 16px;
+    }
+    
+    .summary-section-subtitle {
+        font-size: 12px;
+    }
+    
+    /* Carousels */
+    .carousel-container {
+        gap: 8px;
+    }
+    
+    .carousel-btn {
+        width: 40px !important;
+        height: 40px !important;
+        min-width: 40px !important;
+        max-width: 40px !important;
+        min-height: 40px !important;
+        max-height: 40px !important;
+        border-radius: 8px !important;
+        background: white !important;
+        border: 2px solid var(--borde) !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
+        color: var(--gris-label) !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        overflow: visible !important;
+    }
+    
+    .carousel-btn svg {
+        width: 18px !important;
+        height: 18px !important;
+        min-width: 18px !important;
+        max-width: 18px !important;
+        min-height: 18px !important;
+        max-height: 18px !important;
+        stroke: currentColor !important;
+        fill: none !important;
+        display: block !important;
+        flex-shrink: 0 !important;
+        pointer-events: none !important;
+        color: inherit !important;
+    }
+    
+    .carousel-btn:hover {
+        background: var(--naranja) !important;
+        border-color: var(--naranja) !important;
+        color: white !important;
+    }
+    
+    .carousel-btn:hover svg {
+        stroke: currentColor !important;
+        color: white !important;
+    }
+    
+    .carousel-btn:active {
+        background: var(--naranja) !important;
+        border-color: var(--naranja) !important;
+        transform: scale(0.95) !important;
+        color: white !important;
+    }
+    
+    .carousel-btn:active svg {
+        stroke: currentColor !important;
+        color: white !important;
+    }
+    
+    .carousel-btn:disabled {
+        opacity: 0.4 !important;
+        background: white !important;
+        border-color: var(--borde) !important;
+        color: var(--gris-label) !important;
+    }
+    
+    .carousel-btn:disabled svg {
+        stroke: currentColor !important;
+        color: var(--gris-label) !important;
+    }
+    
+    .summary-cards-grid {
+        gap: 12px;
+        padding: 4px 4px 10px 4px;
+    }
+    
+    .summary-cards-grid .player-card {
+        min-width: 240px;
+        max-width: 240px;
+    }
+    
+    .carousel-dots {
+        display: none !important;
+    }
+    
+    .carousel-dot {
+        display: none !important;
+    }
+    
+    /* Modales */
+    .modal-content {
+        max-width: 95%;
+        padding: 20px;
+        margin: 10px;
+    }
+    
+    .modal-player-info h3 {
+        font-size: 20px;
+    }
+    
+    .modal-info-grid {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+    
+    .modal-info-item {
+        padding: 12px;
+    }
+    
+    .modal-info-label {
+        font-size: 11px;
+    }
+    
+    .modal-info-value {
+        font-size: 13px;
+    }
+    
+    /* Tooltips */
+    .reminder-tooltip {
+        min-width: 160px;
+        max-width: 200px;
+        padding: 8px;
+        font-size: 10px;
+    }
+    
+    .reminder-tooltip-header {
+        font-size: 9px;
+        margin-bottom: 4px;
+        padding-bottom: 3px;
+    }
+    
+    .reminder-tooltip-text {
+        font-size: 10px;
+    }
+    
+    .reminder-tooltip-status {
+        font-size: 8px;
+        padding: 1px 4px;
+    }
+}
+
+/* ========================================
+   RESPONSIVE - TABLETS (768px - 1024px)
+======================================== */
+@media (min-width: 481px) and (max-width: 1024px) {
+    .dashboard-top-row {
+        grid-template-columns: 1fr;
+        gap: 16px;
+    }
+    
+    .cards-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 16px;
+    }
+}
+
+/* ========================================
+   RESPONSIVE - ORIENTACIÓN LANDSCAPE MÓVIL
+======================================== */
+@media (max-width: 768px) and (orientation: landscape) {
+    .dashboard-card {
+        min-height: auto;
+    }
+    
+    .welcome-time {
+        font-size: 36px;
+    }
+    
+    .balance-value {
+        font-size: 36px;
+    }
+    
+    .balance-chart-container {
+        height: 120px;
+    }
+    
+    .balance-chart-container canvas {
+        max-height: 120px !important;
+    }
+}
+
+/* ========================================
+   OPTIMIZACIONES TÁCTILES PARA MÓVILES
+======================================== */
+@media (max-width: 768px) {
+    /* Áreas táctiles más grandes */
+    button, .btn, .calendar-nav-btn, .add-reminder-btn {
+        min-height: 44px;
+        min-width: 44px;
+        touch-action: manipulation;
+        -webkit-tap-highlight-color: rgba(242, 101, 34, 0.2);
+    }
+    
+    /* Botones del carrusel con tamaño específico */
+    .carousel-btn {
+        min-height: 40px !important;
+        min-width: 40px !important;
+        touch-action: manipulation;
+        -webkit-tap-highlight-color: rgba(242, 101, 34, 0.2);
+    }
+    
+    /* Scroll suave mejorado */
+    .summary-cards-grid {
+        -webkit-overflow-scrolling: touch;
+        scroll-behavior: smooth;
+        overscroll-behavior-x: contain;
+    }
+    
+    /* Prevenir zoom en inputs */
+    input[type="text"],
+    input[type="email"],
+    input[type="number"],
+    input[type="date"],
+    input[type="time"],
+    textarea,
+    select {
+        font-size: 16px !important;
+    }
+    
+    /* Mejorar contraste y legibilidad */
+    .dashboard-card {
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+    }
+    
+    /* Optimizar modales para móviles */
+    .modal-overlay {
+        padding: 10px;
+    }
+    
+    .modal-content {
+        border-radius: 16px;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+    
+    /* Mejorar espaciado en formularios */
+    .reminder-form .form-group {
+        margin-bottom: 16px;
+    }
+    
+    .reminder-form textarea,
+    .reminder-form input {
+        padding: 12px;
+        font-size: 16px;
+    }
+    
+    /* Optimizar tooltips para móviles */
+    .reminder-tooltip {
+        pointer-events: none;
+    }
+    
+    .calendar-day.has-reminder:active .reminder-tooltip {
+        opacity: 1;
+        visibility: visible;
+    }
+}
+
+/* ========================================
+   OPTIMIZACIONES ADICIONALES MÓVILES PEQUEÑOS
+======================================== */
+@media (max-width: 480px) {
+    /* Mejorar áreas táctiles */
+    .calendar-nav-btn,
+    .add-reminder-btn,
+    .reminder-delete {
+        min-height: 40px;
+        min-width: 40px;
+    }
+    
+    /* Optimizar scroll horizontal */
+    .summary-cards-grid {
+        scroll-snap-type: x mandatory;
+        scroll-padding: 0 12px;
+    }
+    
+    .summary-cards-grid .player-card {
+        scroll-snap-align: start;
+    }
+    
+    /* Reducir animaciones en móviles para mejor rendimiento */
+    .dashboard-card:hover {
+        transform: none;
+    }
+    
+    /* Mejorar legibilidad de texto pequeño */
+    .balance-chart-description,
+    .reminder-date,
+    .calendar-today {
+        line-height: 1.5;
+    }
+    
+    /* Optimizar modales */
+    .modal-content {
+        border-radius: 12px;
+        padding: 16px;
+    }
+    
+    .modal-header {
+        padding: 12px 16px;
+    }
+    
+    .modal-close {
+        width: 36px;
+        height: 36px;
+    }
+    
+    /* Asegurar que el contenido no se desborde */
+    img, video, iframe, canvas {
+        max-width: 100%;
+        height: auto;
+    }
+    
+    /* Mejorar contenedores principales */
+    .main-content {
+        padding: 12px;
+    }
+    
+    /* Optimizar secciones */
+    .section {
+        padding: 16px 12px;
+    }
+    
+    /* Mejorar espaciado general */
+    .dashboard-summary {
+        padding: 16px 12px;
     }
 }
