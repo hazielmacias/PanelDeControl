@@ -9,7 +9,7 @@ let getFirestore = null;
 
 // Cargar Firebase cuando sea necesario
 async function initFirebase() {
-    if (db) return;
+    if (db) return; // Ya está inicializado
     
     try {
         const { initializeApp } = await import("https://www.gstatic.com/firebasejs/12.5.0/firebase-app.js");
@@ -297,196 +297,6 @@ const modalAvatarText = document.getElementById('modalAvatarText');
 const modalBody = document.getElementById('modalBody');
 
 // ========================================
-// DATOS DE EJEMPLO
-// ========================================
-const mockData = {
-    adeudos: [
-        {
-            id: 1,
-            nombre: "Juan Pérez García",
-            categoria: "Sub-17",
-            foto: null,
-            monto: 4500,
-            meses: 3,
-            prioridad: "critico",
-            ultimoPago: "15/07/2024"
-        },
-        {
-            id: 2,
-            nombre: "Carlos Rodríguez",
-            categoria: "Sub-15",
-            foto: null,
-            monto: 3000,
-            meses: 2,
-            prioridad: "alto",
-            ultimoPago: "20/08/2024"
-        },
-        {
-            id: 3,
-            nombre: "Miguel Hernández",
-            categoria: "Sub-16",
-            foto: null,
-            monto: 1500,
-            meses: 1,
-            prioridad: "medio",
-            ultimoPago: "10/09/2024"
-        },
-        {
-            id: 4,
-            nombre: "Roberto Sánchez",
-            categoria: "Sub-14",
-            foto: null,
-            monto: 3000,
-            meses: 2,
-            prioridad: "alto",
-            ultimoPago: "25/08/2024"
-        },
-        {
-            id: 5,
-            nombre: "Diego Martínez",
-            categoria: "Sub-17",
-            foto: null,
-            monto: 6000,
-            meses: 4,
-            prioridad: "critico",
-            ultimoPago: "01/07/2024"
-        },
-        {
-            id: 6,
-            nombre: "Fernando López",
-            categoria: "Sub-15",
-            foto: null,
-            monto: 1500,
-            meses: 1,
-            prioridad: "medio",
-            ultimoPago: "05/09/2024"
-        },
-        {
-            id: 7,
-            nombre: "Javier Torres",
-            categoria: "Sub-16",
-            foto: null,
-            monto: 4500,
-            meses: 3,
-            prioridad: "critico",
-            ultimoPago: "18/07/2024"
-        },
-        {
-            id: 8,
-            nombre: "Antonio Ramírez",
-            categoria: "Sub-14",
-            foto: null,
-            monto: 3000,
-            meses: 2,
-            prioridad: "alto",
-            ultimoPago: "22/08/2024"
-        }
-    ],
-    lesionados: [
-        {
-            id: 1,
-            nombre: "Pedro González",
-            categoria: "Sub-17",
-            foto: null,
-            tipoLesion: "Esguince de tobillo",
-            fechaLesion: "15/09/2024",
-            recuperacion: "2-3 semanas",
-            estado: "En tratamiento"
-        },
-        {
-            id: 2,
-            nombre: "Luis Morales",
-            categoria: "Sub-16",
-            foto: null,
-            tipoLesion: "Desgarro muscular",
-            fechaLesion: "20/09/2024",
-            recuperacion: "4-6 semanas",
-            estado: "Recuperándose"
-        },
-        {
-            id: 3,
-            nombre: "Andrés Vega",
-            categoria: "Sub-15",
-            foto: null,
-            tipoLesion: "Fractura de brazo",
-            fechaLesion: "10/09/2024",
-            recuperacion: "6-8 semanas",
-            estado: "En tratamiento"
-        }
-    ],
-    permisos: [
-        {
-            id: 1,
-            nombre: "Ricardo Castro",
-            categoria: "Sub-16",
-            foto: null,
-            motivo: "Viaje familiar",
-            fecha: "25/10/2024",
-            duracion: "3 días",
-            estado: "Pendiente"
-        },
-        {
-            id: 2,
-            nombre: "Daniel Flores",
-            categoria: "Sub-15",
-            foto: null,
-            motivo: "Exámenes escolares",
-            fecha: "28/10/2024",
-            duracion: "1 día",
-            estado: "Aprobado"
-        },
-        {
-            id: 3,
-            nombre: "Jorge Mendoza",
-            categoria: "Sub-17",
-            foto: null,
-            motivo: "Cita médica",
-            fecha: "30/10/2024",
-            duracion: "1 día",
-            estado: "Pendiente"
-        },
-        {
-            id: 4,
-            nombre: "Sergio Ortiz",
-            categoria: "Sub-14",
-            foto: null,
-            motivo: "Compromiso familiar",
-            fecha: "02/11/2024",
-            duracion: "2 días",
-            estado: "Pendiente"
-        },
-        {
-            id: 5,
-            nombre: "Raúl Jiménez",
-            categoria: "Sub-16",
-            foto: null,
-            motivo: "Torneo escolar",
-            fecha: "05/11/2024",
-            duracion: "2 días",
-            estado: "Aprobado"
-        }
-    ],
-    comedor: [
-        {
-            id: 1,
-            nombre: "Eduardo Silva",
-            categoria: "Sub-15",
-            foto: null,
-            fecha: "28/10/2024",
-            hora: "14:30"
-        },
-        {
-            id: 2,
-            nombre: "Manuel Ruiz",
-            categoria: "Sub-16",
-            foto: null,
-            fecha: "28/10/2024",
-            hora: "14:30"
-        }
-    ]
-};
-
-// ========================================
 // CARRUSELES - Estado
 // ========================================
 const carouselStates = {
@@ -510,6 +320,9 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // Mostrar banner de bienvenida
     showWelcomeBanner();
+    
+    // Inicializar calendario
+    initCalendar();
     
     // Cargar tema guardado
     loadTheme();
@@ -708,46 +521,80 @@ function loadUserData() {
 }
 
 // ========================================
-// BANNER DE BIENVENIDA
+// BANNER DE BIENVENIDA MEJORADO
 // ========================================
 let timeUpdateInterval = null;
 
 function showWelcomeBanner() {
-    const welcomeBanner = document.getElementById('welcomeBanner');
-    const welcomeUserName = document.getElementById('welcomeUserName');
+    const welcomeGreeting = document.getElementById('welcomeGreeting');
+    const welcomeName = document.getElementById('welcomeName');
+    const welcomeDate = document.getElementById('welcomeDate');
     const timeHours = document.getElementById('timeHours');
     const timeMinutes = document.getElementById('timeMinutes');
     const timePeriod = document.getElementById('timePeriod');
+    const dashboardTopRow = document.getElementById('dashboardTopRow');
     
-    if (!welcomeBanner || !welcomeUserName || !timeHours || !timeMinutes || !timePeriod) {
+    if (!welcomeGreeting || !welcomeName || !welcomeDate || !timeHours || !timeMinutes || !timePeriod) {
         return;
     }
     
-    // Mostrar nombre del usuario
-    if (currentUser) {
-        welcomeUserName.textContent = currentUser.name || 'Usuario';
-    } else {
-        const session = localStorage.getItem('teotihuacan_session');
-        if (session) {
-            try {
-                const sessionData = JSON.parse(session);
-                currentUser = sessionData.user;
-                welcomeUserName.textContent = currentUser.name || 'Usuario';
-            } catch (error) {
-                console.error('❌ Error al cargar nombre del usuario:', error);
-            }
+    // Función para obtener saludo según la hora
+    function getGreeting() {
+        const hour = new Date().getHours();
+        if (hour >= 5 && hour < 12) {
+            return 'Buenos días';
+        } else if (hour >= 12 && hour < 19) {
+            return 'Buenas tardes';
+        } else {
+            return 'Buenas noches';
         }
     }
     
-    // Limpiar intervalo anterior si existe
-    if (timeUpdateInterval) {
-        clearInterval(timeUpdateInterval);
+    // Función para formatear fecha
+    function formatDate() {
+        const now = new Date();
+        const diasSemana = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
+        const meses = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
+        
+        const diaSemana = diasSemana[now.getDay()];
+        const dia = now.getDate();
+        const mes = meses[now.getMonth()];
+        const año = now.getFullYear();
+        
+        return `${diaSemana}, ${dia} de ${mes} de ${año}`;
     }
     
     // Función para formatear números con ceros a la izquierda
     function padZero(num) {
         return num.toString().padStart(2, '0');
     }
+    
+    // Cargar usuario si no está cargado
+    if (!currentUser) {
+        const session = localStorage.getItem('teotihuacan_session');
+        if (session) {
+            try {
+                const sessionData = JSON.parse(session);
+                currentUser = sessionData.user;
+            } catch (error) {
+                console.error('❌ Error al cargar nombre del usuario:', error);
+            }
+        }
+    }
+    
+    // Actualizar saludo y nombre por separado
+    if (welcomeGreeting) {
+        const greeting = getGreeting();
+        welcomeGreeting.textContent = greeting;
+    }
+    
+    if (welcomeName) {
+        // Si el usuario es Juan, mostrar "Juan Manuel", sino mostrar el nombre del usuario
+        const displayName = (currentUser?.name === 'Juan' || currentUser?.username === 'Juan') ? 'Juan Manuel' : (currentUser?.name || 'Usuario');
+        welcomeName.textContent = displayName;
+    }
+    
+    if (welcomeDate) welcomeDate.textContent = formatDate();
     
     // Función para actualizar la hora en tiempo real
     function updateTime() {
@@ -764,6 +611,18 @@ function showWelcomeBanner() {
         if (timeHours) timeHours.textContent = hours;
         if (timeMinutes) timeMinutes.textContent = minutes;
         if (timePeriod) timePeriod.textContent = period;
+        
+        // Actualizar saludo si cambia de día
+        if (welcomeGreeting) {
+            const greeting = getGreeting();
+            welcomeGreeting.textContent = greeting;
+        }
+        if (welcomeDate) welcomeDate.textContent = formatDate();
+    }
+    
+    // Limpiar intervalo anterior si existe
+    if (timeUpdateInterval) {
+        clearInterval(timeUpdateInterval);
     }
     
     // Actualizar hora inmediatamente
@@ -772,18 +631,161 @@ function showWelcomeBanner() {
     // Actualizar hora cada segundo
     timeUpdateInterval = setInterval(updateTime, 1000);
     
-    // Mostrar banner solo en dashboard
+    // Mostrar fila superior solo en dashboard
     const currentPage = document.querySelector('.nav-item.active')?.dataset.page || 'dashboard';
-    if (currentPage === 'dashboard') {
-        welcomeBanner.style.display = 'block';
-    } else {
-        welcomeBanner.style.display = 'none';
-        // Limpiar intervalo cuando se oculta el banner
+    if (currentPage === 'dashboard' && dashboardTopRow) {
+        dashboardTopRow.style.display = 'grid';
+    } else if (dashboardTopRow) {
+        dashboardTopRow.style.display = 'none';
+        // Limpiar intervalo cuando se oculta
         if (timeUpdateInterval) {
             clearInterval(timeUpdateInterval);
             timeUpdateInterval = null;
         }
     }
+}
+
+// ========================================
+// CALENDARIO VISUAL
+// ========================================
+// Variables para controlar el mes actual del calendario
+let currentCalendarYear = new Date().getFullYear();
+let currentCalendarMonth = new Date().getMonth();
+
+function renderCalendar() {
+    const calendarMonth = document.getElementById('calendarMonth');
+    const calendarDays = document.getElementById('calendarDays');
+    
+    if (!calendarMonth || !calendarDays) {
+        return;
+    }
+    
+    const now = new Date();
+    const todayYear = now.getFullYear();
+    const todayMonth = now.getMonth();
+    const today = now.getDate();
+    
+    // Usar las variables de navegación
+    const year = currentCalendarYear;
+    const month = currentCalendarMonth;
+    
+    // Nombres de meses y días
+    const meses = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+    const diasSemana = ['D', 'L', 'M', 'M', 'J', 'V', 'S'];
+    
+    // Actualizar mes
+    calendarMonth.textContent = meses[month] + ' ' + year;
+    
+    // Obtener primer día del mes y cantidad de días
+    const firstDay = new Date(year, month, 1);
+    const lastDay = new Date(year, month + 1, 0);
+    const daysInMonth = lastDay.getDate();
+    const startingDayOfWeek = firstDay.getDay();
+    
+    // Crear grid de días
+    let calendarHTML = '';
+    
+    // Agregar días de la semana como encabezados (opcional, o puedes omitirlos para más minimalismo)
+    // Agregar días vacíos al inicio
+    for (let i = 0; i < startingDayOfWeek; i++) {
+        const prevMonth = new Date(year, month, 0);
+        const day = prevMonth.getDate() - (startingDayOfWeek - i - 1);
+        calendarHTML += `<div class="calendar-day other-month">${day}</div>`;
+    }
+    
+    // Obtener recordatorios
+    const remindersData = JSON.parse(localStorage.getItem('dashboardReminders')) || [];
+    
+    // Agregar días del mes actual
+    for (let day = 1; day <= daysInMonth; day++) {
+        // Solo marcar como today si es el mes y año actual
+        const isToday = day === today && month === todayMonth && year === todayYear;
+        const date = new Date(year, month, day);
+        const dayOfWeek = date.getDay();
+        const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
+        
+        // Verificar si hay recordatorios para este día
+        const dateString = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+        const dayReminders = remindersData.filter(r => r.date === dateString);
+        const hasReminder = dayReminders.length > 0;
+        
+        // Crear tooltip con detalles de recordatorios
+        let reminderTooltip = '';
+        if (hasReminder) {
+            const remindersList = dayReminders.map(r => {
+                const status = r.completed ? 'Completado' : 'Pendiente';
+                return `<div class="reminder-tooltip-item">
+                    <div class="reminder-tooltip-text">${r.text}</div>
+                    <div class="reminder-tooltip-status ${r.completed ? 'completed' : 'pending'}">${status}</div>
+                </div>`;
+            }).join('');
+            
+            reminderTooltip = `<div class="reminder-tooltip">
+                <div class="reminder-tooltip-header">Recordatorios</div>
+                ${remindersList}
+            </div>`;
+        }
+        
+        calendarHTML += `<div class="calendar-day ${isToday ? 'today' : ''} ${isWeekend ? 'weekend' : ''} ${hasReminder ? 'has-reminder' : ''}" ${hasReminder ? 'data-has-reminder="true"' : ''}>
+            ${day}
+            ${hasReminder ? '<span class="reminder-dot"></span>' : ''}
+            ${reminderTooltip}
+        </div>`;
+    }
+    
+    // Agregar días del siguiente mes para completar la grid (6 semanas = 42 días)
+    const totalCells = startingDayOfWeek + daysInMonth;
+    const remainingCells = 42 - totalCells;
+    if (remainingCells > 0) {
+        for (let day = 1; day <= remainingCells; day++) {
+            calendarHTML += `<div class="calendar-day other-month">${day}</div>`;
+        }
+    }
+    
+    calendarDays.innerHTML = calendarHTML;
+}
+
+// Navegación del calendario
+function prevMonth() {
+    currentCalendarMonth--;
+    if (currentCalendarMonth < 0) {
+        currentCalendarMonth = 11;
+        currentCalendarYear--;
+    }
+    renderCalendar();
+}
+
+function nextMonth() {
+    currentCalendarMonth++;
+    if (currentCalendarMonth > 11) {
+        currentCalendarMonth = 0;
+        currentCalendarYear++;
+    }
+    renderCalendar();
+}
+
+// ========================================
+// INICIALIZAR CALENDARIO
+// ========================================
+function initCalendar() {
+    renderCalendar();
+    
+    // Botones de navegación
+    const prevMonthBtn = document.getElementById('prevMonthBtn');
+    const nextMonthBtn = document.getElementById('nextMonthBtn');
+    
+    if (prevMonthBtn) {
+        prevMonthBtn.addEventListener('click', prevMonth);
+    }
+    
+    if (nextMonthBtn) {
+        nextMonthBtn.addEventListener('click', nextMonth);
+    }
+    
+    // Actualizar calendario cada minuto (por si cambia de día)
+    setInterval(() => {
+        renderCalendar();
+    }, 60000);
 }
 
 // ========================================
@@ -809,10 +811,20 @@ function loadDashboardData() {
         }
     }
     
-    // Ocultar balance compacto (ingresos del mes) si no tiene acceso completo
+    // Ocultar tarjeta de balance (ingresos del mes) si no tiene acceso completo
+    // El balance está dentro de la fila superior, pero se oculta individualmente
     const dashboardBalanceCompact = document.getElementById('dashboardBalanceCompact');
+    const dashboardTopRow = document.getElementById('dashboardTopRow');
     if (dashboardBalanceCompact) {
         dashboardBalanceCompact.style.display = hasFullAccess ? 'block' : 'none';
+        // Ajustar grid cuando el balance está oculto
+        if (dashboardTopRow) {
+            if (hasFullAccess) {
+                dashboardTopRow.classList.remove('without-balance');
+            } else {
+                dashboardTopRow.classList.add('without-balance');
+            }
+        }
     }
     
     // Cargar datos según permisos
@@ -1007,6 +1019,9 @@ function loadSummaryAdeudos() {
             openPlayerModal(adeudos[index], 'mensualidades');
         });
     });
+    
+    // Inicializar carrusel
+    setTimeout(() => initCarousel('adeudos'), 100);
 }
 
 function loadSummaryLesionados() {
@@ -1035,6 +1050,9 @@ function loadSummaryLesionados() {
             openPlayerModal(lesionados[index], 'lesionados');
         });
     });
+    
+    // Inicializar carrusel
+    setTimeout(() => initCarousel('lesionados'), 100);
 }
 
 function loadSummaryPermisos() {
@@ -1063,6 +1081,9 @@ function loadSummaryPermisos() {
             openPlayerModal(permisos[index], 'permisos');
         });
     });
+    
+    // Inicializar carrusel
+    setTimeout(() => initCarousel('permisos'), 100);
 }
 
 function loadSummaryComedor() {
@@ -1117,6 +1138,9 @@ function loadSummaryComedor() {
             openPlayerModal(jugadoresConInfo[index], 'comedor');
         });
     });
+    
+    // Inicializar carrusel
+    setTimeout(() => initCarousel('comedor'), 100);
 }
 
 function loadSummaryCasaClub() {
@@ -1160,13 +1184,18 @@ function loadSummaryCasaClub() {
             openPlayerModal(jugadores[index], 'casaclub');
         });
     });
+    
+    // Inicializar carrusel
+    setTimeout(() => initCarousel('casaclub'), 100);
 }
 
 function loadSummaryBalance() {
-    // Obtener mes actual
+    // Obtener mes actual y anterior
     const ahora = new Date();
-    const mesActual = String(ahora.getMonth() + 1).padStart(2, '0');
+    const mesActual = ahora.getMonth();
     const añoActual = ahora.getFullYear();
+    const mesAnterior = mesActual === 0 ? 11 : mesActual - 1;
+    const añoAnterior = mesActual === 0 ? añoActual - 1 : añoActual;
     
     // Filtrar registros del mes actual
     const todosLosRegistros = balanceData?.todosLosRegistros || balanceDataOriginal?.todosLosRegistros || [];
@@ -1174,78 +1203,93 @@ function loadSummaryBalance() {
     // Si no hay datos aún, mostrar mensaje de carga
     if (!todosLosRegistros || todosLosRegistros.length === 0) {
         const balanceCompactValue = document.getElementById('balanceCompactValue');
-        const balanceCompactDetails = document.getElementById('balanceCompactDetails');
+        const balancePeriod = document.getElementById('balancePeriod');
         
         if (balanceCompactValue) {
             balanceCompactValue.textContent = '$0.00';
         }
-        if (balanceCompactDetails) {
-            balanceCompactDetails.innerHTML = '<span class="balance-compact-period">Cargando datos...</span>';
+        if (balancePeriod) {
+            balancePeriod.textContent = 'Cargando datos...';
+        }
+        const balanceChart = document.getElementById('balanceChartTipoPago');
+        if (balanceChart) {
+            balanceChart.style.display = 'none';
         }
         return;
     }
     
-    const registrosMesActual = todosLosRegistros.filter(reg => {
-        let fechaRegistro = null;
-        
-        // Intentar obtener fecha del registro
-        if (reg.mes) {
-            // Si tiene campo mes, comparar directamente
-            const meses = {
-                'Enero': '01', 'Febrero': '02', 'Marzo': '03', 'Abril': '04',
-                'Mayo': '05', 'Junio': '06', 'Julio': '07', 'Agosto': '08',
-                'Septiembre': '09', 'Octubre': '10', 'Noviembre': '11', 'Diciembre': '12'
-            };
-            const mesRegistro = meses[reg.mes] || reg.mes;
-            if (mesRegistro === mesActual) {
-                // Verificar también el año
-                if (reg.fechaPago) {
-                    const fecha = new Date(reg.fechaPago);
-                    return fecha.getFullYear() === añoActual;
+    // Función para filtrar registros por mes y año
+    function filtrarPorMesAño(registros, mes, año) {
+        return registros.filter(reg => {
+            let fechaRegistro = null;
+            
+            if (reg.mes) {
+                const meses = {
+                    'Enero': 0, 'Febrero': 1, 'Marzo': 2, 'Abril': 3,
+                    'Mayo': 4, 'Junio': 5, 'Julio': 6, 'Agosto': 7,
+                    'Septiembre': 8, 'Octubre': 9, 'Noviembre': 10, 'Diciembre': 11
+                };
+                const mesRegistro = meses[reg.mes];
+                if (mesRegistro === mes) {
+                    if (reg.fechaPago) {
+                        const fecha = new Date(reg.fechaPago);
+                        return fecha.getFullYear() === año;
+                    }
+                    return true;
                 }
-                return true;
+                return false;
             }
-            return false;
-        }
-        
-        // Si no tiene campo mes, extraer de fecha
-        if (reg.fechaPago) {
-            fechaRegistro = new Date(reg.fechaPago);
-        } else if (reg.timestamp) {
-            fechaRegistro = reg.timestamp.toDate ? reg.timestamp.toDate() : new Date(reg.timestamp);
-        } else if (reg.fechaCreacion) {
-            fechaRegistro = new Date(reg.fechaCreacion);
-        }
-        
-        if (!fechaRegistro) return false;
-        
-        const mesRegistro = String(fechaRegistro.getMonth() + 1).padStart(2, '0');
-        const añoRegistro = fechaRegistro.getFullYear();
-        
-        return mesRegistro === mesActual && añoRegistro === añoActual;
-    });
+            
+            if (reg.fechaPago) {
+                fechaRegistro = new Date(reg.fechaPago);
+            } else if (reg.timestamp) {
+                fechaRegistro = reg.timestamp.toDate ? reg.timestamp.toDate() : new Date(reg.timestamp);
+            } else if (reg.fechaCreacion) {
+                fechaRegistro = new Date(reg.fechaCreacion);
+            }
+            
+            if (!fechaRegistro || isNaN(fechaRegistro.getTime())) return false;
+            
+            return fechaRegistro.getMonth() === mes && fechaRegistro.getFullYear() === año;
+        });
+    }
     
-    // Calcular total de ingresos del mes actual
-    const totalIngresosMes = registrosMesActual.reduce((total, reg) => {
-        return total + (reg.monto || 0);
-    }, 0);
+    const registrosMesActual = filtrarPorMesAño(todosLosRegistros, mesActual, añoActual);
+    const registrosMesAnterior = filtrarPorMesAño(todosLosRegistros, mesAnterior, añoAnterior);
     
-    // Actualizar monto en el balance compacto (arriba)
+    // Calcular totales
+    const totalIngresosMes = registrosMesActual.reduce((total, reg) => total + (reg.monto || 0), 0);
+    const totalIngresosMesAnterior = registrosMesAnterior.reduce((total, reg) => total + (reg.monto || 0), 0);
+    
+    // Calcular promedio diario (días transcurridos del mes)
+    const diaActual = ahora.getDate();
+    const diasTranscurridos = diaActual;
+    const promedioDiario = diasTranscurridos > 0 ? totalIngresosMes / diasTranscurridos : 0;
+    
+    // Calcular diferencia con mes anterior
+    const diferencia = totalIngresosMes - totalIngresosMesAnterior;
+    const porcentajeCambio = totalIngresosMesAnterior > 0 
+        ? ((diferencia / totalIngresosMesAnterior) * 100).toFixed(1)
+        : 0;
+    
+    // Actualizar valor principal
     const balanceCompactValue = document.getElementById('balanceCompactValue');
     if (balanceCompactValue) {
         balanceCompactValue.textContent = `$${totalIngresosMes.toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
     }
     
-    // Mostrar información adicional en el balance compacto
+    // Actualizar período
     const nombreMes = ahora.toLocaleString('es-MX', { month: 'long' });
     const nombreMesCapitalizado = nombreMes.charAt(0).toUpperCase() + nombreMes.slice(1);
-    const balanceCompactDetails = document.getElementById('balanceCompactDetails');
-    
-    if (balanceCompactDetails) {
-        balanceCompactDetails.innerHTML = `
-            <span class="balance-compact-period">${nombreMesCapitalizado} ${añoActual} • ${registrosMesActual.length} ${registrosMesActual.length === 1 ? 'pago' : 'pagos'}</span>
-        `;
+    const balancePeriod = document.getElementById('balancePeriod');
+    if (balancePeriod) {
+        balancePeriod.textContent = `${nombreMesCapitalizado} ${añoActual}`;
     }
+    
+    // Las estadísticas y comparaciones se han eliminado para un diseño más limpio
+    
+    // Renderizar gráfica de distribución por tipo de pago
+    renderBalanceChartTipoPago(registrosMesActual);
     
     // Mostrar el balance compacto solo si tiene acceso completo
     const dashboardBalanceCompact = document.getElementById('dashboardBalanceCompact');
@@ -1254,6 +1298,107 @@ function loadSummaryBalance() {
         const hasFullAccess = dashboardPermissions.includes('all');
         dashboardBalanceCompact.style.display = hasFullAccess ? 'block' : 'none';
     }
+}
+
+// ========================================
+// RENDERIZAR GRÁFICA DE DISTRIBUCIÓN POR TIPO DE PAGO
+// ========================================
+function renderBalanceChartTipoPago(registros) {
+    const canvas = document.getElementById('balanceChartTipoPago');
+    if (!canvas) return;
+    
+    // Agrupar registros por tipo de pago
+    const porTipoPago = {};
+    registros.forEach(reg => {
+        const tipoPago = reg.tipoPago || 'N/A';
+        if (!porTipoPago[tipoPago]) {
+            porTipoPago[tipoPago] = 0;
+        }
+        porTipoPago[tipoPago] += reg.monto || 0;
+    });
+    
+    // Si no hay datos, no renderizar
+    if (Object.keys(porTipoPago).length === 0) {
+        canvas.style.display = 'none';
+        return;
+    }
+    
+    canvas.style.display = 'block';
+    
+    // Verificar si Chart.js está disponible
+    if (!window.Chart) {
+        console.warn('Chart.js no está cargado');
+        return;
+    }
+    
+    // Destruir gráfica anterior si existe
+    if (canvas.chart) {
+        canvas.chart.destroy();
+    }
+    
+    // Ordenar por monto descendente
+    const tiposPago = Object.keys(porTipoPago).sort((a, b) => porTipoPago[b] - porTipoPago[a]);
+    const montos = tiposPago.map(tipo => porTipoPago[tipo]);
+    
+    // Colores para la gráfica (usando los colores de la app)
+    const colores = [
+        'rgba(242, 101, 34, 0.8)',  // Naranja principal
+        'rgba(224, 86, 29, 0.8)',   // Naranja oscuro
+        'rgba(255, 149, 0, 0.8)',   // Naranja claro
+        'rgba(255, 87, 34, 0.8)',   // Naranja alternativo
+        'rgba(244, 143, 177, 0.8)', // Rosa
+        'rgba(171, 71, 188, 0.8)',  // Púrpura
+    ];
+    
+    const backgroundColors = tiposPago.map((_, i) => colores[i % colores.length]);
+    
+    // Crear gráfica de dona (doughnut) minimalista
+    canvas.chart = new Chart(canvas, {
+        type: 'doughnut',
+        data: {
+            labels: tiposPago,
+            datasets: [{
+                data: montos,
+                backgroundColor: backgroundColors,
+                borderWidth: 0,
+                cutout: '70%'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                },
+                tooltip: {
+                    enabled: true,
+                    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                    padding: 8,
+                    titleFont: {
+                        size: 11,
+                        weight: '600'
+                    },
+                    bodyFont: {
+                        size: 11
+                    },
+                    callbacks: {
+                        label: function(context) {
+                            const label = context.label || '';
+                            const value = context.parsed || 0;
+                            const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                            const percentage = ((value / total) * 100).toFixed(1);
+                            return `${label}: $${value.toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} (${percentage}%)`;
+                        }
+                    }
+                }
+            },
+            animation: {
+                animateRotate: true,
+                duration: 800
+            }
+        }
+    });
 }
 
 async function loadLimitedDashboardData(permissions) {
@@ -1341,6 +1486,24 @@ function loadCarousel(type, data) {
     
     // Configurar botones
     setupCarouselButtons(type, data.length);
+    
+    // Inicializar carrusel después de renderizar (con un pequeño delay para asegurar que el DOM esté actualizado)
+    // Normalizar el tipo para que coincida con los IDs del carrusel
+    setTimeout(() => {
+        if (typeof initCarousel === 'function') {
+            // Mapear tipos a los IDs correctos del carrusel
+            let carouselType = type;
+            if (type === 'adeudos' || type.startsWith('mensualidades')) {
+                carouselType = 'adeudos';
+            } else if (type.startsWith('comedor')) {
+                carouselType = 'comedor';
+            }
+            // Solo inicializar si el tipo está en el mapeo
+            if (carouselIds && carouselIds[carouselType]) {
+                initCarousel(carouselType);
+            }
+        }
+    }, 100);
     
     // Agregar event listeners a las tarjetas
     carousel.querySelectorAll('.player-card').forEach((card, index) => {
@@ -1585,14 +1748,31 @@ function createPlayerCard(player, type) {
             break;
         case 'lesionados':
             avatarClass = 'lesion';
+            // Formatear fecha de lesión
+            let fechaLesionFormateada = 'N/A';
+            if (player.fechaRegistro) {
+                fechaLesionFormateada = new Date(player.fechaRegistro).toLocaleDateString('es-MX', { 
+                    day: '2-digit', 
+                    month: '2-digit', 
+                    year: 'numeric' 
+                });
+            } else if (player.timestamp) {
+                const fecha = player.timestamp?.toDate ? player.timestamp.toDate() : new Date(player.timestamp);
+                fechaLesionFormateada = fecha.toLocaleDateString('es-MX', { 
+                    day: '2-digit', 
+                    month: '2-digit', 
+                    year: 'numeric' 
+                });
+            }
+            
             specificInfo = `
                 <div class="info-row">
                     <span class="info-label">Lesión:</span>
                     <span class="info-value" style="font-size: 12px;">${player.tipoLesion || 'N/A'}</span>
                 </div>
                 <div class="info-row">
-                    <span class="info-label">Recuperación:</span>
-                    <span class="info-value" style="font-size: 12px;">${player.recuperacion || 'N/A'}</span>
+                    <span class="info-label">Fecha de Lesión:</span>
+                    <span class="info-value" style="font-size: 12px;">${fechaLesionFormateada}</span>
                 </div>
                 <div class="info-row">
                     <span class="info-label">Estado:</span>
@@ -1602,6 +1782,44 @@ function createPlayerCard(player, type) {
             break;
         case 'permisos':
             avatarClass = 'permiso';
+            // Formatear fecha de inicio para la tarjeta
+            const fechaTarjeta = player.fechaInicio ? new Date(player.fechaInicio).toLocaleDateString('es-MX', { 
+                day: '2-digit', 
+                month: '2-digit', 
+                year: 'numeric' 
+            }) : 'N/A';
+            
+            // Determinar información de aprobación
+            let aprobacionTexto = 'N/A';
+            let aprobacionColor = '#6B7280';
+            let aprobacionBg = '#F3F4F6';
+            if (player.aprobado === true) {
+                aprobacionTexto = 'Aprobado';
+                aprobacionColor = '#10B981';
+                aprobacionBg = '#D1FAE5';
+            } else if (player.aprobado === false) {
+                aprobacionTexto = 'No Aprobado';
+                aprobacionColor = '#EF4444';
+                aprobacionBg = '#FEE2E2';
+            }
+            
+            // Estilos para el estado
+            const estadoPermiso = (player.estado || '').toLowerCase();
+            let estadoColorPermiso = '#6B7280';
+            let estadoBgPermiso = '#F3F4F6';
+            let estadoTextoPermiso = player.estado || 'N/A';
+            
+            if (estadoPermiso === 'finalizado') {
+                estadoColorPermiso = '#6B7280';
+                estadoBgPermiso = '#F3F4F6';
+            } else if (estadoPermiso === 'activo') {
+                estadoColorPermiso = '#3B82F6';
+                estadoBgPermiso = '#DBEAFE';
+            } else if (estadoPermiso === 'pendiente') {
+                estadoColorPermiso = '#FCD34D';
+                estadoBgPermiso = '#FEF3C7';
+            }
+            
             specificInfo = `
                 <div class="info-row">
                     <span class="info-label">Motivo:</span>
@@ -1609,11 +1827,15 @@ function createPlayerCard(player, type) {
                 </div>
                 <div class="info-row">
                     <span class="info-label">Fecha:</span>
-                    <span class="info-value" style="font-size: 12px;">${player.fecha || 'N/A'}</span>
+                    <span class="info-value" style="font-size: 12px;">${fechaTarjeta}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Aprobación:</span>
+                    <span class="status-badge" style="background: ${aprobacionBg}; color: ${aprobacionColor};">${aprobacionTexto}</span>
                 </div>
                 <div class="info-row">
                     <span class="info-label">Estado:</span>
-                    <span class="status-badge ${(player.estado || '').toLowerCase()}">${player.estado || 'N/A'}</span>
+                    <span class="status-badge" style="background: ${estadoBgPermiso}; color: ${estadoColorPermiso};">${estadoTextoPermiso}</span>
                 </div>
             `;
             break;
@@ -1777,12 +1999,12 @@ function createPlayerCard(player, type) {
                     <span class="info-value" style="font-size: 12px;">${player.motivo || 'N/A'}</span>
                 </div>
                 <div class="info-row">
-                    <span class="info-label">Entrada:</span>
+                    <span class="info-label">Salida:</span>
                     <span class="info-value" style="font-size: 12px;">${player.horaEntrada || 'N/A'}</span>
                 </div>
                 <div class="info-row">
-                    <span class="info-label">Salida:</span>
-                    <span class="info-value" style="font-size: 12px;">${player.horaSalida || 'Pendiente'}</span>
+                    <span class="info-label">Entrada:</span>
+                    <span class="info-value" style="font-size: 12px;">Pendiente</span>
                 </div>
                 <div class="info-row">
                     <span class="info-label">Estado:</span>
@@ -1858,6 +2080,22 @@ function setupCarouselButtons(type, totalItems) {
     
     if (!prevBtn || !nextBtn) return;
     
+    // Inicializar el objeto del carrusel si no existe
+    if (!carousels[type]) {
+        // Usar valores por defecto seguros
+        const cardsPerView = 5; // Valor por defecto
+        const totalSlides = totalItems ? Math.ceil(totalItems / cardsPerView) : 0;
+        carousels[type] = {
+            currentIndex: 0,
+            cardsPerView: cardsPerView,
+            totalSlides: totalSlides
+        };
+    } else if (totalItems) {
+        // Actualizar totalSlides si se proporciona totalItems
+        const cardsPerView = carousels[type].cardsPerView || 5;
+        carousels[type].totalSlides = Math.ceil(totalItems / cardsPerView);
+    }
+    
     // Remover event listeners anteriores
     const newPrevBtn = prevBtn.cloneNode(true);
     const newNextBtn = nextBtn.cloneNode(true);
@@ -1869,7 +2107,7 @@ function setupCarouselButtons(type, totalItems) {
     newNextBtn.addEventListener('click', () => moveCarousel(type, 1));
     
     // Actualizar estado inicial
-    updateCarouselButtons(type, totalItems);
+    updateCarouselButtons(type);
 }
 
 // ========================================
@@ -2036,9 +2274,50 @@ function openPlayerModal(player, type) {
     // Actualizar clase del avatar
     modalAvatar.className = 'modal-avatar';
     modalAvatarText.style.display = 'flex';
-    switch(type) {
+    
+    // Normalizar el tipo: si viene con prefijo 'mensualidades-' o es 'adeudos', tratarlo como mensualidades
+    let tipoParaSwitch = type;
+    if (type.startsWith('mensualidades-') || type === 'adeudos') {
+        tipoParaSwitch = 'mensualidades';
+    }
+    
+    switch(tipoParaSwitch) {
+        case 'mensualidades':
         case 'adeudos':
-            modalAvatar.classList.add(`priority-${player.prioridad}`);
+            // Calcular meses pagados (manejar Set o Array)
+            let mesesPagadosCount = 0;
+            if (player.mesesPagados) {
+                if (player.mesesPagados instanceof Set) {
+                    mesesPagadosCount = player.mesesPagados.size;
+                } else if (Array.isArray(player.mesesPagados)) {
+                    mesesPagadosCount = player.mesesPagados.length;
+                }
+            }
+            
+            // Calcular meses adeudados (siempre 12 meses requeridos)
+            const mesesAdeudados = 12 - mesesPagadosCount;
+            
+            // Si el jugador tiene prioridad definida, usarla
+            if (player.prioridad) {
+                modalAvatar.classList.add(`priority-${player.prioridad}`);
+            } else {
+                // Calcular prioridad basada en meses adeudados
+                let prioridad;
+                if (mesesAdeudados >= 9) {
+                    prioridad = 'critico';
+                } else if (mesesAdeudados >= 6) {
+                    prioridad = 'alto';
+                } else if (mesesAdeudados >= 3) {
+                    prioridad = 'medio';
+                } else if (mesesAdeudados > 0) {
+                    prioridad = 'bajo';
+                } else {
+                    // Si no hay meses adeudados, usar 'adeudo' como fallback (aunque no debería pasar)
+                    modalAvatar.classList.add('adeudo');
+                    break;
+                }
+                modalAvatar.classList.add(`priority-${prioridad}`);
+            }
             break;
         case 'lesionados':
             modalAvatar.classList.add('lesion');
@@ -2521,62 +2800,152 @@ function createModalContent(player, type) {
             `;
         
         case 'lesionados':
+            // Formatear fecha de lesión
+            let fechaLesionModal = 'N/A';
+            if (player.fechaRegistro) {
+                fechaLesionModal = new Date(player.fechaRegistro).toLocaleDateString('es-MX', { 
+                    day: '2-digit', 
+                    month: '2-digit', 
+                    year: 'numeric' 
+                });
+            } else if (player.timestamp) {
+                const fecha = player.timestamp?.toDate ? player.timestamp.toDate() : new Date(player.timestamp);
+                fechaLesionModal = fecha.toLocaleDateString('es-MX', { 
+                    day: '2-digit', 
+                    month: '2-digit', 
+                    year: 'numeric' 
+                });
+            }
+            
+            // Formatear nivel de dolor
+            const nivelDolorTexto = player.nivelDolorTexto || (player.nivelDolor !== undefined ? `${player.nivelDolor}/10` : 'N/A');
+            
             return `
                 <div class="modal-section">
                     <h4 class="modal-section-title">Detalles de la Lesión</h4>
                     <div class="modal-info-grid">
                         <div class="modal-info-item">
                             <p class="modal-info-label">Tipo de Lesión</p>
-                            <p class="modal-info-value" style="font-size: 14px;">${player.tipoLesion}</p>
+                            <p class="modal-info-value" style="font-size: 14px;">${player.tipoLesion || 'N/A'}</p>
                         </div>
                         <div class="modal-info-item">
                             <p class="modal-info-label">Fecha de Lesión</p>
-                            <p class="modal-info-value" style="font-size: 14px;">${player.fechaLesion}</p>
+                            <p class="modal-info-value" style="font-size: 14px;">${fechaLesionModal}</p>
                         </div>
                         <div class="modal-info-item">
-                            <p class="modal-info-label">Tiempo de Recuperación</p>
-                            <p class="modal-info-value" style="font-size: 14px;">${player.recuperacion}</p>
+                            <p class="modal-info-label">Nivel de Dolor</p>
+                            <p class="modal-info-value" style="font-size: 14px;">${nivelDolorTexto}</p>
+                        </div>
+                        <div class="modal-info-item">
+                            <p class="modal-info-label">Zona Afectada</p>
+                            <p class="modal-info-value" style="font-size: 14px;">${player.zonaAfectada || 'N/A'}</p>
+                        </div>
+                        <div class="modal-info-item">
+                            <p class="modal-info-label">Categoría</p>
+                            <p class="modal-info-value" style="font-size: 14px;">${player.categoria || 'N/A'}</p>
                         </div>
                         <div class="modal-info-item">
                             <p class="modal-info-label">Estado Actual</p>
                             <p class="modal-info-value">
-                                <span class="status-badge alto">${player.estado}</span>
+                                <span class="status-badge alto">${player.estado || 'N/A'}</span>
                             </p>
                         </div>
                     </div>
                 </div>
                 <div class="modal-section">
-                    <h4 class="modal-section-title">Seguimiento</h4>
-                    <p style="color: var(--gris-texto); line-height: 1.6;">
-                        El jugador se encuentra en proceso de recuperación. 
-                        Se debe realizar seguimiento médico continuo y evaluación antes de reincorporar a entrenamientos.
+                    <h4 class="modal-section-title">Comentarios</h4>
+                    <p style="color: var(--gris-texto); line-height: 1.6; white-space: pre-wrap;">
+                        ${player.notas || 'No hay comentarios registrados.'}
                     </p>
                 </div>
             `;
         
         case 'permisos':
+            // Formatear fechas
+            const fechaInicioFormateada = player.fechaInicio ? new Date(player.fechaInicio).toLocaleDateString('es-MX', { 
+                day: '2-digit', 
+                month: '2-digit', 
+                year: 'numeric' 
+            }) : 'N/A';
+            
+            const fechaFinFormateada = player.fechaFin ? new Date(player.fechaFin).toLocaleDateString('es-MX', { 
+                day: '2-digit', 
+                month: '2-digit', 
+                year: 'numeric' 
+            }) : 'N/A';
+            
+            // Calcular duración
+            const duracionTexto = player.diasPermisoTexto || (player.diasPermiso ? `${player.diasPermiso} día(s)` : 'N/A');
+            
+            // Determinar información de aprobación
+            let aprobacionTextoModal = 'N/A';
+            let aprobacionColorModal = '#6B7280';
+            let aprobacionBgModal = '#F3F4F6';
+            if (player.aprobado === true) {
+                aprobacionTextoModal = 'Aprobado';
+                aprobacionColorModal = '#10B981';
+                aprobacionBgModal = '#D1FAE5';
+            } else if (player.aprobado === false) {
+                aprobacionTextoModal = 'No Aprobado';
+                aprobacionColorModal = '#EF4444';
+                aprobacionBgModal = '#FEE2E2';
+            }
+            
+            // Estilos para el estado en el modal
+            const estadoPermisoModal = (player.estado || '').toLowerCase();
+            let estadoColorPermisoModal = '#6B7280';
+            let estadoBgPermisoModal = '#F3F4F6';
+            let estadoTextoPermisoModal = player.estado || 'N/A';
+            
+            if (estadoPermisoModal === 'finalizado') {
+                estadoColorPermisoModal = '#6B7280';
+                estadoBgPermisoModal = '#F3F4F6';
+            } else if (estadoPermisoModal === 'activo') {
+                estadoColorPermisoModal = '#3B82F6';
+                estadoBgPermisoModal = '#DBEAFE';
+            } else if (estadoPermisoModal === 'pendiente') {
+                estadoColorPermisoModal = '#FCD34D';
+                estadoBgPermisoModal = '#FEF3C7';
+            }
+            
             return `
                 <div class="modal-section">
                     <h4 class="modal-section-title">Detalles del Permiso</h4>
                     <div class="modal-info-grid">
                         <div class="modal-info-item">
                             <p class="modal-info-label">Motivo</p>
-                            <p class="modal-info-value" style="font-size: 14px;">${player.motivo}</p>
+                            <p class="modal-info-value" style="font-size: 14px;">${player.motivo || 'N/A'}</p>
                         </div>
                         <div class="modal-info-item">
-                            <p class="modal-info-label">Fecha</p>
-                            <p class="modal-info-value" style="font-size: 14px;">${player.fecha}</p>
+                            <p class="modal-info-label">Fecha de Inicio</p>
+                            <p class="modal-info-value" style="font-size: 14px;">${fechaInicioFormateada}</p>
+                        </div>
+                        <div class="modal-info-item">
+                            <p class="modal-info-label">Fecha de Fin</p>
+                            <p class="modal-info-value" style="font-size: 14px;">${fechaFinFormateada}</p>
                         </div>
                         <div class="modal-info-item">
                             <p class="modal-info-label">Duración</p>
-                            <p class="modal-info-value">${player.duracion}</p>
+                            <p class="modal-info-value">${duracionTexto}</p>
+                        </div>
+                        <div class="modal-info-item">
+                            <p class="modal-info-label">Aprobación</p>
+                            <p class="modal-info-value">
+                                <span class="status-badge" style="background: ${aprobacionBgModal}; color: ${aprobacionColorModal};">${aprobacionTextoModal}</span>
+                            </p>
                         </div>
                         <div class="modal-info-item">
                             <p class="modal-info-label">Estado</p>
                             <p class="modal-info-value">
-                                <span class="status-badge ${player.estado.toLowerCase()}">${player.estado}</span>
+                                <span class="status-badge" style="background: ${estadoBgPermisoModal}; color: ${estadoColorPermisoModal};">${estadoTextoPermisoModal}</span>
                             </p>
                         </div>
+                        ${player.descripcion ? `
+                        <div class="modal-info-item" style="grid-column: 1 / -1;">
+                            <p class="modal-info-label">Descripción</p>
+                            <p class="modal-info-value" style="font-size: 14px; line-height: 1.6;">${player.descripcion}</p>
+                        </div>
+                        ` : ''}
                     </div>
                 </div>
                 ${player.estado === 'Pendiente' ? `
@@ -2705,11 +3074,11 @@ function createModalContent(player, type) {
                     </div>
                     <div class="info-row">
                         <span class="info-label">Hora de Entrada:</span>
-                        <span class="info-value">${player.horaEntrada || 'N/A'}</span>
+                        <span class="info-value">Pendiente</span>
                     </div>
                     <div class="info-row">
                         <span class="info-label">Hora de Salida:</span>
-                        <span class="info-value">${player.horaSalida || 'Pendiente'}</span>
+                        <span class="info-value">${player.horaEntrada || 'N/A'}</span>
                     </div>
                     <div class="info-row">
                         <span class="info-label">Estado:</span>
@@ -2740,26 +3109,12 @@ function configureModalActionButton(player, type) {
             modalBtnAction.style.display = 'none';
             break;
         case 'lesionados':
-            modalBtnAction.textContent = 'Ver Historial Médico';
-            modalBtnAction.onclick = () => {
-                alert(`Abrir historial médico de ${player.nombre}`);
-                closePlayerModal();
-            };
+            // Ocultar el botón de acción para lesionados, solo mostrar cerrar
+            modalBtnAction.style.display = 'none';
             break;
         case 'permisos':
-            if (player.estado === 'Pendiente') {
-                modalBtnAction.textContent = 'Aprobar Permiso';
-                modalBtnAction.onclick = () => {
-                    alert(`Permiso aprobado para ${player.nombre}`);
-                    closePlayerModal();
-                };
-            } else {
-                modalBtnAction.textContent = 'Ver Detalles';
-                modalBtnAction.onclick = () => {
-                    alert(`Ver más detalles de ${player.nombre}`);
-                    closePlayerModal();
-                };
-            }
+            // Ocultar el botón de acción para permisos, solo mostrar cerrar
+            modalBtnAction.style.display = 'none';
             break;
         case 'comedor':
             // Ocultar el botón de acción, solo mostrar cerrar
@@ -2973,13 +3328,16 @@ function showPageContent(page) {
         section.style.display = 'none';
     });
     
-    // Mostrar/ocultar banner de bienvenida y tarjetas de estadísticas solo en dashboard
-    const welcomeBanner = document.getElementById('welcomeBanner');
-    if (welcomeBanner) {
+    // Mostrar/ocultar fila superior (bienvenida, calendario, balance) solo en dashboard
+    const dashboardTopRow = document.getElementById('dashboardTopRow');
+    if (dashboardTopRow) {
         if (page === 'dashboard') {
-            welcomeBanner.style.display = 'block';
+            dashboardTopRow.style.display = 'grid';
+            // Actualizar bienvenida y calendario
+            showWelcomeBanner();
+            renderCalendar();
         } else {
-            welcomeBanner.style.display = 'none';
+            dashboardTopRow.style.display = 'none';
         }
     }
     
@@ -3007,6 +3365,14 @@ function showPageContent(page) {
         const dashboardBalanceCompact = document.getElementById('dashboardBalanceCompact');
         if (dashboardBalanceCompact) {
             dashboardBalanceCompact.style.display = hasFullAccess ? 'block' : 'none';
+            // Ajustar grid cuando el balance está oculto
+            if (dashboardTopRow) {
+                if (hasFullAccess) {
+                    dashboardTopRow.classList.remove('without-balance');
+                } else {
+                    dashboardTopRow.classList.add('without-balance');
+                }
+            }
         }
         
         // Mostrar resumen general del dashboard
@@ -3040,10 +3406,10 @@ function showPageContent(page) {
             loadDashboardSummary(dashboardPermissions, hasFullAccess);
         }
     } else {
-        // Ocultar balance compacto y resumen cuando se navega a otra página
-        const dashboardBalanceCompact = document.getElementById('dashboardBalanceCompact');
-        if (dashboardBalanceCompact) {
-            dashboardBalanceCompact.style.display = 'none';
+        // Ocultar fila superior, balance compacto y resumen cuando se navega a otra página
+        const dashboardTopRow = document.getElementById('dashboardTopRow');
+        if (dashboardTopRow) {
+            dashboardTopRow.style.display = 'none';
         }
         
         const dashboardSummary = document.getElementById('dashboardSummary');
@@ -7853,6 +8219,444 @@ window.addEventListener('resize', () => {
 });
 
 // ========================================
+// RECORDATORIOS
+// ========================================
+let reminders = JSON.parse(localStorage.getItem('dashboardReminders')) || [];
+
+// Elementos del DOM
+const addReminderBtn = document.getElementById('addReminderBtn');
+const reminderModal = document.getElementById('reminderModal');
+const reminderModalClose = document.getElementById('reminderModalClose');
+const reminderCancelBtn = document.getElementById('reminderCancelBtn');
+const reminderForm = document.getElementById('reminderForm');
+const remindersList = document.getElementById('remindersList');
+const noReminders = document.getElementById('noReminders');
+const reminderModalOverlay = document.querySelector('.reminder-modal-overlay');
+
+// Abrir modal
+if (addReminderBtn) {
+    addReminderBtn.addEventListener('click', () => {
+        reminderModal.classList.add('active');
+        document.getElementById('reminderText').value = '';
+        document.getElementById('reminderDate').value = '';
+    });
+}
+
+// Cerrar modal
+function closeReminderModal() {
+    reminderModal.classList.remove('active');
+}
+
+if (reminderModalClose) {
+    reminderModalClose.addEventListener('click', closeReminderModal);
+}
+
+if (reminderCancelBtn) {
+    reminderCancelBtn.addEventListener('click', closeReminderModal);
+}
+
+if (reminderModalOverlay) {
+    reminderModalOverlay.addEventListener('click', closeReminderModal);
+}
+
+// Guardar recordatorio
+if (reminderForm) {
+    reminderForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        
+        const text = document.getElementById('reminderText').value.trim();
+        const date = document.getElementById('reminderDate').value;
+        
+        if (text && date) {
+            const reminder = {
+                id: Date.now(),
+                text: text,
+                date: date,
+                completed: false,
+                createdAt: new Date().toISOString()
+            };
+            
+            reminders.push(reminder);
+            localStorage.setItem('dashboardReminders', JSON.stringify(reminders));
+            
+            renderReminders();
+            updateCalendarWithReminders();
+            closeReminderModal();
+        }
+    });
+}
+
+// Renderizar recordatorios
+function renderReminders() {
+    if (!remindersList) return;
+    
+    // Limpiar lista
+    remindersList.innerHTML = '';
+    
+    if (reminders.length === 0) {
+        remindersList.innerHTML = `
+            <div class="no-reminders">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <line x1="12" y1="8" x2="12" y2="12"></line>
+                    <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                </svg>
+                <span>No hay recordatorios</span>
+            </div>
+        `;
+        return;
+    }
+    
+    // Ordenar por fecha
+    const sortedReminders = [...reminders].sort((a, b) => new Date(a.date) - new Date(b.date));
+    
+    sortedReminders.forEach(reminder => {
+        const reminderItem = document.createElement('div');
+        reminderItem.className = 'reminder-item';
+        reminderItem.dataset.id = reminder.id;
+        
+        const formattedDate = new Date(reminder.date).toLocaleDateString('es-ES', {
+            day: 'numeric',
+            month: 'long',
+            year: 'numeric'
+        });
+        
+        reminderItem.innerHTML = `
+            <div class="reminder-checkbox ${reminder.completed ? 'checked' : ''}" data-id="${reminder.id}">
+                ${reminder.completed ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>' : ''}
+            </div>
+            <div class="reminder-content">
+                <div class="reminder-text ${reminder.completed ? 'completed' : ''}">${reminder.text}</div>
+                <div class="reminder-date">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                        <line x1="16" y1="2" x2="16" y2="6"></line>
+                        <line x1="8" y1="2" x2="8" y2="6"></line>
+                        <line x1="3" y1="10" x2="21" y2="10"></line>
+                    </svg>
+                    ${formattedDate}
+                </div>
+            </div>
+            <button class="reminder-delete" data-id="${reminder.id}">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="3 6 5 6 21 6"></polyline>
+                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                </svg>
+            </button>
+        `;
+        
+        remindersList.appendChild(reminderItem);
+    });
+    
+    // Event listeners para checkboxes
+    document.querySelectorAll('.reminder-checkbox').forEach(checkbox => {
+        checkbox.addEventListener('click', (e) => {
+            const id = parseInt(e.currentTarget.dataset.id);
+            toggleReminderCompletion(id);
+        });
+    });
+    
+    // Event listeners para botones de eliminar
+    document.querySelectorAll('.reminder-delete').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            const id = parseInt(e.currentTarget.dataset.id);
+            deleteReminder(id);
+        });
+    });
+}
+
+// Marcar como completado
+function toggleReminderCompletion(id) {
+    const reminder = reminders.find(r => r.id === id);
+    if (reminder) {
+        reminder.completed = !reminder.completed;
+        localStorage.setItem('dashboardReminders', JSON.stringify(reminders));
+        renderReminders();
+    }
+}
+
+// Eliminar recordatorio
+function deleteReminder(id) {
+    reminders = reminders.filter(r => r.id !== id);
+    localStorage.setItem('dashboardReminders', JSON.stringify(reminders));
+    renderReminders();
+    updateCalendarWithReminders();
+}
+
+// Actualizar calendario con recordatorios
+function updateCalendarWithReminders() {
+    // Esta función se llamará para marcar los días con recordatorios en el calendario
+    // Se integrará con la función existente del calendario
+    if (typeof renderCalendar === 'function') {
+        renderCalendar();
+    }
+}
+
+// Inicializar
+renderReminders();
+
+// ========================================
+// CARRUSELES DE SECCIONES
+// ========================================
+const carousels = {
+    comedor: { currentIndex: 0, cardsPerView: 0, totalSlides: 0 },
+    casaclub: { currentIndex: 0, cardsPerView: 0, totalSlides: 0 },
+    permisos: { currentIndex: 0, cardsPerView: 0, totalSlides: 0 },
+    lesionados: { currentIndex: 0, cardsPerView: 0, totalSlides: 0 },
+    adeudos: { currentIndex: 0, cardsPerView: 0, totalSlides: 0 }
+};
+
+// Mapeo de IDs de carruseles a IDs de contenedores
+const carouselIds = {
+    comedor: 'summaryComedorCards',
+    casaclub: 'summaryCasaClubCards',
+    permisos: 'summaryPermisosCards',
+    lesionados: 'summaryLesionadosCards',
+    adeudos: 'summaryAdeudosCards'
+};
+
+// Mapeo de IDs de carruseles a IDs de dots
+const carouselDotsIds = {
+    comedor: 'carouselDotsComedor',
+    casaclub: 'carouselDotsCasaClub',
+    permisos: 'carouselDotsPermisos',
+    lesionados: 'carouselDotsLesionados',
+    adeudos: 'carouselDotsAdeudos'
+};
+
+// Calcular cuántas tarjetas caben en pantalla
+function calculateCardsPerView(carouselId) {
+    const gridId = carouselIds[carouselId];
+    if (!gridId) return 0;
+    
+    const grid = document.getElementById(gridId);
+    if (!grid || !grid.firstElementChild || grid.firstElementChild.classList.contains('loading-text')) {
+        return 0;
+    }
+    
+    const card = grid.querySelector('.player-card');
+    if (!card) return 0;
+    
+    const cardWidth = card.offsetWidth;
+    const gap = 20;
+    const containerWidth = grid.offsetWidth;
+    const cardsPerView = Math.floor((containerWidth + gap) / (cardWidth + gap));
+    
+    return Math.max(1, cardsPerView);
+}
+
+// Inicializar carrusel
+function initCarousel(carouselId) {
+    const gridId = carouselIds[carouselId];
+    if (!gridId) return;
+    
+    const grid = document.getElementById(gridId);
+    if (!grid) return;
+    
+    const cards = grid.querySelectorAll('.player-card');
+    if (cards.length === 0) return;
+    
+    const cardsPerView = calculateCardsPerView(carouselId);
+    const totalSlides = Math.ceil(cards.length / cardsPerView);
+    
+    carousels[carouselId] = {
+        currentIndex: 0,
+        cardsPerView: cardsPerView,
+        totalSlides: totalSlides
+    };
+    
+    updateCarouselDots(carouselId, totalSlides);
+    updateCarouselButtons(carouselId);
+    scrollToSlide(carouselId, 0);
+    
+    // Reinicializar botones después de cargar datos
+    setTimeout(initCarouselButtons, 50);
+}
+
+// Actualizar puntos indicadores
+function updateCarouselDots(carouselId, totalSlides) {
+    const dotsId = carouselDotsIds[carouselId];
+    if (!dotsId) return;
+    
+    const dotsContainer = document.getElementById(dotsId);
+    if (!dotsContainer) return;
+    
+    dotsContainer.innerHTML = '';
+    
+    if (totalSlides <= 1) {
+        dotsContainer.style.display = 'none';
+        return;
+    }
+    
+    dotsContainer.style.display = 'flex';
+    
+    for (let i = 0; i < totalSlides; i++) {
+        const dot = document.createElement('button');
+        dot.className = `carousel-dot ${i === 0 ? 'active' : ''}`;
+        dot.setAttribute('data-slide', i);
+        dot.setAttribute('data-carousel', carouselId);
+        dot.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            e.stopImmediatePropagation();
+            goToSlide(carouselId, i);
+            return false;
+        }, true);
+        dotsContainer.appendChild(dot);
+    }
+}
+
+// Actualizar estado de botones
+function updateCarouselButtons(carouselId) {
+    const prevBtn = document.querySelector(`.carousel-btn-prev[data-carousel="${carouselId}"]`);
+    const nextBtn = document.querySelector(`.carousel-btn-next[data-carousel="${carouselId}"]`);
+    
+    // Inicializar el objeto del carrusel si no existe
+    if (!carousels[carouselId]) {
+        carousels[carouselId] = {
+            currentIndex: 0,
+            cardsPerView: 0,
+            totalSlides: 0
+        };
+    }
+    
+    const carousel = carousels[carouselId];
+    
+    if (prevBtn && carousel) {
+        prevBtn.disabled = carousel.currentIndex === 0;
+    }
+    
+    if (nextBtn && carousel) {
+        nextBtn.disabled = carousel.currentIndex >= carousel.totalSlides - 1;
+    }
+}
+
+// Scroll a slide específico
+function scrollToSlide(carouselId, slideIndex) {
+    const gridId = carouselIds[carouselId];
+    if (!gridId) return;
+    
+    const grid = document.getElementById(gridId);
+    if (!grid) return;
+    
+    const carousel = carousels[carouselId];
+    const cards = grid.querySelectorAll('.player-card');
+    if (cards.length === 0) return;
+    
+    const cardWidth = cards[0].offsetWidth;
+    const gap = 20;
+    const scrollAmount = slideIndex * (cardWidth + gap) * carousel.cardsPerView;
+    
+    grid.scrollTo({
+        left: scrollAmount,
+        behavior: 'smooth'
+    });
+    
+    carousel.currentIndex = slideIndex;
+    updateCarouselButtons(carouselId);
+    updateActiveDot(carouselId, slideIndex);
+}
+
+// Ir a slide específico
+function goToSlide(carouselId, slideIndex) {
+    const carousel = carousels[carouselId];
+    if (slideIndex < 0 || slideIndex >= carousel.totalSlides) return;
+    scrollToSlide(carouselId, slideIndex);
+}
+
+// Siguiente slide
+function nextSlide(carouselId) {
+    const carousel = carousels[carouselId];
+    if (carousel.currentIndex < carousel.totalSlides - 1) {
+        goToSlide(carouselId, carousel.currentIndex + 1);
+    }
+}
+
+// Slide anterior
+function prevSlide(carouselId) {
+    const carousel = carousels[carouselId];
+    if (carousel.currentIndex > 0) {
+        goToSlide(carouselId, carousel.currentIndex - 1);
+    }
+}
+
+// Actualizar punto activo
+function updateActiveDot(carouselId, slideIndex) {
+    const dotsId = carouselDotsIds[carouselId];
+    if (!dotsId) return;
+    
+    const dotsContainer = document.getElementById(dotsId);
+    if (!dotsContainer) return;
+    
+    const dots = dotsContainer.querySelectorAll('.carousel-dot');
+    dots.forEach((dot, index) => {
+        if (index === slideIndex) {
+            dot.classList.add('active');
+        } else {
+            dot.classList.remove('active');
+        }
+    });
+}
+
+// Event listeners directos para botones - con máxima prioridad
+function initCarouselButtons() {
+    document.querySelectorAll('.carousel-btn-prev, .carousel-btn-next').forEach(btn => {
+        // Evitar agregar múltiples listeners usando atributo data
+        if (btn.hasAttribute('data-carousel-initialized')) return;
+        btn.setAttribute('data-carousel-initialized', 'true');
+        
+        // Agregar listener con máxima prioridad en capture phase
+        btn.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            e.stopImmediatePropagation();
+            
+            if (this.disabled) return false;
+            
+            const carouselId = this.getAttribute('data-carousel');
+            if (!carouselId) return false;
+            
+            if (this.classList.contains('carousel-btn-prev')) {
+                prevSlide(carouselId);
+            } else if (this.classList.contains('carousel-btn-next')) {
+                nextSlide(carouselId);
+            }
+            
+            return false;
+        }, true); // Capture phase para máxima prioridad
+    });
+}
+
+// Inicializar botones cuando el DOM esté listo y después de cargar datos
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => {
+        setTimeout(initCarouselButtons, 100);
+    });
+} else {
+    setTimeout(initCarouselButtons, 100);
+}
+
+// Recalcular carruseles al redimensionar ventana
+let resizeTimeout;
+window.addEventListener('resize', () => {
+    clearTimeout(resizeTimeout);
+    resizeTimeout = setTimeout(() => {
+        Object.keys(carousels).forEach(carouselId => {
+            initCarousel(carouselId);
+        });
+    }, 250);
+});
+
+// Función para inicializar todos los carruseles después de cargar datos
+function initAllCarousels() {
+    Object.keys(carousels).forEach(carouselId => {
+        setTimeout(() => {
+            initCarousel(carouselId);
+        }, 100);
+    });
+}
+
+// ========================================
 // CONSOLE INFO
 // ========================================
 console.log('%c🏆 Dashboard - Panel de Control Mejorado', 'color: #f26522; font-size: 18px; font-weight: bold; padding: 8px 12px; background: #fff5ed; border-radius: 6px;');
@@ -7863,3 +8667,4 @@ console.log('  - Adeudos:', mockData.adeudos.length, 'jugadores');
 console.log('  - Lesionados:', mockData.lesionados.length, 'jugadores');
 console.log('  - Permisos:', mockData.permisos.length, 'jugadores');
 console.log('  - Comedor:', mockData.comedor.length, 'jugadores');
+console.log('%c📝 Sistema de recordatorios activo', 'color: #f26522; font-weight: bold;');
