@@ -290,6 +290,7 @@ const playerModal = document.getElementById('playerModal');
 const modalClose = document.getElementById('modalClose');
 const modalBtnClose = document.getElementById('modalBtnClose');
 const modalBtnAction = document.getElementById('modalBtnAction');
+const modalBtnEdit = document.getElementById('modalBtnEdit');
 const modalPlayerName = document.getElementById('modalPlayerName');
 const modalPlayerCategory = document.getElementById('modalPlayerCategory');
 const modalAvatar = document.getElementById('modalAvatar');
@@ -304,8 +305,8 @@ const carouselStates = {
     lesionados: { currentIndex: 0, itemsPerView: 5 },
     permisos: { currentIndex: 0, itemsPerView: 5 },
     comedor: { currentIndex: 0, itemsPerView: 5 },
-    'comedor-no-pasaron': { currentIndex: 0, itemsPerView: 5 },
-    'comedor-pasaron': { currentIndex: 0, itemsPerView: 5 }
+    'comedor-no-pasaron': { currentIndex: 0, cardsPerView: 0, totalSlides: 0 },
+    'comedor-pasaron': { currentIndex: 0, cardsPerView: 0, totalSlides: 0 }
 };
 
 // ========================================
@@ -405,6 +406,7 @@ function applyUserPermissions() {
         'permisos': 'permisos',
         'lesionados': 'lesionados',
         'mensualidades': 'mensualidades',
+        'pagos': 'pagos',
         'exportar': 'exportar',
         'balance': 'balance',
         'altas': 'altas',
@@ -463,6 +465,7 @@ function hasPagePermission(page) {
         'permisos': 'permisos',
         'lesionados': 'lesionados',
         'mensualidades': 'mensualidades',
+        'pagos': 'pagos',
         'exportar': 'exportar',
         'balance': 'balance',
         'altas': 'altas',
@@ -977,18 +980,42 @@ function setupSummarySectionNavigation() {
     Object.keys(sectionPageMap).forEach(sectionId => {
         const section = document.getElementById(sectionId);
         if (section) {
-            // Hacer la sección clickeable
-            section.style.cursor = 'pointer';
-            section.addEventListener('click', (e) => {
-                // Evitar navegación si se hace clic en las tarjetas de jugadores
-                if (e.target.closest('.summary-cards-grid') || e.target.closest('.player-card')) {
-                    return;
-                }
-                
-                const page = sectionPageMap[sectionId];
-                navigateToPage(page);
-            });
+            // Hacer la sección clickeable solo en el header
+            const summaryHeader = section.querySelector('.summary-header');
+            if (summaryHeader) {
+                summaryHeader.style.cursor = 'pointer';
+                summaryHeader.addEventListener('click', (e) => {
+                    // Evitar navegación si se hace clic en botones o elementos interactivos
+                    const target = e.target;
+                    const isButton = target.closest('.carousel-btn') || 
+                                     target.closest('button') ||
+                                     target.classList.contains('carousel-btn') ||
+                                     target.tagName === 'BUTTON';
+                    
+                    if (isButton || 
+                        target.closest('.summary-cards-grid') || 
+                        target.closest('.player-card') ||
+                        target.closest('.carousel-container') ||
+                        target.closest('.carousel-dots') ||
+                        target.closest('.carousel-wrapper')) {
+                        e.stopPropagation();
+                        return;
+                    }
+                    
+                    const page = sectionPageMap[sectionId];
+                    navigateToPage(page);
+                });
+            }
             
+            // Asegurarse de que los botones del carrusel no activen la navegación
+            const carouselContainer = section.querySelector('.carousel-container');
+            if (carouselContainer) {
+                carouselContainer.addEventListener('click', (e) => {
+                    if (e.target.closest('.carousel-btn') || e.target.classList.contains('carousel-btn')) {
+                        e.stopPropagation();
+                    }
+                });
+            }
         }
     });
 }
@@ -1020,8 +1047,12 @@ function loadSummaryAdeudos() {
         });
     });
     
-    // Inicializar carrusel
-    setTimeout(() => initCarousel('adeudos'), 100);
+    // Inicializar carrusel después de un delay para asegurar que el DOM esté actualizado
+    setTimeout(() => {
+        initCarousel('adeudos');
+        // Reinicializar botones del carrusel
+        initCarouselButtons();
+    }, 150);
 }
 
 function loadSummaryLesionados() {
@@ -1463,29 +1494,82 @@ function loadAllCarousels() {
 // CARGAR CARRUSEL
 // ========================================
 function loadCarousel(type, data) {
-    const carousel = document.getElementById(`carousel-${type}`);
+    // Usar el mapeo de carouselIds para obtener el ID correcto del carrusel
+    const carouselId = carouselIds[type] || `carousel-${type}`;
+    const carousel = document.getElementById(carouselId);
     const totalElement = document.getElementById(`${type}Total`);
     
-    if (!carousel || !data || data.length === 0) {
+    // Validar que data sea un array válido
+    if (!data || !Array.isArray(data)) {
+        console.warn('⚠️ loadCarousel: data no es un array válido:', { type, data });
         if (carousel) {
             carousel.innerHTML = '<p style="text-align: center; color: var(--gris-label); padding: 40px;">No hay datos disponibles</p>';
         }
         return;
     }
     
+    if (!carousel) {
+        console.warn('⚠️ loadCarousel: No se encontró el carrusel:', carouselId, '(tipo:', type + ')');
+        return;
+    }
+    
+    if (data.length === 0) {
+        carousel.innerHTML = '<p style="text-align: center; color: var(--gris-label); padding: 40px;">No hay datos disponibles</p>';
+        // Limpiar indicadores si no hay datos
+        const dotsId = carouselDotsIds[type] || `indicators-${type}`;
+        const indicatorsContainer = document.getElementById(dotsId);
+        if (indicatorsContainer) {
+            indicatorsContainer.innerHTML = '';
+        }
+        return;
+    }
+    
+    // Validar que data.length sea un número válido
+    const dataLength = Array.isArray(data) ? data.length : 0;
+    if (isNaN(dataLength) || dataLength < 0) {
+        console.error('❌ loadCarousel: data.length no es válido:', { type, dataLength, data });
+        carousel.innerHTML = '<p style="text-align: center; color: var(--rojo); padding: 40px;">Error al cargar datos</p>';
+        return;
+    }
+    
     // Actualizar contador total solo si existe el elemento
     if (totalElement) {
-        totalElement.textContent = `${data.length} ${data.length === 1 ? 'jugador' : 'jugadores'}`;
+        totalElement.textContent = `${dataLength} ${dataLength === 1 ? 'jugador' : 'jugadores'}`;
     }
     
     // Crear tarjetas
-    carousel.innerHTML = data.map(player => createPlayerCard(player, type)).join('');
+    try {
+        // Normalizar el tipo para createPlayerCard
+        let cardType = type;
+        if (type === 'adeudos-section' || type === 'adeudos' || type.startsWith('mensualidades')) {
+            cardType = 'mensualidades';
+        }
+        carousel.innerHTML = data.map(player => createPlayerCard(player, cardType)).join('');
+    } catch (error) {
+        console.error('❌ Error al crear tarjetas:', error);
+        carousel.innerHTML = '<p style="text-align: center; color: var(--rojo); padding: 40px;">Error al crear tarjetas</p>';
+        return;
+    }
     
-    // Crear indicadores
-    createIndicators(type, data.length);
+    // Crear indicadores solo si data.length es válido
+    try {
+        createIndicators(type, dataLength);
+    } catch (error) {
+        console.error('❌ Error al crear indicadores:', error);
+        // Continuar sin indicadores en lugar de fallar completamente
+        const dotsId = carouselDotsIds[type] || `indicators-${type}`;
+        const indicatorsContainer = document.getElementById(dotsId);
+        if (indicatorsContainer) {
+            indicatorsContainer.innerHTML = '';
+        }
+    }
     
     // Configurar botones
-    setupCarouselButtons(type, data.length);
+    try {
+        setupCarouselButtons(type, dataLength);
+    } catch (error) {
+        console.error('❌ Error al configurar botones:', error);
+    }
     
     // Inicializar carrusel después de renderizar (con un pequeño delay para asegurar que el DOM esté actualizado)
     // Normalizar el tipo para que coincida con los IDs del carrusel
@@ -1493,8 +1577,22 @@ function loadCarousel(type, data) {
         if (typeof initCarousel === 'function') {
             // Mapear tipos a los IDs correctos del carrusel
             let carouselType = type;
-            if (type === 'adeudos' || type.startsWith('mensualidades')) {
-                carouselType = 'adeudos';
+            if (type === 'adeudos-section') {
+                // Mantener el tipo para el carrusel de la sección Mensualidades
+                carouselType = 'adeudos-section';
+            } else if (type === 'adeudos' || type.startsWith('mensualidades')) {
+                // Verificar si es el carrusel de la sección Mensualidades o del dashboard
+                const carouselElement = document.getElementById('carousel-adeudos');
+                if (carouselElement && carouselElement.closest('#section-adeudos')) {
+                    // Es el carrusel de la sección Mensualidades
+                    carouselType = 'adeudos-section';
+                } else {
+                    // Es el carrusel del dashboard
+                    carouselType = 'adeudos';
+                }
+            } else if (type === 'comedor-no-pasaron') {
+                // Mantener el tipo exacto para el carrusel de la sección Comedor
+                carouselType = 'comedor-no-pasaron';
             } else if (type.startsWith('comedor')) {
                 carouselType = 'comedor';
             }
@@ -1510,7 +1608,7 @@ function loadCarousel(type, data) {
         card.addEventListener('click', () => {
             // Normalizar el tipo para comedor (puede ser 'comedor-pasaron' o 'comedor-no-pasaron')
             let tipoNormalizado = type.startsWith('comedor') ? 'comedor' : type;
-            if (type === 'adeudos' || type.startsWith('mensualidades')) {
+            if (type === 'adeudos-section' || type === 'adeudos' || type.startsWith('mensualidades')) {
                 tipoNormalizado = 'mensualidades';
             }
             console.log('🖱️ Click en tarjeta:', { tipoOriginal: type, tipoNormalizado, index, player: data[index] });
@@ -1695,10 +1793,10 @@ function createPlayerCard(player, type) {
     let avatarClass = '';
     let specificInfo = '';
     
-    // Normalizar el tipo: si viene con prefijo 'mensualidades-' o es 'adeudos', tratarlo como mensualidades
+    // Normalizar el tipo: si viene con prefijo 'mensualidades-' o es 'adeudos' o 'adeudos-section', tratarlo como mensualidades
     // Si viene con prefijo 'comedor-' o es 'comedor', tratarlo como comedor
     let tipoParaSwitch = type;
-    if (type.startsWith('mensualidades-') || type === 'adeudos') {
+    if (type.startsWith('mensualidades-') || type === 'adeudos' || type === 'adeudos-section') {
         tipoParaSwitch = 'mensualidades';
     } else if (type.startsWith('comedor-') || type === 'comedor') {
         tipoParaSwitch = 'comedor';
@@ -1726,23 +1824,104 @@ function createPlayerCard(player, type) {
             const montoMensualidad = player.mensualidad?.monto || 0;
             const montoAdeudado = mesesAdeudados * montoMensualidad;
             
-            // Todas las tarjetas muestran el mismo formato de adeudo
+            // Determinar nivel de gravedad del adeudo
+            let nivelAdeudo = 'Alto';
+            let adeudoColor = '#DC2626';
+            let adeudoBg = '#FEE2E2';
+            if (mesesAdeudados <= 3) {
+                nivelAdeudo = 'Bajo';
+                adeudoColor = '#F59E0B';
+                adeudoBg = '#FEF3C7';
+            } else if (mesesAdeudados <= 6) {
+                nivelAdeudo = 'Medio';
+                adeudoColor = '#EF4444';
+                adeudoBg = '#FEE2E2';
+            } else {
+                nivelAdeudo = 'Alto';
+                adeudoColor = '#DC2626';
+                adeudoBg = '#FEE2E2';
+            }
+            
             specificInfo = `
-                <div class="info-row">
-                    <span class="info-label">Estado:</span>
-                    <span class="status-badge" style="background: #EF4444; color: white;">ADEUDO</span>
+                <div class="mensualidad-badge-principal" style="background: ${adeudoBg}; color: ${adeudoColor};">
+                    <div class="mensualidad-badge-icon">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect>
+                            <line x1="1" y1="10" x2="23" y2="10"></line>
+                        </svg>
+                    </div>
+                    <span class="mensualidad-badge-text">ADEUDO - ${nivelAdeudo.toUpperCase()}</span>
                 </div>
-                <div class="info-row">
-                    <span class="info-label">Meses adeudados:</span>
-                    <span class="info-value" style="color: #EF4444; font-weight: 600;">${mesesAdeudados}</span>
-                </div>
-                <div class="info-row">
-                    <span class="info-label">Monto adeudado:</span>
-                    <span class="info-value" style="color: #EF4444; font-weight: 600;">$${montoAdeudado.toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
-                </div>
-                <div class="info-row">
-                    <span class="info-label">Categoría:</span>
-                    <span class="info-value" style="font-size: 12px;">${player.categoria || 'N/A'}</span>
+                <div class="mensualidad-info-list">
+                    <div class="mensualidad-info-item">
+                        <div class="mensualidad-info-icon mensualidad-info-icon-months">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                                <line x1="16" y1="2" x2="16" y2="6"></line>
+                                <line x1="8" y1="2" x2="8" y2="6"></line>
+                                <line x1="3" y1="10" x2="21" y2="10"></line>
+                            </svg>
+                        </div>
+                        <div class="mensualidad-info-content">
+                            <span class="mensualidad-info-label">Meses Adeudados</span>
+                            <span class="mensualidad-info-value" style="color: ${adeudoColor}; font-weight: 700;">${mesesAdeudados} de 12</span>
+                            <span class="mensualidad-info-progress">${mesesPagadosCount} meses pagados</span>
+                        </div>
+                    </div>
+                    <div class="mensualidad-info-item">
+                        <div class="mensualidad-info-icon mensualidad-info-icon-amount">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <line x1="12" y1="1" x2="12" y2="23"></line>
+                                <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+                            </svg>
+                        </div>
+                        <div class="mensualidad-info-content">
+                            <span class="mensualidad-info-label">Monto Adeudado</span>
+                            <span class="mensualidad-info-value" style="color: ${adeudoColor}; font-weight: 700;">$${montoAdeudado.toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                            <span class="mensualidad-info-monthly">Mensualidad: $${montoMensualidad.toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                        </div>
+                    </div>
+                    <div class="mensualidad-info-item">
+                        <div class="mensualidad-info-icon mensualidad-info-icon-category">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                                <circle cx="9" cy="7" r="4"></circle>
+                                <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                                <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                            </svg>
+                        </div>
+                        <div class="mensualidad-info-content">
+                            <span class="mensualidad-info-label">Categoría</span>
+                            <span class="mensualidad-info-value">${player.categoria || 'N/A'}</span>
+                        </div>
+                    </div>
+                    ${player.mensualidad?.diaPago ? `
+                    <div class="mensualidad-info-item">
+                        <div class="mensualidad-info-icon mensualidad-info-icon-day">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <polyline points="12 6 12 12 16 14"></polyline>
+                            </svg>
+                        </div>
+                        <div class="mensualidad-info-content">
+                            <span class="mensualidad-info-label">Día de Pago</span>
+                            <span class="mensualidad-info-value">Día ${player.mensualidad.diaPago} de cada mes</span>
+                        </div>
+                    </div>
+                    ` : `
+                    <div class="mensualidad-info-item">
+                        <div class="mensualidad-info-icon mensualidad-info-icon-day">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <polyline points="12 6 12 12 16 14"></polyline>
+                            </svg>
+                        </div>
+                        <div class="mensualidad-info-content">
+                            <span class="mensualidad-info-label">Día de Pago</span>
+                            <span class="mensualidad-info-value" style="color: var(--gris-label); font-style: italic;">No especificado</span>
+                        </div>
+                    </div>
+                    `}
                 </div>
             `;
             break;
@@ -1765,34 +1944,168 @@ function createPlayerCard(player, type) {
                 });
             }
             
+            // Calcular días desde la lesión
+            let diasDesdeLesion = 'N/A';
+            if (player.fechaRegistro || player.timestamp) {
+                const fechaLesion = player.fechaRegistro 
+                    ? new Date(player.fechaRegistro) 
+                    : (player.timestamp?.toDate ? player.timestamp.toDate() : new Date(player.timestamp));
+                const hoy = new Date();
+                const diferencia = Math.floor((hoy - fechaLesion) / (1000 * 60 * 60 * 24));
+                if (diferencia >= 0) {
+                    diasDesdeLesion = diferencia === 0 ? 'Hoy' : diferencia === 1 ? 'Hace 1 día' : `Hace ${diferencia} días`;
+                }
+            }
+            
+            // Obtener nivel de dolor
+            const nivelDolor = player.nivelDolor !== undefined ? player.nivelDolor : null;
+            const nivelDolorTexto = player.nivelDolorTexto || (nivelDolor !== null ? `${nivelDolor}/10` : 'N/A');
+            
+            // Determinar color del nivel de dolor
+            let dolorColor = '#6B7280';
+            let dolorBg = '#F3F4F6';
+            if (nivelDolor !== null) {
+                if (nivelDolor >= 8) {
+                    dolorColor = '#DC2626';
+                    dolorBg = '#FEE2E2';
+                } else if (nivelDolor >= 5) {
+                    dolorColor = '#F59E0B';
+                    dolorBg = '#FEF3C7';
+                } else if (nivelDolor >= 3) {
+                    dolorColor = '#FCD34D';
+                    dolorBg = '#FEF9C3';
+                } else {
+                    dolorColor = '#10B981';
+                    dolorBg = '#D1FAE5';
+                }
+            }
+            
+            // Determinar color del estado
+            const estado = (player.estado || '').toLowerCase();
+            let estadoColor = '#6B7280';
+            let estadoBg = '#F3F4F6';
+            if (estado.includes('grave') || estado.includes('severa') || estado.includes('crítica')) {
+                estadoColor = '#DC2626';
+                estadoBg = '#FEE2E2';
+            } else if (estado.includes('moderada') || estado.includes('media')) {
+                estadoColor = '#F59E0B';
+                estadoBg = '#FEF3C7';
+            } else if (estado.includes('leve') || estado.includes('ligera')) {
+                estadoColor = '#FCD34D';
+                estadoBg = '#FEF9C3';
+            } else if (estado.includes('recuperación') || estado.includes('mejorando')) {
+                estadoColor = '#10B981';
+                estadoBg = '#D1FAE5';
+            }
+            
+            // Truncar tipo de lesión si es muy largo
+            const tipoLesion = player.tipoLesion || 'Lesión';
+            const tipoLesionTruncado = tipoLesion.length > 20 ? tipoLesion.substring(0, 20) + '...' : tipoLesion;
+            
             specificInfo = `
-                <div class="info-row">
-                    <span class="info-label">Lesión:</span>
-                    <span class="info-value" style="font-size: 12px;">${player.tipoLesion || 'N/A'}</span>
+                <div class="lesion-badge-principal" style="background: ${dolorBg}; color: ${dolorColor};" title="${player.tipoLesion || 'Lesión'}">
+                    <div class="lesion-badge-icon">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M12 2L2 7l10 5 10-5-10-5z"></path>
+                            <path d="M2 17l10 5 10-5M2 12l10 5 10-5"></path>
+                        </svg>
+                    </div>
+                    <span class="lesion-badge-text">${tipoLesionTruncado}</span>
                 </div>
-                <div class="info-row">
-                    <span class="info-label">Fecha de Lesión:</span>
-                    <span class="info-value" style="font-size: 12px;">${fechaLesionFormateada}</span>
-                </div>
-                <div class="info-row">
-                    <span class="info-label">Estado:</span>
-                    <span class="status-badge alto">${player.estado || 'N/A'}</span>
+                <div class="lesion-info-list">
+                    <div class="lesion-info-item">
+                        <div class="lesion-info-icon lesion-info-icon-date">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                                <line x1="16" y1="2" x2="16" y2="6"></line>
+                                <line x1="8" y1="2" x2="8" y2="6"></line>
+                                <line x1="3" y1="10" x2="21" y2="10"></line>
+                            </svg>
+                        </div>
+                        <div class="lesion-info-content">
+                            <span class="lesion-info-label">Fecha</span>
+                            <span class="lesion-info-value">${fechaLesionFormateada}</span>
+                            <span class="lesion-info-days">${diasDesdeLesion}</span>
+                        </div>
+                    </div>
+                    <div class="lesion-info-item">
+                        <div class="lesion-info-icon lesion-info-icon-pain" style="background: ${dolorBg}; color: ${dolorColor};">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+                            </svg>
+                        </div>
+                        <div class="lesion-info-content">
+                            <span class="lesion-info-label">Nivel de Dolor</span>
+                            <span class="lesion-info-value" style="color: ${dolorColor}; font-weight: 700;">${nivelDolorTexto}</span>
+                        </div>
+                    </div>
+                    <div class="lesion-info-item">
+                        <div class="lesion-info-icon lesion-info-icon-zone">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z"></path>
+                                <circle cx="12" cy="12" r="3"></circle>
+                            </svg>
+                        </div>
+                        <div class="lesion-info-content">
+                            <span class="lesion-info-label">Zona Afectada</span>
+                            <span class="lesion-info-value" title="${player.zonaAfectada || 'No especificada'}" style="${!player.zonaAfectada ? 'color: var(--gris-label); font-style: italic;' : ''}">
+                                ${player.zonaAfectada || 'No especificada'}
+                            </span>
+                        </div>
+                    </div>
+                    <div class="lesion-info-item">
+                        <div class="lesion-info-icon lesion-info-icon-status" style="background: ${estadoBg}; color: ${estadoColor};">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <polyline points="12 6 12 12 16 14"></polyline>
+                            </svg>
+                        </div>
+                        <div class="lesion-info-content">
+                            <span class="lesion-info-label">Estado</span>
+                            <span class="lesion-info-value lesion-status-badge" style="background: ${estadoBg}; color: ${estadoColor};" title="${player.estado || 'N/A'}">
+                                ${(player.estado || 'N/A').length > 15 ? (player.estado || 'N/A').substring(0, 15) + '...' : (player.estado || 'N/A')}
+                            </span>
+                        </div>
+                    </div>
                 </div>
             `;
             break;
         case 'permisos':
             avatarClass = 'permiso';
             // Formatear fecha de inicio para la tarjeta
-            const fechaTarjeta = player.fechaInicio ? new Date(player.fechaInicio).toLocaleDateString('es-MX', { 
-                day: '2-digit', 
-                month: '2-digit', 
-                year: 'numeric' 
-            }) : 'N/A';
+            let fechaInicioFormateada = 'N/A';
+            if (player.fechaInicio) {
+                fechaInicioFormateada = new Date(player.fechaInicio).toLocaleDateString('es-MX', { 
+                    day: '2-digit', 
+                    month: '2-digit', 
+                    year: 'numeric' 
+                });
+            } else if (player.timestamp) {
+                const fecha = player.timestamp?.toDate ? player.timestamp.toDate() : new Date(player.timestamp);
+                fechaInicioFormateada = fecha.toLocaleDateString('es-MX', { 
+                    day: '2-digit', 
+                    month: '2-digit', 
+                    year: 'numeric' 
+                });
+            }
+            
+            // Calcular días desde la solicitud
+            let diasDesdeSolicitud = 'N/A';
+            if (player.fechaInicio || player.timestamp) {
+                const fechaSolicitud = player.fechaInicio 
+                    ? new Date(player.fechaInicio) 
+                    : (player.timestamp?.toDate ? player.timestamp.toDate() : new Date(player.timestamp));
+                const hoy = new Date();
+                const diferencia = Math.floor((hoy - fechaSolicitud) / (1000 * 60 * 60 * 24));
+                if (diferencia >= 0) {
+                    diasDesdeSolicitud = diferencia === 0 ? 'Hoy' : diferencia === 1 ? 'Hace 1 día' : `Hace ${diferencia} días`;
+                }
+            }
             
             // Determinar información de aprobación
-            let aprobacionTexto = 'N/A';
-            let aprobacionColor = '#6B7280';
-            let aprobacionBg = '#F3F4F6';
+            let aprobacionTexto = 'Pendiente';
+            let aprobacionColor = '#FCD34D';
+            let aprobacionBg = '#FEF3C7';
             if (player.aprobado === true) {
                 aprobacionTexto = 'Aprobado';
                 aprobacionColor = '#10B981';
@@ -1820,22 +2133,96 @@ function createPlayerCard(player, type) {
                 estadoBgPermiso = '#FEF3C7';
             }
             
+            // Truncar motivo si es muy largo
+            const motivoPermiso = player.motivo || 'No especificado';
+            const motivoPermisoTruncado = motivoPermiso.length > 25 ? motivoPermiso.substring(0, 25) + '...' : motivoPermiso;
+            
             specificInfo = `
-                <div class="info-row">
-                    <span class="info-label">Motivo:</span>
-                    <span class="info-value" style="font-size: 12px;">${player.motivo || 'N/A'}</span>
+                <div class="permiso-badge-principal" style="background: ${aprobacionBg}; color: ${aprobacionColor};">
+                    <div class="permiso-badge-icon">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M9 11l3 3L22 4"></path>
+                            <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
+                        </svg>
+                    </div>
+                    <span class="permiso-badge-text">${aprobacionTexto}</span>
                 </div>
-                <div class="info-row">
-                    <span class="info-label">Fecha:</span>
-                    <span class="info-value" style="font-size: 12px;">${fechaTarjeta}</span>
-                </div>
-                <div class="info-row">
-                    <span class="info-label">Aprobación:</span>
-                    <span class="status-badge" style="background: ${aprobacionBg}; color: ${aprobacionColor};">${aprobacionTexto}</span>
-                </div>
-                <div class="info-row">
-                    <span class="info-label">Estado:</span>
-                    <span class="status-badge" style="background: ${estadoBgPermiso}; color: ${estadoColorPermiso};">${estadoTextoPermiso}</span>
+                <div class="permiso-info-list">
+                    <div class="permiso-info-item">
+                        <div class="permiso-info-icon permiso-info-icon-reason">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                <polyline points="14 2 14 8 20 8"></polyline>
+                                <line x1="16" y1="13" x2="8" y2="13"></line>
+                                <line x1="16" y1="17" x2="8" y2="17"></line>
+                                <polyline points="10 9 9 9 8 9"></polyline>
+                            </svg>
+                        </div>
+                        <div class="permiso-info-content">
+                            <span class="permiso-info-label">Motivo</span>
+                            <span class="permiso-info-value" title="${player.motivo || 'No especificado'}">${motivoPermisoTruncado}</span>
+                        </div>
+                    </div>
+                    <div class="permiso-info-item">
+                        <div class="permiso-info-icon permiso-info-icon-date">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                                <line x1="16" y1="2" x2="16" y2="6"></line>
+                                <line x1="8" y1="2" x2="8" y2="6"></line>
+                                <line x1="3" y1="10" x2="21" y2="10"></line>
+                            </svg>
+                        </div>
+                        <div class="permiso-info-content">
+                            <span class="permiso-info-label">Fecha de Solicitud</span>
+                            <span class="permiso-info-value">${fechaInicioFormateada}</span>
+                            <span class="permiso-info-days">${diasDesdeSolicitud}</span>
+                        </div>
+                    </div>
+                    <div class="permiso-info-item">
+                        <div class="permiso-info-icon permiso-info-icon-status" style="background: ${estadoBgPermiso}; color: ${estadoColorPermiso};">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <polyline points="12 6 12 12 16 14"></polyline>
+                            </svg>
+                        </div>
+                        <div class="permiso-info-content">
+                            <span class="permiso-info-label">Estado</span>
+                            <span class="permiso-info-value permiso-status-badge" style="background: ${estadoBgPermiso}; color: ${estadoColorPermiso};" title="${player.estado || 'N/A'}">
+                                ${(estadoTextoPermiso.length > 15 ? estadoTextoPermiso.substring(0, 15) + '...' : estadoTextoPermiso)}
+                            </span>
+                        </div>
+                    </div>
+                    ${player.fechaFin ? `
+                    <div class="permiso-info-item">
+                        <div class="permiso-info-icon permiso-info-icon-end">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <polyline points="12 6 12 12 16 14"></polyline>
+                                <line x1="12" y1="2" x2="12" y2="6"></line>
+                                <line x1="12" y1="18" x2="12" y2="22"></line>
+                            </svg>
+                        </div>
+                        <div class="permiso-info-content">
+                            <span class="permiso-info-label">Fecha de Fin</span>
+                            <span class="permiso-info-value">${new Date(player.fechaFin).toLocaleDateString('es-MX', { day: '2-digit', month: '2-digit', year: 'numeric' })}</span>
+                        </div>
+                    </div>
+                    ` : `
+                    <div class="permiso-info-item">
+                        <div class="permiso-info-icon permiso-info-icon-end">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <polyline points="12 6 12 12 16 14"></polyline>
+                                <line x1="12" y1="2" x2="12" y2="6"></line>
+                                <line x1="12" y1="18" x2="12" y2="22"></line>
+                            </svg>
+                        </div>
+                        <div class="permiso-info-content">
+                            <span class="permiso-info-label">Fecha de Fin</span>
+                            <span class="permiso-info-value" style="color: var(--gris-label); font-style: italic;">No especificada</span>
+                        </div>
+                    </div>
+                    `}
                 </div>
             `;
             break;
@@ -1849,52 +2236,106 @@ function createPlayerCard(player, type) {
                 const totalRegistros = player.totalRegistrosHoy || 0;
                 const comidasFaltantes = player.comidasFaltantes || [];
                 
-                // Mostrar registros de hoy si los tiene
-                let registrosHTML = '';
+                // Definir todas las comidas posibles
+                const todasLasComidas = ['Desayuno', 'Comida', 'Cena'];
+                const iconosComidas = {
+                    'Desayuno': `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>`,
+                    'Comida': `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M6 13c0-1.105.895-2 2-2h8c1.105 0 2 .895 2 2v6H6v-6z"></path>
+                        <path d="M6 13l2-7h8l2 7"></path>
+                        <circle cx="10" cy="16" r=".5"></circle>
+                        <circle cx="14" cy="16" r=".5"></circle>
+                    </svg>`,
+                    'Cena': `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>`
+                };
+                
+                // Crear mapas para verificar qué comidas tiene y cuáles faltan
+                const registrosMap = {};
                 if (player.registrosHoy && player.registrosHoy.length > 0) {
-                    const ordenComidas = { 'Desayuno': 1, 'Comida': 2, 'Cena': 3 };
-                    player.registrosHoy.sort((a, b) => {
-                        const ordenA = ordenComidas[a.tipoComida] || 99;
-                        const ordenB = ordenComidas[b.tipoComida] || 99;
-                        return ordenA - ordenB;
-                    });
-                    
-                    registrosHTML = player.registrosHoy.map(registro => {
+                    player.registrosHoy.forEach(registro => {
                         const tipoComida = registro.tipoComida || 'Comida';
-                        return `
-                            <div class="info-row" style="margin-bottom: 4px; font-size: 11px; display: flex; align-items: center;">
-                                <span class="info-label">${tipoComida}:</span>
-                                <span class="info-value" style="font-size: 11px; color: #10B981; font-weight: 600; margin-left: auto;">${registro.hora || 'N/A'}</span>
-                            </div>
-                        `;
-                    }).join('');
+                        registrosMap[tipoComida] = registro.hora || 'N/A';
+                    });
                 }
                 
-                // Mostrar comidas faltantes
-                let faltantesHTML = '';
-                if (comidasFaltantes.length > 0) {
-                    faltantesHTML = `
-                        <div style="margin-top: 8px; padding-top: 8px; border-top: 1px solid #E1E8ED;">
-                            <div class="info-row" style="font-size: 10px; color: var(--gris-label); margin-bottom: 4px; font-weight: 600;">
-                                Faltantes:
+                // Generar HTML para todas las comidas
+                const comidasHTML = todasLasComidas.map(comida => {
+                    const tieneComida = registrosMap[comida];
+                    const esFaltante = comidasFaltantes.includes(comida);
+                    
+                    if (tieneComida) {
+                        // Comida registrada
+                        return `
+                            <div class="comedor-comida-item comedor-comida-registrada">
+                                <div class="comedor-comida-icon comedor-comida-icon-success">
+                                    ${iconosComidas[comida]}
+                                </div>
+                                <div class="comedor-comida-info">
+                                    <span class="comedor-comida-label">${comida}</span>
+                                    <span class="comedor-comida-hora">${tieneComida}</span>
+                                </div>
+                                <div class="comedor-comida-status comedor-comida-status-success">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                                        <polyline points="20 6 9 17 4 12"></polyline>
+                                    </svg>
+                                </div>
                             </div>
-                            ${comidasFaltantes.map(comida => {
-                                return `
-                                    <div class="info-row" style="margin-bottom: 2px; font-size: 11px; color: #DC2626;">
-                                        <span>${comida}</span>
-                                    </div>
-                                `;
-                            }).join('')}
-                        </div>
-                    `;
+                        `;
+                    } else {
+                        // Comida faltante
+                        return `
+                            <div class="comedor-comida-item comedor-comida-faltante">
+                                <div class="comedor-comida-icon comedor-comida-icon-error">
+                                    ${iconosComidas[comida]}
+                                </div>
+                                <div class="comedor-comida-info">
+                                    <span class="comedor-comida-label">${comida}</span>
+                                    <span class="comedor-comida-hora comedor-comida-hora-faltante">No registrado</span>
+                                </div>
+                                <div class="comedor-comida-status comedor-comida-status-error">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                                    </svg>
+                                </div>
+                            </div>
+                        `;
+                    }
+                }).join('');
+                
+                // Determinar color del badge de progreso
+                let progresoColor = '#DC2626';
+                let progresoBg = '#FEE2E2';
+                if (totalRegistros === 1) {
+                    progresoColor = '#F59E0B';
+                    progresoBg = '#FEF3C7';
+                } else if (totalRegistros === 2) {
+                    progresoColor = '#FCD34D';
+                    progresoBg = '#FEF9C3';
+                } else if (totalRegistros === 3) {
+                    progresoColor = '#10B981';
+                    progresoBg = '#D1FAE5';
                 }
                 
                 specificInfo = `
-                    <div class="info-row" style="margin-bottom: 8px; font-size: 11px; font-weight: 600; color: var(--negro);">
-                        <span>Registros hoy: <span style="color: ${totalRegistros === 0 ? '#DC2626' : totalRegistros < 3 ? '#F59E0B' : '#10B981'};">${totalRegistros}/3</span></span>
+                    <div class="comedor-progreso-badge" style="background: ${progresoBg}; color: ${progresoColor};">
+                        <span class="comedor-progreso-text">${totalRegistros} de 3 comidas</span>
                     </div>
-                    ${registrosHTML}
-                    ${faltantesHTML}
+                    <div class="comedor-comidas-list">
+                        ${comidasHTML}
+                    </div>
                 `;
             } else {
                 // Jugador que SÍ pasó (tiene ingresos agrupados) - mostrar historial
@@ -1991,24 +2432,138 @@ function createPlayerCard(player, type) {
         case 'casaclub':
             avatarClass = 'casaclub';
             const estadoCasaClub = player.horaSalida ? 'Completado' : 'Fuera de Casa Club';
-            const estadoColorCasaClub = player.horaSalida ? '#10B981' : '#FCD34D';
+            const estadoColorCasaClub = player.horaSalida ? '#10B981' : '#F59E0B';
             const estadoBgCasaClub = player.horaSalida ? '#D1FAE5' : '#FEF3C7';
+            
+            // Formatear hora de entrada (salida del jugador)
+            let horaEntradaFormateada = 'N/A';
+            if (player.horaEntrada) {
+                if (typeof player.horaEntrada === 'string') {
+                    horaEntradaFormateada = player.horaEntrada;
+                } else {
+                    horaEntradaFormateada = new Date(player.horaEntrada).toLocaleTimeString('es-MX', { 
+                        hour: '2-digit', 
+                        minute: '2-digit' 
+                    });
+                }
+            } else if (player.timestamp) {
+                const fecha = player.timestamp?.toDate ? player.timestamp.toDate() : new Date(player.timestamp);
+                horaEntradaFormateada = fecha.toLocaleTimeString('es-MX', { 
+                    hour: '2-digit', 
+                    minute: '2-digit' 
+                });
+            }
+            
+            // Formatear fecha de entrada
+            let fechaEntradaFormateada = 'N/A';
+            if (player.fecha) {
+                fechaEntradaFormateada = new Date(player.fecha).toLocaleDateString('es-MX', { 
+                    day: '2-digit', 
+                    month: '2-digit', 
+                    year: 'numeric' 
+                });
+            } else if (player.timestamp) {
+                const fecha = player.timestamp?.toDate ? player.timestamp.toDate() : new Date(player.timestamp);
+                fechaEntradaFormateada = fecha.toLocaleDateString('es-MX', { 
+                    day: '2-digit', 
+                    month: '2-digit', 
+                    year: 'numeric' 
+                });
+            }
+            
+            // Calcular tiempo desde la salida
+            let tiempoDesdeSalida = 'N/A';
+            if (player.timestamp || player.fecha || player.horaEntrada) {
+                let fechaSalida;
+                if (player.timestamp) {
+                    fechaSalida = player.timestamp?.toDate ? player.timestamp.toDate() : new Date(player.timestamp);
+                } else if (player.fecha && player.horaEntrada) {
+                    fechaSalida = new Date(`${player.fecha} ${player.horaEntrada}`);
+                } else {
+                    fechaSalida = new Date(player.fecha || player.horaEntrada);
+                }
+                
+                const ahora = new Date();
+                const diferenciaMs = ahora - fechaSalida;
+                const diferenciaHoras = Math.floor(diferenciaMs / (1000 * 60 * 60));
+                const diferenciaMinutos = Math.floor((diferenciaMs % (1000 * 60 * 60)) / (1000 * 60));
+                
+                if (diferenciaHoras > 0) {
+                    tiempoDesdeSalida = `Hace ${diferenciaHoras} ${diferenciaHoras === 1 ? 'hora' : 'horas'}`;
+                } else if (diferenciaMinutos > 0) {
+                    tiempoDesdeSalida = `Hace ${diferenciaMinutos} ${diferenciaMinutos === 1 ? 'minuto' : 'minutos'}`;
+                } else {
+                    tiempoDesdeSalida = 'Ahora';
+                }
+            }
+            
+            // Truncar motivo si es muy largo
+            const motivoCasaClub = player.motivo || 'No especificado';
+            const motivoCasaClubTruncado = motivoCasaClub.length > 25 ? motivoCasaClub.substring(0, 25) + '...' : motivoCasaClub;
+            
             specificInfo = `
-                <div class="info-row">
-                    <span class="info-label">Destino:</span>
-                    <span class="info-value" style="font-size: 12px;">${player.motivo || 'N/A'}</span>
+                <div class="casaclub-badge-principal" style="background: ${estadoBgCasaClub}; color: ${estadoColorCasaClub};">
+                    <div class="casaclub-badge-icon">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                            <polyline points="9 22 9 12 15 12 15 22"></polyline>
+                        </svg>
+                    </div>
+                    <span class="casaclub-badge-text">${estadoCasaClub}</span>
                 </div>
-                <div class="info-row">
-                    <span class="info-label">Salida:</span>
-                    <span class="info-value" style="font-size: 12px;">${player.horaEntrada || 'N/A'}</span>
-                </div>
-                <div class="info-row">
-                    <span class="info-label">Entrada:</span>
-                    <span class="info-value" style="font-size: 12px;">Pendiente</span>
-                </div>
-                <div class="info-row">
-                    <span class="info-label">Estado:</span>
-                    <span class="status-badge" style="background: ${estadoBgCasaClub}; color: ${estadoColorCasaClub};">${estadoCasaClub}</span>
+                <div class="casaclub-info-list">
+                    <div class="casaclub-info-item">
+                        <div class="casaclub-info-icon casaclub-info-icon-destination">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                                <circle cx="12" cy="10" r="3"></circle>
+                            </svg>
+                        </div>
+                        <div class="casaclub-info-content">
+                            <span class="casaclub-info-label">Destino</span>
+                            <span class="casaclub-info-value" title="${player.motivo || 'No especificado'}">${motivoCasaClubTruncado}</span>
+                        </div>
+                    </div>
+                    <div class="casaclub-info-item">
+                        <div class="casaclub-info-icon casaclub-info-icon-time">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <polyline points="12 6 12 12 16 14"></polyline>
+                            </svg>
+                        </div>
+                        <div class="casaclub-info-content">
+                            <span class="casaclub-info-label">Hora de Salida</span>
+                            <span class="casaclub-info-value">${horaEntradaFormateada}</span>
+                            <span class="casaclub-info-time">${tiempoDesdeSalida}</span>
+                        </div>
+                    </div>
+                    <div class="casaclub-info-item">
+                        <div class="casaclub-info-icon casaclub-info-icon-date">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                                <line x1="16" y1="2" x2="16" y2="6"></line>
+                                <line x1="8" y1="2" x2="8" y2="6"></line>
+                                <line x1="3" y1="10" x2="21" y2="10"></line>
+                            </svg>
+                        </div>
+                        <div class="casaclub-info-content">
+                            <span class="casaclub-info-label">Fecha</span>
+                            <span class="casaclub-info-value">${fechaEntradaFormateada}</span>
+                        </div>
+                    </div>
+                    <div class="casaclub-info-item">
+                        <div class="casaclub-info-icon casaclub-info-icon-phone">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
+                            </svg>
+                        </div>
+                        <div class="casaclub-info-content">
+                            <span class="casaclub-info-label">Contacto</span>
+                            <span class="casaclub-info-value" title="${player.celular || 'No disponible'}" style="${!player.celular ? 'color: var(--gris-label); font-style: italic;' : ''}">
+                                ${player.celular || 'No disponible'}
+                            </span>
+                        </div>
+                    </div>
                 </div>
             `;
             break;
@@ -2037,7 +2592,9 @@ function createPlayerCard(player, type) {
 // CREAR INDICADORES
 // ========================================
 function createIndicators(type, totalItems) {
-    const indicatorsContainer = document.getElementById(`indicators-${type}`);
+    // Usar el mapeo de carouselDotsIds para obtener el ID correcto de los indicadores
+    const dotsId = carouselDotsIds[type] || `indicators-${type}`;
+    const indicatorsContainer = document.getElementById(dotsId);
     
     // Inicializar estado del carousel si no existe
     if (!carouselStates[type]) {
@@ -2049,36 +2606,66 @@ function createIndicators(type, totalItems) {
         return;
     }
     
-    const itemsPerView = carouselStates[type].itemsPerView;
+    // Validar que totalItems sea un número válido y positivo
+    if (!totalItems || typeof totalItems !== 'number' || isNaN(totalItems) || totalItems < 0) {
+        indicatorsContainer.innerHTML = '';
+        return;
+    }
+    
+    const itemsPerView = carouselStates[type].itemsPerView || 5;
+    
+    // Validar que itemsPerView sea un número válido y mayor que 0
+    if (!itemsPerView || typeof itemsPerView !== 'number' || isNaN(itemsPerView) || itemsPerView <= 0) {
+        indicatorsContainer.innerHTML = '';
+        return;
+    }
+    
     const totalPages = Math.ceil(totalItems / itemsPerView);
+    
+    // Validar que totalPages sea un número válido antes de crear el array
+    if (!totalPages || isNaN(totalPages) || totalPages <= 0 || !isFinite(totalPages)) {
+        indicatorsContainer.innerHTML = '';
+        return;
+    }
+    
+    // Validar que totalPages no sea demasiado grande (límite de seguridad)
+    if (totalPages > 1000) {
+        console.warn('⚠️ TotalPages demasiado grande, limitando a 1000:', totalPages);
+        indicatorsContainer.innerHTML = '';
+        return;
+    }
     
     if (totalPages <= 1) {
         indicatorsContainer.innerHTML = '';
         return;
     }
     
-    indicatorsContainer.innerHTML = Array(totalPages)
-        .fill(0)
-        .map((_, i) => `<div class="indicator ${i === 0 ? 'active' : ''}" data-page="${i}"></div>`)
-        .join('');
-    
-    // Event listeners
-    indicatorsContainer.querySelectorAll('.indicator').forEach(indicator => {
-        indicator.addEventListener('click', () => {
-            const page = parseInt(indicator.dataset.page);
-            goToCarouselPage(type, page);
+    try {
+        indicatorsContainer.innerHTML = Array(totalPages)
+            .fill(0)
+            .map((_, i) => `<div class="indicator ${i === 0 ? 'active' : ''}" data-page="${i}"></div>`)
+            .join('');
+        
+        // Event listeners
+        indicatorsContainer.querySelectorAll('.indicator').forEach(indicator => {
+            indicator.addEventListener('click', () => {
+                const page = parseInt(indicator.dataset.page);
+                goToCarouselPage(type, page);
+            });
         });
-    });
+    } catch (error) {
+        console.error('❌ Error al crear indicadores:', error);
+        console.error('Detalles:', { type, totalItems, itemsPerView, totalPages });
+        indicatorsContainer.innerHTML = '';
+    }
 }
 
 // ========================================
 // CONFIGURAR BOTONES DEL CARRUSEL
 // ========================================
 function setupCarouselButtons(type, totalItems) {
-    const prevBtn = document.querySelector(`.carousel-btn-prev[data-carousel="${type}"]`);
-    const nextBtn = document.querySelector(`.carousel-btn-next[data-carousel="${type}"]`);
-    
-    if (!prevBtn || !nextBtn) return;
+    // Esta función ahora solo actualiza el estado del carrusel
+    // Los event listeners se manejan en initCarouselButtons
     
     // Inicializar el objeto del carrusel si no existe
     if (!carousels[type]) {
@@ -2096,17 +2683,7 @@ function setupCarouselButtons(type, totalItems) {
         carousels[type].totalSlides = Math.ceil(totalItems / cardsPerView);
     }
     
-    // Remover event listeners anteriores
-    const newPrevBtn = prevBtn.cloneNode(true);
-    const newNextBtn = nextBtn.cloneNode(true);
-    prevBtn.parentNode.replaceChild(newPrevBtn, prevBtn);
-    nextBtn.parentNode.replaceChild(newNextBtn, nextBtn);
-    
-    // Agregar nuevos event listeners
-    newPrevBtn.addEventListener('click', () => moveCarousel(type, -1));
-    newNextBtn.addEventListener('click', () => moveCarousel(type, 1));
-    
-    // Actualizar estado inicial
+    // Actualizar estado inicial de botones
     updateCarouselButtons(type);
 }
 
@@ -2275,9 +2852,9 @@ function openPlayerModal(player, type) {
     modalAvatar.className = 'modal-avatar';
     modalAvatarText.style.display = 'flex';
     
-    // Normalizar el tipo: si viene con prefijo 'mensualidades-' o es 'adeudos', tratarlo como mensualidades
+    // Normalizar el tipo: si viene con prefijo 'mensualidades-' o es 'adeudos' o 'adeudos-section', tratarlo como mensualidades
     let tipoParaSwitch = type;
-    if (type.startsWith('mensualidades-') || type === 'adeudos') {
+    if (type.startsWith('mensualidades-') || type === 'adeudos' || type === 'adeudos-section') {
         tipoParaSwitch = 'mensualidades';
     }
     
@@ -2336,11 +2913,16 @@ function openPlayerModal(player, type) {
     // Crear contenido específico del modal
     modalBody.innerHTML = createModalContent(player, type);
     
+    // Ocultar botón de editar para otros tipos de modal (no jugadores)
+    if (modalBtnEdit) {
+        modalBtnEdit.style.display = 'none';
+    }
+
     // Configurar botón de acción
     configureModalActionButton(player, type);
     
     // Agregar event listeners para editar meses (solo para mensualidades)
-    if (type === 'mensualidades' || type === 'adeudos') {
+    if (tipoParaSwitch === 'mensualidades' || type === 'adeudos' || type === 'adeudos-section') {
         setupPaymentMonthEditors(player);
     }
     
@@ -2685,7 +3267,14 @@ function mostrarNotificacionMensualidad(mensaje, tipo = 'success') {
 // ========================================
 function createModalContent(player, type) {
     console.log('📝 createModalContent llamado:', { type, player: player?.nombreCompleto || 'sin nombre' });
-    switch(type) {
+    
+    // Normalizar el tipo para el switch
+    let tipoNormalizado = type;
+    if (type === 'adeudos-section' || type === 'adeudos' || type.startsWith('mensualidades')) {
+        tipoNormalizado = 'mensualidades';
+    }
+    
+    switch(tipoNormalizado) {
         case 'adeudos':
         case 'mensualidades':
             // Generar historial de meses (últimos 12 meses)
@@ -2705,30 +3294,128 @@ function createModalContent(player, type) {
                 return fechaB - fechaA;
             })[0];
             
+            // Determinar color del badge según meses adeudados
+            let badgeColorMensualidades = '#10B981';
+            let badgeBgMensualidades = '#D1FAE5';
+            let badgeTextoMensualidades = 'Al día';
+            let badgeIconoMensualidades = `
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                    <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                </svg>
+            `;
+            
+            if (mesesAdeudados >= 9) {
+                badgeColorMensualidades = '#DC2626';
+                badgeBgMensualidades = '#FEE2E2';
+                badgeTextoMensualidades = 'Crítico';
+                badgeIconoMensualidades = `
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <line x1="12" y1="8" x2="12" y2="12"></line>
+                        <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                    </svg>
+                `;
+            } else if (mesesAdeudados >= 6) {
+                badgeColorMensualidades = '#F59E0B';
+                badgeBgMensualidades = '#FEF3C7';
+                badgeTextoMensualidades = 'Alto';
+                badgeIconoMensualidades = `
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+                        <line x1="12" y1="9" x2="12" y2="13"></line>
+                        <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                    </svg>
+                `;
+            } else if (mesesAdeudados >= 3) {
+                badgeColorMensualidades = '#FCD34D';
+                badgeBgMensualidades = '#FEF9C3';
+                badgeTextoMensualidades = 'Moderado';
+                badgeIconoMensualidades = `
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <path d="M12 6v6l4 2"></path>
+                    </svg>
+                `;
+            } else if (mesesAdeudados > 0) {
+                badgeColorMensualidades = '#FCD34D';
+                badgeBgMensualidades = '#FEF9C3';
+                badgeTextoMensualidades = 'Pendiente';
+                badgeIconoMensualidades = `
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <polyline points="12 6 12 12 16 14"></polyline>
+                    </svg>
+                `;
+            }
+            
+            // Formatear fecha del último pago
+            let ultimoPagoFormateado = 'Sin pagos';
+            if (ultimoPago && ultimoPago.fechaPago) {
+                const fecha = new Date(ultimoPago.fechaPago);
+                ultimoPagoFormateado = fecha.toLocaleDateString('es-MX', { 
+                    weekday: 'long',
+                    day: 'numeric', 
+                    month: 'long', 
+                    year: 'numeric' 
+                });
+                ultimoPagoFormateado = ultimoPagoFormateado.charAt(0).toUpperCase() + ultimoPagoFormateado.slice(1);
+            }
+            
             return `
                 <div class="modal-section">
-                    <h4 class="modal-section-title">Información de Pagos</h4>
-                    <div class="modal-info-grid">
-                        <div class="modal-info-item">
-                            <p class="modal-info-label">Total Pagado</p>
-                            <p class="modal-info-value">$${totalPagado.toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+                    <div class="mensualidad-modal-estado-badge" style="background: ${badgeBgMensualidades}; color: ${badgeColorMensualidades};">
+                        <div class="mensualidad-modal-estado-icon">
+                            ${badgeIconoMensualidades}
                         </div>
-                        <div class="modal-info-item">
-                            <p class="modal-info-label">Meses Pagados</p>
-                            <p class="modal-info-value">${mesesPagados} de 12</p>
+                        <div class="mensualidad-modal-estado-content">
+                            <span class="mensualidad-modal-estado-text">${mesesAdeudados} ${mesesAdeudados === 1 ? 'mes adeudado' : 'meses adeudados'}</span>
+                            <span class="mensualidad-modal-estado-status">${badgeTextoMensualidades}</span>
                         </div>
-                        <div class="modal-info-item">
-                            <p class="modal-info-label">Meses Adeudados</p>
-                            <p class="modal-info-value" style="color: #EF4444; font-weight: 700;">${mesesAdeudados}</p>
+                    </div>
+                    <div class="mensualidad-modal-info-list">
+                        <div class="mensualidad-modal-info-item">
+                            <div class="mensualidad-modal-info-icon mensualidad-modal-info-icon-total">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <line x1="12" y1="1" x2="12" y2="23"></line>
+                                    <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+                                </svg>
+                            </div>
+                            <div class="mensualidad-modal-info-content">
+                                <span class="mensualidad-modal-info-label">Total Pagado</span>
+                                <span class="mensualidad-modal-info-value">$${totalPagado.toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                            </div>
                         </div>
-                        <div class="modal-info-item">
-                            <p class="modal-info-label">Último Pago</p>
-                            <p class="modal-info-value" style="font-size: 14px;">${ultimoPago ? (ultimoPago.fechaPago ? new Date(ultimoPago.fechaPago).toLocaleDateString('es-MX') : 'N/A') : 'Sin pagos'}</p>
+                        <div class="mensualidad-modal-info-item">
+                            <div class="mensualidad-modal-info-icon mensualidad-modal-info-icon-paid">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                                    <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                                </svg>
+                            </div>
+                            <div class="mensualidad-modal-info-content">
+                                <span class="mensualidad-modal-info-label">Meses Pagados</span>
+                                <span class="mensualidad-modal-info-value">${mesesPagados} de 12</span>
+                            </div>
+                        </div>
+                        <div class="mensualidad-modal-info-item">
+                            <div class="mensualidad-modal-info-icon mensualidad-modal-info-icon-last">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                                    <line x1="16" y1="2" x2="16" y2="6"></line>
+                                    <line x1="8" y1="2" x2="8" y2="6"></line>
+                                    <line x1="3" y1="10" x2="21" y2="10"></line>
+                                </svg>
+                            </div>
+                            <div class="mensualidad-modal-info-content">
+                                <span class="mensualidad-modal-info-label">Último Pago</span>
+                                <span class="mensualidad-modal-info-value">${ultimoPagoFormateado}</span>
+                            </div>
                         </div>
                     </div>
                 </div>
                 <div class="modal-section">
-                    <h4 class="modal-section-title">Historial de Pagos (Últimos 12 Meses) - Click para editar</h4>
+                    <h4 class="modal-section-title">Historial de Pagos</h4>
                     <p style="font-size: 0.85rem; color: var(--gris-label); margin-bottom: 15px;">Haz click en cualquier mes para cambiar su estado de pago</p>
                     <div class="payment-history" id="paymentHistoryContainer">
                         ${historialMeses.map((mes, index) => `
@@ -2765,14 +3452,16 @@ function createModalContent(player, type) {
                 ${pagos.length > 0 ? `
                 <div class="modal-section">
                     <h4 class="modal-section-title">Detalle de Pagos Registrados</h4>
-                    <div style="max-height: 300px; overflow-y: auto;">
-                        <table style="width: 100%; border-collapse: collapse; font-size: 0.9rem;">
+                    <div style="max-height: 400px; overflow-y: auto;">
+                        <table class="mensualidad-modal-table">
                             <thead>
-                                <tr style="background: #F9FAFB; border-bottom: 2px solid #E1E8ED;">
-                                    <th style="padding: 10px; text-align: left; font-weight: 600; color: var(--negro);">Mes</th>
-                                    <th style="padding: 10px; text-align: left; font-weight: 600; color: var(--negro);">Monto</th>
-                                    <th style="padding: 10px; text-align: left; font-weight: 600; color: var(--negro);">Fecha Pago</th>
-                                    <th style="padding: 10px; text-align: left; font-weight: 600; color: var(--negro);">Tipo</th>
+                                <tr>
+                                    <th>Mes</th>
+                                    <th>Monto</th>
+                                    <th>Fecha Pago</th>
+                                    <th>Tipo de Pago</th>
+                                    <th>Concepto de Pago</th>
+                                    <th>Recibió</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -2780,18 +3469,29 @@ function createModalContent(player, type) {
                                     const mesA = mesesNombres.indexOf(a.mes || '');
                                     const mesB = mesesNombres.indexOf(b.mes || '');
                                     return mesB - mesA;
-                                }).map(pago => `
-                                    <tr style="border-bottom: 1px solid #F0F3F5;">
-                                        <td style="padding: 10px; font-weight: 600;">${pago.mes || 'N/A'}</td>
-                                        <td style="padding: 10px;">$${montoMensualidad.toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
-                                        <td style="padding: 10px; color: var(--gris-label);">${pago.fechaPago ? new Date(pago.fechaPago).toLocaleDateString('es-MX') : 'N/A'}</td>
-                                        <td style="padding: 10px;">
-                                            <span style="padding: 4px 8px; background: #E0F2FE; color: #0369A1; border-radius: 6px; font-size: 0.8rem; font-weight: 600;">
-                                                ${pago.tipoPago || 'N/A'}
-                                            </span>
-                                        </td>
-                                    </tr>
-                                `).join('')}
+                                }).map(pago => {
+                                    const tipoPago = pago.tipoPago || 'N/A';
+                                    const conceptoPago = pago.conceptoPago || pago.conceptoPagoOriginal || 'N/A';
+                                    const recibio = pago.recibio || 'N/A';
+                                    const esEfectivo = tipoPago.toLowerCase().includes('efectivo') || tipoPago.toLowerCase() === 'efectivo';
+                                    
+                                    return `
+                                        <tr>
+                                            <td style="font-weight: 600;">${pago.mes || 'N/A'}</td>
+                                            <td>$${montoMensualidad.toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+                                            <td>${pago.fechaPago ? new Date(pago.fechaPago).toLocaleDateString('es-MX', { day: '2-digit', month: '2-digit', year: 'numeric' }) : 'N/A'}</td>
+                                            <td>
+                                                <span class="mensualidad-modal-badge-tipo">${tipoPago}</span>
+                                            </td>
+                                            <td>
+                                                <span class="mensualidad-modal-badge-concepto">${conceptoPago}</span>
+                                            </td>
+                                            <td>
+                                                ${esEfectivo ? (recibio !== 'N/A' ? `<span class="mensualidad-modal-badge-recibio">${recibio}</span>` : '<span style="color: var(--gris-label); font-style: italic;">N/A</span>') : '<span style="color: var(--gris-label); font-style: italic;">—</span>'}
+                                            </td>
+                                        </tr>
+                                    `;
+                                }).join('')}
                             </tbody>
                         </table>
                     </div>
@@ -2800,102 +3500,306 @@ function createModalContent(player, type) {
             `;
         
         case 'lesionados':
+            // Obtener nivel de dolor
+            const nivelDolorModal = player.nivelDolor !== undefined ? player.nivelDolor : null;
+            const nivelDolorTextoModal = player.nivelDolorTexto || (nivelDolorModal !== null ? `${nivelDolorModal}/10` : 'N/A');
+            
+            // Determinar color del nivel de dolor
+            let dolorColorModal = '#6B7280';
+            let dolorBgModal = '#F3F4F6';
+            let dolorTextoModal = 'Sin especificar';
+            let dolorIconoModal = `
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <path d="M12 6v6l4 2"></path>
+                </svg>
+            `;
+            
+            if (nivelDolorModal !== null) {
+                if (nivelDolorModal >= 8) {
+                    dolorColorModal = '#DC2626';
+                    dolorBgModal = '#FEE2E2';
+                    dolorTextoModal = 'Dolor intenso';
+                    dolorIconoModal = `
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+                            <line x1="12" y1="9" x2="12" y2="13"></line>
+                            <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                        </svg>
+                    `;
+                } else if (nivelDolorModal >= 5) {
+                    dolorColorModal = '#F59E0B';
+                    dolorBgModal = '#FEF3C7';
+                    dolorTextoModal = 'Dolor moderado';
+                    dolorIconoModal = `
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+                            <line x1="12" y1="9" x2="12" y2="13"></line>
+                            <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                        </svg>
+                    `;
+                } else if (nivelDolorModal >= 3) {
+                    dolorColorModal = '#FCD34D';
+                    dolorBgModal = '#FEF9C3';
+                    dolorTextoModal = 'Dolor leve';
+                    dolorIconoModal = `
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <path d="M12 6v6l4 2"></path>
+                        </svg>
+                    `;
+                } else {
+                    dolorColorModal = '#10B981';
+                    dolorBgModal = '#D1FAE5';
+                    dolorTextoModal = 'Dolor leve';
+                    dolorIconoModal = `
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                            <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                        </svg>
+                    `;
+                }
+            }
+            
             // Formatear fecha de lesión
             let fechaLesionModal = 'N/A';
             if (player.fechaRegistro) {
-                fechaLesionModal = new Date(player.fechaRegistro).toLocaleDateString('es-MX', { 
-                    day: '2-digit', 
-                    month: '2-digit', 
+                const fecha = new Date(player.fechaRegistro);
+                fechaLesionModal = fecha.toLocaleDateString('es-MX', { 
+                    weekday: 'long',
+                    day: 'numeric', 
+                    month: 'long', 
                     year: 'numeric' 
                 });
+                fechaLesionModal = fechaLesionModal.charAt(0).toUpperCase() + fechaLesionModal.slice(1);
             } else if (player.timestamp) {
                 const fecha = player.timestamp?.toDate ? player.timestamp.toDate() : new Date(player.timestamp);
                 fechaLesionModal = fecha.toLocaleDateString('es-MX', { 
-                    day: '2-digit', 
-                    month: '2-digit', 
+                    weekday: 'long',
+                    day: 'numeric', 
+                    month: 'long', 
                     year: 'numeric' 
                 });
+                fechaLesionModal = fechaLesionModal.charAt(0).toUpperCase() + fechaLesionModal.slice(1);
             }
             
-            // Formatear nivel de dolor
-            const nivelDolorTexto = player.nivelDolorTexto || (player.nivelDolor !== undefined ? `${player.nivelDolor}/10` : 'N/A');
+            // Calcular días desde la lesión
+            let diasDesdeLesionModal = '';
+            if (player.fechaRegistro || player.timestamp) {
+                const fechaLesion = player.fechaRegistro 
+                    ? new Date(player.fechaRegistro) 
+                    : (player.timestamp?.toDate ? player.timestamp.toDate() : new Date(player.timestamp));
+                const hoy = new Date();
+                const diferencia = Math.floor((hoy - fechaLesion) / (1000 * 60 * 60 * 24));
+                if (diferencia >= 0) {
+                    diasDesdeLesionModal = diferencia === 0 ? 'Hoy' : diferencia === 1 ? 'Hace 1 día' : `Hace ${diferencia} días`;
+                }
+            }
+            
+            // Determinar color del estado
+            const estadoModal = (player.estado || '').toLowerCase();
+            let estadoColorModal = '#6B7280';
+            let estadoBgModal = '#F3F4F6';
+            let estadoLesionTextoModal = player.estado || 'N/A';
+            
+            // Capitalizar la primera letra del estado
+            if (estadoLesionTextoModal && estadoLesionTextoModal !== 'N/A') {
+                estadoLesionTextoModal = estadoLesionTextoModal.charAt(0).toUpperCase() + estadoLesionTextoModal.slice(1).toLowerCase();
+            }
+            
+            if (estadoModal.includes('grave') || estadoModal.includes('severa') || estadoModal.includes('crítica')) {
+                estadoColorModal = '#DC2626';
+                estadoBgModal = '#FEE2E2';
+            } else if (estadoModal.includes('moderada') || estadoModal.includes('media')) {
+                estadoColorModal = '#F59E0B';
+                estadoBgModal = '#FEF3C7';
+            } else if (estadoModal.includes('leve') || estadoModal.includes('ligera')) {
+                estadoColorModal = '#FCD34D';
+                estadoBgModal = '#FEF9C3';
+            } else if (estadoModal.includes('recuperación') || estadoModal.includes('mejorando')) {
+                estadoColorModal = '#10B981';
+                estadoBgModal = '#D1FAE5';
+            }
             
             return `
                 <div class="modal-section">
-                    <h4 class="modal-section-title">Detalles de la Lesión</h4>
-                    <div class="modal-info-grid">
-                        <div class="modal-info-item">
-                            <p class="modal-info-label">Tipo de Lesión</p>
-                            <p class="modal-info-value" style="font-size: 14px;">${player.tipoLesion || 'N/A'}</p>
+                    <div class="lesion-modal-estado-badge" style="background: ${dolorBgModal}; color: ${dolorColorModal};">
+                        <div class="lesion-modal-estado-icon">
+                            ${dolorIconoModal}
                         </div>
-                        <div class="modal-info-item">
-                            <p class="modal-info-label">Fecha de Lesión</p>
-                            <p class="modal-info-value" style="font-size: 14px;">${fechaLesionModal}</p>
-                        </div>
-                        <div class="modal-info-item">
-                            <p class="modal-info-label">Nivel de Dolor</p>
-                            <p class="modal-info-value" style="font-size: 14px;">${nivelDolorTexto}</p>
-                        </div>
-                        <div class="modal-info-item">
-                            <p class="modal-info-label">Zona Afectada</p>
-                            <p class="modal-info-value" style="font-size: 14px;">${player.zonaAfectada || 'N/A'}</p>
-                        </div>
-                        <div class="modal-info-item">
-                            <p class="modal-info-label">Categoría</p>
-                            <p class="modal-info-value" style="font-size: 14px;">${player.categoria || 'N/A'}</p>
-                        </div>
-                        <div class="modal-info-item">
-                            <p class="modal-info-label">Estado Actual</p>
-                            <p class="modal-info-value">
-                                <span class="status-badge alto">${player.estado || 'N/A'}</span>
-                            </p>
+                        <div class="lesion-modal-estado-content">
+                            <span class="lesion-modal-estado-text">${nivelDolorTextoModal}</span>
+                            <span class="lesion-modal-estado-status">${dolorTextoModal}</span>
                         </div>
                     </div>
-                </div>
-                <div class="modal-section">
-                    <h4 class="modal-section-title">Comentarios</h4>
-                    <p style="color: var(--gris-texto); line-height: 1.6; white-space: pre-wrap;">
-                        ${player.notas || 'No hay comentarios registrados.'}
-                    </p>
+                    <div class="lesion-modal-info-list">
+                        <div class="lesion-modal-info-item">
+                            <div class="lesion-modal-info-icon lesion-modal-info-icon-type">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M12 2L2 7l10 5 10-5-10-5z"></path>
+                                    <path d="M2 17l10 5 10-5M2 12l10 5 10-5"></path>
+                                </svg>
+                            </div>
+                            <div class="lesion-modal-info-content">
+                                <span class="lesion-modal-info-label">Tipo de Lesión</span>
+                                <span class="lesion-modal-info-value" title="${player.tipoLesion || 'No especificada'}">${player.tipoLesion || 'No especificada'}</span>
+                            </div>
+                        </div>
+                        <div class="lesion-modal-info-item">
+                            <div class="lesion-modal-info-icon lesion-modal-info-icon-date">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                                    <line x1="16" y1="2" x2="16" y2="6"></line>
+                                    <line x1="8" y1="2" x2="8" y2="6"></line>
+                                    <line x1="3" y1="10" x2="21" y2="10"></line>
+                                </svg>
+                            </div>
+                            <div class="lesion-modal-info-content">
+                                <span class="lesion-modal-info-label">Fecha de Lesión</span>
+                                <span class="lesion-modal-info-value">${fechaLesionModal}</span>
+                                ${diasDesdeLesionModal ? `<span class="lesion-modal-info-time">${diasDesdeLesionModal}</span>` : ''}
+                            </div>
+                        </div>
+                        <div class="lesion-modal-info-item">
+                            <div class="lesion-modal-info-icon lesion-modal-info-icon-zone">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                                    <circle cx="12" cy="10" r="3"></circle>
+                                </svg>
+                            </div>
+                            <div class="lesion-modal-info-content">
+                                <span class="lesion-modal-info-label">Zona Afectada</span>
+                                <span class="lesion-modal-info-value" title="${player.zonaAfectada || 'No especificada'}">${player.zonaAfectada || 'No especificada'}</span>
+                            </div>
+                        </div>
+                        <div class="lesion-modal-info-item">
+                            <div class="lesion-modal-info-icon lesion-modal-info-icon-status" style="background: ${estadoBgModal}; color: ${estadoColorModal};">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <circle cx="12" cy="12" r="10"></circle>
+                                    <polyline points="12 6 12 12 16 14"></polyline>
+                                </svg>
+                            </div>
+                            <div class="lesion-modal-info-content">
+                                <span class="lesion-modal-info-label">Estado</span>
+                                <span class="lesion-modal-info-value">${estadoLesionTextoModal}</span>
+                            </div>
+                        </div>
+                        ${player.notas ? `
+                        <div class="lesion-modal-info-item lesion-modal-info-item-notes">
+                            <div class="lesion-modal-info-icon lesion-modal-info-icon-notes">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                                </svg>
+                            </div>
+                            <div class="lesion-modal-info-content">
+                                <span class="lesion-modal-info-label">Comentarios</span>
+                                <span class="lesion-modal-info-value lesion-modal-info-notes">
+                                    ${Array.isArray(player.notas) ? 
+                                        `${player.notas.length} ${player.notas.length === 1 ? 'comentario' : 'comentarios'}` : 
+                                        'Ver comentarios'}
+                                </span>
+                            </div>
+                        </div>
+                        ` : ''}
+                    </div>
                 </div>
             `;
         
         case 'permisos':
-            // Formatear fechas
-            const fechaInicioFormateada = player.fechaInicio ? new Date(player.fechaInicio).toLocaleDateString('es-MX', { 
-                day: '2-digit', 
-                month: '2-digit', 
-                year: 'numeric' 
-            }) : 'N/A';
-            
-            const fechaFinFormateada = player.fechaFin ? new Date(player.fechaFin).toLocaleDateString('es-MX', { 
-                day: '2-digit', 
-                month: '2-digit', 
-                year: 'numeric' 
-            }) : 'N/A';
-            
-            // Calcular duración
-            const duracionTexto = player.diasPermisoTexto || (player.diasPermiso ? `${player.diasPermiso} día(s)` : 'N/A');
-            
             // Determinar información de aprobación
-            let aprobacionTextoModal = 'N/A';
-            let aprobacionColorModal = '#6B7280';
-            let aprobacionBgModal = '#F3F4F6';
+            let aprobacionTextoModal = 'Pendiente';
+            let aprobacionColorModal = '#FCD34D';
+            let aprobacionBgModal = '#FEF3C7';
+            let aprobacionIconoModal = `
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <polyline points="12 6 12 12 16 14"></polyline>
+                </svg>
+            `;
+            
             if (player.aprobado === true) {
                 aprobacionTextoModal = 'Aprobado';
                 aprobacionColorModal = '#10B981';
                 aprobacionBgModal = '#D1FAE5';
+                aprobacionIconoModal = `
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                        <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                    </svg>
+                `;
             } else if (player.aprobado === false) {
                 aprobacionTextoModal = 'No Aprobado';
                 aprobacionColorModal = '#EF4444';
                 aprobacionBgModal = '#FEE2E2';
+                aprobacionIconoModal = `
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <line x1="15" y1="9" x2="9" y2="15"></line>
+                        <line x1="9" y1="9" x2="15" y2="15"></line>
+                    </svg>
+                `;
             }
             
-            // Estilos para el estado en el modal
+            // Texto secundario del badge
+            let badgeTextoSecondaryModal = '';
+            if (player.aprobado === true) {
+                badgeTextoSecondaryModal = 'Permiso autorizado';
+            } else if (player.aprobado === false) {
+                badgeTextoSecondaryModal = 'Permiso rechazado';
+            } else {
+                badgeTextoSecondaryModal = 'Pendiente de revisión';
+            }
+            
+            // Formatear fecha de inicio
+            let fechaInicioFormateadaModal = 'N/A';
+            if (player.fechaInicio) {
+                const fecha = new Date(player.fechaInicio);
+                fechaInicioFormateadaModal = fecha.toLocaleDateString('es-MX', { 
+                    weekday: 'long',
+                    day: 'numeric', 
+                    month: 'long', 
+                    year: 'numeric' 
+                });
+                fechaInicioFormateadaModal = fechaInicioFormateadaModal.charAt(0).toUpperCase() + fechaInicioFormateadaModal.slice(1);
+            }
+            
+            // Formatear fecha de fin
+            let fechaFinFormateadaModal = 'N/A';
+            if (player.fechaFin) {
+                const fecha = new Date(player.fechaFin);
+                fechaFinFormateadaModal = fecha.toLocaleDateString('es-MX', { 
+                    weekday: 'long',
+                    day: 'numeric', 
+                    month: 'long', 
+                    year: 'numeric' 
+                });
+                fechaFinFormateadaModal = fechaFinFormateadaModal.charAt(0).toUpperCase() + fechaFinFormateadaModal.slice(1);
+            }
+            
+            // Calcular duración
+            const duracionTextoModal = player.diasPermisoTexto || (player.diasPermiso ? `${player.diasPermiso} ${player.diasPermiso === 1 ? 'día' : 'días'}` : 'N/A');
+            
+            // Calcular días desde la solicitud
+            let diasDesdeSolicitudModal = '';
+            if (player.fechaInicio) {
+                const fechaSolicitud = new Date(player.fechaInicio);
+                const hoy = new Date();
+                const diferencia = Math.floor((hoy - fechaSolicitud) / (1000 * 60 * 60 * 24));
+                if (diferencia >= 0) {
+                    diasDesdeSolicitudModal = diferencia === 0 ? 'Hoy' : diferencia === 1 ? 'Hace 1 día' : `Hace ${diferencia} días`;
+                }
+            }
+            
+            // Determinar información del estado
             const estadoPermisoModal = (player.estado || '').toLowerCase();
             let estadoColorPermisoModal = '#6B7280';
             let estadoBgPermisoModal = '#F3F4F6';
             let estadoTextoPermisoModal = player.estado || 'N/A';
+            
+            // Capitalizar la primera letra del estado
+            if (estadoTextoPermisoModal && estadoTextoPermisoModal !== 'N/A') {
+                estadoTextoPermisoModal = estadoTextoPermisoModal.charAt(0).toUpperCase() + estadoTextoPermisoModal.slice(1).toLowerCase();
+            }
             
             if (estadoPermisoModal === 'finalizado') {
                 estadoColorPermisoModal = '#6B7280';
@@ -2910,186 +3814,499 @@ function createModalContent(player, type) {
             
             return `
                 <div class="modal-section">
-                    <h4 class="modal-section-title">Detalles del Permiso</h4>
-                    <div class="modal-info-grid">
-                        <div class="modal-info-item">
-                            <p class="modal-info-label">Motivo</p>
-                            <p class="modal-info-value" style="font-size: 14px;">${player.motivo || 'N/A'}</p>
+                    <div class="permiso-modal-estado-badge" style="background: ${aprobacionBgModal}; color: ${aprobacionColorModal};">
+                        <div class="permiso-modal-estado-icon">
+                            ${aprobacionIconoModal}
                         </div>
-                        <div class="modal-info-item">
-                            <p class="modal-info-label">Fecha de Inicio</p>
-                            <p class="modal-info-value" style="font-size: 14px;">${fechaInicioFormateada}</p>
+                        <div class="permiso-modal-estado-content">
+                            <span class="permiso-modal-estado-text">${aprobacionTextoModal}</span>
+                            <span class="permiso-modal-estado-status">${badgeTextoSecondaryModal}</span>
                         </div>
-                        <div class="modal-info-item">
-                            <p class="modal-info-label">Fecha de Fin</p>
-                            <p class="modal-info-value" style="font-size: 14px;">${fechaFinFormateada}</p>
+                    </div>
+                    <div class="permiso-modal-info-list">
+                        <div class="permiso-modal-info-item">
+                            <div class="permiso-modal-info-icon permiso-modal-info-icon-reason">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                    <polyline points="14 2 14 8 20 8"></polyline>
+                                    <line x1="16" y1="13" x2="8" y2="13"></line>
+                                    <line x1="16" y1="17" x2="8" y2="17"></line>
+                                    <polyline points="10 9 9 9 8 9"></polyline>
+                                </svg>
+                            </div>
+                            <div class="permiso-modal-info-content">
+                                <span class="permiso-modal-info-label">Motivo</span>
+                                <span class="permiso-modal-info-value" title="${player.motivo || 'No especificado'}">${player.motivo || 'No especificado'}</span>
+                            </div>
                         </div>
-                        <div class="modal-info-item">
-                            <p class="modal-info-label">Duración</p>
-                            <p class="modal-info-value">${duracionTexto}</p>
+                        <div class="permiso-modal-info-item">
+                            <div class="permiso-modal-info-icon permiso-modal-info-icon-date">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                                    <line x1="16" y1="2" x2="16" y2="6"></line>
+                                    <line x1="8" y1="2" x2="8" y2="6"></line>
+                                    <line x1="3" y1="10" x2="21" y2="10"></line>
+                                </svg>
+                            </div>
+                            <div class="permiso-modal-info-content">
+                                <span class="permiso-modal-info-label">Fecha de Inicio</span>
+                                <span class="permiso-modal-info-value">${fechaInicioFormateadaModal}</span>
+                                ${diasDesdeSolicitudModal ? `<span class="permiso-modal-info-time">${diasDesdeSolicitudModal}</span>` : ''}
+                            </div>
                         </div>
-                        <div class="modal-info-item">
-                            <p class="modal-info-label">Aprobación</p>
-                            <p class="modal-info-value">
-                                <span class="status-badge" style="background: ${aprobacionBgModal}; color: ${aprobacionColorModal};">${aprobacionTextoModal}</span>
-                            </p>
+                        <div class="permiso-modal-info-item">
+                            <div class="permiso-modal-info-icon permiso-modal-info-icon-end">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <circle cx="12" cy="12" r="10"></circle>
+                                    <polyline points="12 6 12 12 16 14"></polyline>
+                                    <line x1="12" y1="2" x2="12" y2="6"></line>
+                                    <line x1="12" y1="18" x2="12" y2="22"></line>
+                                </svg>
+                            </div>
+                            <div class="permiso-modal-info-content">
+                                <span class="permiso-modal-info-label">Fecha de Fin</span>
+                                <span class="permiso-modal-info-value">${fechaFinFormateadaModal}</span>
+                            </div>
                         </div>
-                        <div class="modal-info-item">
-                            <p class="modal-info-label">Estado</p>
-                            <p class="modal-info-value">
-                                <span class="status-badge" style="background: ${estadoBgPermisoModal}; color: ${estadoColorPermisoModal};">${estadoTextoPermisoModal}</span>
-                            </p>
+                        <div class="permiso-modal-info-item">
+                            <div class="permiso-modal-info-icon permiso-modal-info-icon-duration">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <circle cx="12" cy="12" r="10"></circle>
+                                    <polyline points="12 6 12 12 16 14"></polyline>
+                                </svg>
+                            </div>
+                            <div class="permiso-modal-info-content">
+                                <span class="permiso-modal-info-label">Duración</span>
+                                <span class="permiso-modal-info-value">${duracionTextoModal}</span>
+                            </div>
+                        </div>
+                        <div class="permiso-modal-info-item">
+                            <div class="permiso-modal-info-icon permiso-modal-info-icon-status" style="background: ${estadoBgPermisoModal}; color: ${estadoColorPermisoModal};">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <circle cx="12" cy="12" r="10"></circle>
+                                    <polyline points="12 6 12 12 16 14"></polyline>
+                                </svg>
+                            </div>
+                            <div class="permiso-modal-info-content">
+                                <span class="permiso-modal-info-label">Estado</span>
+                                <span class="permiso-modal-info-value">${estadoTextoPermisoModal}</span>
+                            </div>
                         </div>
                         ${player.descripcion ? `
-                        <div class="modal-info-item" style="grid-column: 1 / -1;">
-                            <p class="modal-info-label">Descripción</p>
-                            <p class="modal-info-value" style="font-size: 14px; line-height: 1.6;">${player.descripcion}</p>
+                        <div class="permiso-modal-info-item permiso-modal-info-item-description">
+                            <div class="permiso-modal-info-icon permiso-modal-info-icon-description">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                    <polyline points="14 2 14 8 20 8"></polyline>
+                                    <line x1="16" y1="13" x2="8" y2="13"></line>
+                                    <line x1="16" y1="17" x2="8" y2="17"></line>
+                                </svg>
+                            </div>
+                            <div class="permiso-modal-info-content">
+                                <span class="permiso-modal-info-label">Descripción</span>
+                                <span class="permiso-modal-info-value permiso-modal-info-description">${player.descripcion}</span>
+                            </div>
                         </div>
                         ` : ''}
                     </div>
                 </div>
-                ${player.estado === 'Pendiente' ? `
-                <div class="modal-section">
-                    <h4 class="modal-section-title">Acción Requerida</h4>
-                    <p style="color: var(--gris-texto); line-height: 1.6;">
-                        Este permiso está pendiente de aprobación. 
-                        Revise la solicitud y tome una decisión lo antes posible.
-                    </p>
-                </div>
-                ` : ''}
             `;
         
         case 'comedor':
-            // Debug: verificar datos antes de procesar
-            console.log('🔍 Modal - Datos recibidos:', {
-                nombre: player.nombreCompleto,
-                tieneIngresos: !!(player.ingresos && player.ingresos.length > 0),
-                ingresos: player.ingresos,
-                hora: player.hora,
-                horaEntrada: player.horaEntrada,
-                timestamp: player.timestamp,
-                fecha: player.fecha,
-                playerCompleto: player
-            });
+            // Verificar si el jugador tiene información de registros de hoy (no pasaron)
+            const totalRegistrosModal = player.totalRegistrosHoy || 0;
+            const comidasFaltantesModal = player.comidasFaltantes || [];
+            const registrosHoyModal = player.registrosHoy || [];
             
-            const fechaFormateadaModal = formatearFechaComedor(player.timestamp, player.fecha);
-            
-            // Obtener todos los ingresos del día (Desayuno, Comida, Cena)
-            const ingresosModal = player.ingresos || [];
-            
-            // Ordenar ingresos por tipo de comida (Desayuno, Comida, Cena)
-            const ordenComidasModal = { 'Desayuno': 1, 'Comida': 2, 'Cena': 3 };
-            ingresosModal.sort((a, b) => {
-                const ordenA = ordenComidasModal[a.tipoComida] || 99;
-                const ordenB = ordenComidasModal[b.tipoComida] || 99;
-                return ordenA - ordenB;
-            });
-            
-            // Crear HTML para mostrar todos los ingresos en el modal agrupados por fecha
-            let ingresosModalHTML = '';
-            if (ingresosModal.length > 0) {
-                // Agrupar ingresos por fecha
-                const ingresosPorFecha = {};
-                ingresosModal.forEach(ingreso => {
-                    const fechaIngreso = ingreso.fecha || player.fecha;
-                    if (!ingresosPorFecha[fechaIngreso]) {
-                        ingresosPorFecha[fechaIngreso] = [];
+            // Si el jugador NO pasó (tiene información de registrosHoy)
+            if (player.registrosHoy !== undefined || player.totalRegistrosHoy !== undefined || player.comidasFaltantes !== undefined) {
+                // Definir todas las comidas posibles
+                const todasLasComidasModal = ['Desayuno', 'Comida', 'Cena'];
+                const iconosComidasModal = {
+                    'Desayuno': `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>`,
+                    'Comida': `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M6 13c0-1.105.895-2 2-2h8c1.105 0 2 .895 2 2v6H6v-6z"></path>
+                        <path d="M6 13l2-7h8l2 7"></path>
+                        <circle cx="10" cy="16" r=".5"></circle>
+                        <circle cx="14" cy="16" r=".5"></circle>
+                    </svg>`,
+                    'Cena': `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>`
+                };
+                
+                // Crear mapas para verificar qué comidas tiene y cuáles faltan
+                const registrosMapModal = {};
+                if (registrosHoyModal.length > 0) {
+                    registrosHoyModal.forEach(registro => {
+                        const tipoComida = registro.tipoComida || 'Comida';
+                        registrosMapModal[tipoComida] = {
+                            hora: registro.hora || 'N/A',
+                            fecha: registro.fecha || player.fecha || 'N/A',
+                            timestamp: registro.timestamp || null
+                        };
+                    });
+                }
+                
+                // Determinar color del badge de progreso
+                let progresoColorModal = '#DC2626';
+                let progresoBgModal = '#FEE2E2';
+                let progresoTextoModal = 'Faltan comidas';
+                if (totalRegistrosModal === 1) {
+                    progresoColorModal = '#F59E0B';
+                    progresoBgModal = '#FEF3C7';
+                    progresoTextoModal = 'Parcial';
+                } else if (totalRegistrosModal === 2) {
+                    progresoColorModal = '#FCD34D';
+                    progresoBgModal = '#FEF9C3';
+                    progresoTextoModal = 'Casi completo';
+                } else if (totalRegistrosModal === 3) {
+                    progresoColorModal = '#10B981';
+                    progresoBgModal = '#D1FAE5';
+                    progresoTextoModal = 'Completo';
+                }
+                
+                // Generar HTML para todas las comidas
+                const comidasModalHTML = todasLasComidasModal.map(comida => {
+                    const registroComida = registrosMapModal[comida];
+                    const esFaltante = comidasFaltantesModal.includes(comida);
+                    
+                    if (registroComida) {
+                        // Comida registrada
+                        const fechaFormateada = registroComida.timestamp 
+                            ? formatearFechaComedor(registroComida.timestamp, registroComida.fecha)
+                            : (registroComida.fecha || 'Hoy');
+                        
+                        return `
+                            <div class="comedor-modal-comida-item comedor-modal-comida-registrada">
+                                <div class="comedor-modal-comida-icon comedor-modal-comida-icon-success">
+                                    ${iconosComidasModal[comida]}
+                                </div>
+                                <div class="comedor-modal-comida-content">
+                                    <span class="comedor-modal-comida-label">${comida}</span>
+                                    <span class="comedor-modal-comida-hora">${registroComida.hora}</span>
+                                    <span class="comedor-modal-comida-fecha">${fechaFormateada}</span>
+                                </div>
+                                <div class="comedor-modal-comida-status comedor-modal-comida-status-success">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                                        <polyline points="20 6 9 17 4 12"></polyline>
+                                    </svg>
+                                </div>
+                            </div>
+                        `;
+                    } else {
+                        // Comida faltante
+                        return `
+                            <div class="comedor-modal-comida-item comedor-modal-comida-faltante">
+                                <div class="comedor-modal-comida-icon comedor-modal-comida-icon-error">
+                                    ${iconosComidasModal[comida]}
+                                </div>
+                                <div class="comedor-modal-comida-content">
+                                    <span class="comedor-modal-comida-label">${comida}</span>
+                                    <span class="comedor-modal-comida-hora comedor-modal-comida-hora-faltante">No registrado</span>
+                                    <span class="comedor-modal-comida-fecha comedor-modal-comida-fecha-faltante">Pendiente</span>
+                                </div>
+                                <div class="comedor-modal-comida-status comedor-modal-comida-status-error">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                                    </svg>
+                                </div>
+                            </div>
+                        `;
                     }
-                    ingresosPorFecha[fechaIngreso].push(ingreso);
+                }).join('');
+                
+                return `
+                    <div class="modal-section">
+                        <div class="comedor-modal-progreso-badge" style="background: ${progresoBgModal}; color: ${progresoColorModal};">
+                            <div class="comedor-modal-progreso-icon">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <circle cx="12" cy="12" r="10"></circle>
+                                    <polyline points="12 6 12 12 16 14"></polyline>
+                                </svg>
+                            </div>
+                            <div class="comedor-modal-progreso-content">
+                                <span class="comedor-modal-progreso-text">${totalRegistrosModal} de 3 comidas</span>
+                                <span class="comedor-modal-progreso-status">${progresoTextoModal}</span>
+                            </div>
+                        </div>
+                        <div class="comedor-modal-comidas-list">
+                            ${comidasModalHTML}
+                        </div>
+                    </div>
+                `;
+            } else {
+                // Jugador que SÍ pasó (tiene ingresos agrupados) - mostrar historial
+                const fechaFormateadaModal = formatearFechaComedor(player.timestamp, player.fecha);
+                const ingresosModal = player.ingresos || [];
+                
+                // Ordenar ingresos por tipo de comida (Desayuno, Comida, Cena)
+                const ordenComidasModal = { 'Desayuno': 1, 'Comida': 2, 'Cena': 3 };
+                ingresosModal.sort((a, b) => {
+                    const ordenA = ordenComidasModal[a.tipoComida] || 99;
+                    const ordenB = ordenComidasModal[b.tipoComida] || 99;
+                    return ordenA - ordenB;
                 });
                 
-                // Ordenar fechas (más recientes primero)
-                const fechasOrdenadas = Object.keys(ingresosPorFecha).sort((a, b) => b.localeCompare(a));
-                
-                ingresosModalHTML = fechasOrdenadas.map(fecha => {
-                    const ingresosFecha = ingresosPorFecha[fecha];
-                    const fechaFormateadaIngreso = formatearFechaComedor(
-                        ingresosFecha[0]?.timestamp || null, 
-                        fecha
-                    );
-                    
-                    // Ordenar ingresos por tipo de comida
-                    const ordenComidas = { 'Desayuno': 1, 'Comida': 2, 'Cena': 3 };
-                    ingresosFecha.sort((a, b) => {
-                        const ordenA = ordenComidas[a.tipoComida] || 99;
-                        const ordenB = ordenComidas[b.tipoComida] || 99;
-                        return ordenA - ordenB;
+                // Crear HTML para mostrar todos los ingresos en el modal agrupados por fecha
+                let ingresosModalHTML = '';
+                if (ingresosModal.length > 0) {
+                    // Agrupar ingresos por fecha
+                    const ingresosPorFecha = {};
+                    ingresosModal.forEach(ingreso => {
+                        const fechaIngreso = ingreso.fecha || player.fecha;
+                        if (!ingresosPorFecha[fechaIngreso]) {
+                            ingresosPorFecha[fechaIngreso] = [];
+                        }
+                        ingresosPorFecha[fechaIngreso].push(ingreso);
                     });
                     
-                    const ingresosFechaHTML = ingresosFecha.map(ingreso => {
-                        const tipoComida = ingreso.tipoComida || 'Comida';
-                        const iconoComida = tipoComida === 'Desayuno' ? '🌅' : 
-                                           tipoComida === 'Comida' ? '🍽️' : '🌙';
+                    // Ordenar fechas (más recientes primero)
+                    const fechasOrdenadas = Object.keys(ingresosPorFecha).sort((a, b) => b.localeCompare(a));
+                    
+                    ingresosModalHTML = fechasOrdenadas.map(fecha => {
+                        const ingresosFecha = ingresosPorFecha[fecha];
+                        const fechaFormateadaIngreso = formatearFechaComedor(
+                            ingresosFecha[0]?.timestamp || null, 
+                            fecha
+                        );
+                        
+                        // Ordenar ingresos por tipo de comida
+                        const ordenComidas = { 'Desayuno': 1, 'Comida': 2, 'Cena': 3 };
+                        ingresosFecha.sort((a, b) => {
+                            const ordenA = ordenComidas[a.tipoComida] || 99;
+                            const ordenB = ordenComidas[b.tipoComida] || 99;
+                            return ordenA - ordenB;
+                        });
+                        
+                        const ingresosFechaHTML = ingresosFecha.map(ingreso => {
+                            const tipoComida = ingreso.tipoComida || 'Comida';
+                            const iconoComida = tipoComida === 'Desayuno' ? '🌅' : 
+                                               tipoComida === 'Comida' ? '🍽️' : '🌙';
+                            return `
+                                <div class="modal-info-item" style="margin-left: 20px; padding-top: 8px;">
+                                    <p class="modal-info-label">${iconoComida} ${tipoComida}</p>
+                                    <p class="modal-info-value">${ingreso.hora || 'N/A'}</p>
+                                </div>
+                            `;
+                        }).join('');
+                        
                         return `
-                            <div class="modal-info-item" style="margin-left: 20px; padding-top: 8px;">
-                                <p class="modal-info-label">${iconoComida} ${tipoComida}</p>
-                                <p class="modal-info-value">${ingreso.hora || 'N/A'}</p>
+                            <div class="modal-info-item" style="border-bottom: 1px solid var(--gris-borde); padding-bottom: 12px; margin-bottom: 12px;">
+                                <p class="modal-info-label" style="font-weight: 600; font-size: 14px; margin-bottom: 8px;">${fechaFormateadaIngreso}</p>
+                                ${ingresosFechaHTML}
                             </div>
                         `;
                     }).join('');
-                    
-                    return `
-                        <div class="modal-info-item" style="border-bottom: 1px solid var(--gris-borde); padding-bottom: 12px; margin-bottom: 12px;">
-                            <p class="modal-info-label" style="font-weight: 600; font-size: 14px; margin-bottom: 8px;">${fechaFormateadaIngreso}</p>
-                            ${ingresosFechaHTML}
+                } else {
+                    // Si no hay ingresos agrupados, mostrar el ingreso único (compatibilidad hacia atrás)
+                    const horaUnica = player.hora || player.horaEntrada || 'N/A';
+                    const tipoComidaUnica = determinarTipoComidaPorHora(horaUnica);
+                    const iconoUnico = tipoComidaUnica === 'Desayuno' ? '🌅' : 
+                                      tipoComidaUnica === 'Comida' ? '🍽️' : '🌙';
+                    ingresosModalHTML = `
+                        <div class="modal-info-item">
+                            <p class="modal-info-label">${iconoUnico} ${tipoComidaUnica}</p>
+                            <p class="modal-info-value">${horaUnica}</p>
                         </div>
                     `;
-                }).join('');
-            } else {
-                // Si no hay ingresos agrupados, mostrar el ingreso único (compatibilidad hacia atrás)
-                const horaUnica = player.hora || player.horaEntrada || 'N/A';
-                const tipoComidaUnica = determinarTipoComidaPorHora(horaUnica);
-                const iconoUnico = tipoComidaUnica === 'Desayuno' ? '🌅' : 
-                                  tipoComidaUnica === 'Comida' ? '🍽️' : '🌙';
-                ingresosModalHTML = `
-                    <div class="modal-info-item">
-                        <p class="modal-info-label">${iconoUnico} ${tipoComidaUnica}</p>
-                        <p class="modal-info-value">${horaUnica}</p>
+                }
+                
+                return `
+                    <div class="modal-section">
+                        <h4 class="modal-section-title">Información de Asistencia</h4>
+                        <div class="modal-info-grid">
+                            ${ingresosModalHTML}
+                        </div>
                     </div>
                 `;
             }
-            
-            const htmlResultado = `
-                <div class="modal-section">
-                    <h4 class="modal-section-title">Información de Asistencia</h4>
-                    <div class="modal-info-grid">
-                        ${ingresosModalHTML}
-                    </div>
-                </div>
-            `;
-            
-            console.log('✅ HTML generado para modal:', htmlResultado);
-            return htmlResultado;
         
         case 'casaclub':
-            const estadoCasaClubModal = player.horaSalida ? 'Completado' : 'Fuera de Casa Club';
-            const estadoColorCasaClubModal = player.horaSalida ? '#10B981' : '#FCD34D';
-            const estadoBgCasaClubModal = player.horaSalida ? '#D1FAE5' : '#FEF3C7';
+            // Determinar estado y colores
+            let estadoCasaClubModal = '';
+            let estadoColorCasaClubModal = '#F59E0B';
+            let estadoBgCasaClubModal = '#FEF3C7';
+            let estadoTextoModal = '';
+            
+            if (player.horaSalida) {
+                estadoCasaClubModal = 'Completado';
+                estadoColorCasaClubModal = '#10B981';
+                estadoBgCasaClubModal = '#D1FAE5';
+                estadoTextoModal = 'Registro completado';
+            } else {
+                estadoCasaClubModal = 'Fuera de Casa Club';
+                estadoColorCasaClubModal = '#F59E0B';
+                estadoBgCasaClubModal = '#FEF3C7';
+                estadoTextoModal = 'Pendiente de regreso';
+            }
+            
+            // Formatear hora de salida (entrada del jugador)
+            let horaSalidaFormateadaModal = 'N/A';
+            if (player.horaEntrada) {
+                if (typeof player.horaEntrada === 'string') {
+                    horaSalidaFormateadaModal = player.horaEntrada;
+                } else {
+                    horaSalidaFormateadaModal = new Date(player.horaEntrada).toLocaleTimeString('es-MX', { 
+                        hour: '2-digit', 
+                        minute: '2-digit' 
+                    });
+                }
+            } else if (player.timestamp) {
+                const fecha = player.timestamp?.toDate ? player.timestamp.toDate() : new Date(player.timestamp);
+                horaSalidaFormateadaModal = fecha.toLocaleTimeString('es-MX', { 
+                    hour: '2-digit', 
+                    minute: '2-digit' 
+                });
+            }
+            
+            // Formatear fecha
+            let fechaFormateadaModal = 'N/A';
+            if (player.fecha) {
+                fechaFormateadaModal = new Date(player.fecha).toLocaleDateString('es-MX', { 
+                    weekday: 'long',
+                    day: 'numeric', 
+                    month: 'long', 
+                    year: 'numeric' 
+                });
+                fechaFormateadaModal = fechaFormateadaModal.charAt(0).toUpperCase() + fechaFormateadaModal.slice(1);
+            } else if (player.timestamp) {
+                const fecha = player.timestamp?.toDate ? player.timestamp.toDate() : new Date(player.timestamp);
+                fechaFormateadaModal = fecha.toLocaleDateString('es-MX', { 
+                    weekday: 'long',
+                    day: 'numeric', 
+                    month: 'long', 
+                    year: 'numeric' 
+                });
+                fechaFormateadaModal = fechaFormateadaModal.charAt(0).toUpperCase() + fechaFormateadaModal.slice(1);
+            }
+            
+            // Calcular tiempo desde la salida
+            let tiempoDesdeSalidaModal = '';
+            if (player.timestamp || player.fecha || player.horaEntrada) {
+                let fechaSalida;
+                if (player.timestamp) {
+                    fechaSalida = player.timestamp?.toDate ? player.timestamp.toDate() : new Date(player.timestamp);
+                } else if (player.fecha && player.horaEntrada) {
+                    fechaSalida = new Date(`${player.fecha} ${player.horaEntrada}`);
+                } else {
+                    fechaSalida = new Date(player.fecha || player.horaEntrada);
+                }
+                
+                const ahora = new Date();
+                const diferenciaMs = ahora - fechaSalida;
+                const diferenciaHoras = Math.floor(diferenciaMs / (1000 * 60 * 60));
+                const diferenciaMinutos = Math.floor((diferenciaMs % (1000 * 60 * 60)) / (1000 * 60));
+                
+                if (diferenciaHoras > 0) {
+                    tiempoDesdeSalidaModal = `Hace ${diferenciaHoras} ${diferenciaHoras === 1 ? 'hora' : 'horas'}`;
+                } else if (diferenciaMinutos > 0) {
+                    tiempoDesdeSalidaModal = `Hace ${diferenciaMinutos} ${diferenciaMinutos === 1 ? 'minuto' : 'minutos'}`;
+                } else {
+                    tiempoDesdeSalidaModal = 'Ahora';
+                }
+            }
+            
+            // Texto del badge mejorado
+            let badgeTextoPrincipal = '';
+            let badgeTextoSecondary = '';
+            
+            if (player.horaSalida) {
+                badgeTextoPrincipal = 'Registro Completado';
+                badgeTextoSecondary = 'El jugador ya regresó';
+            } else {
+                badgeTextoPrincipal = 'Fuera de Casa Club';
+                if (tiempoDesdeSalidaModal) {
+                    badgeTextoSecondary = `Salida: ${tiempoDesdeSalidaModal}`;
+                } else {
+                    badgeTextoSecondary = 'Pendiente de regreso';
+                }
+            }
+            
             return `
                 <div class="modal-section">
-                    <h4>Información de Casa Club</h4>
-                    <div class="info-row">
-                        <span class="info-label">Destino:</span>
-                        <span class="info-value">${player.motivo || 'N/A'}</span>
+                    <div class="casaclub-modal-estado-badge" style="background: ${estadoBgCasaClubModal}; color: ${estadoColorCasaClubModal};">
+                        <div class="casaclub-modal-estado-icon">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                ${player.horaSalida ? `
+                                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                                    <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                                ` : `
+                                    <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                                    <polyline points="9 22 9 12 15 12 15 22"></polyline>
+                                `}
+                            </svg>
+                        </div>
+                        <div class="casaclub-modal-estado-content">
+                            <span class="casaclub-modal-estado-text">${badgeTextoPrincipal}</span>
+                            <span class="casaclub-modal-estado-status">${badgeTextoSecondary}</span>
+                        </div>
                     </div>
-                    <div class="info-row">
-                        <span class="info-label">Hora de Entrada:</span>
-                        <span class="info-value">Pendiente</span>
+                    <div class="casaclub-modal-info-list">
+                        <div class="casaclub-modal-info-item">
+                            <div class="casaclub-modal-info-icon casaclub-modal-info-icon-destination">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                                    <circle cx="12" cy="10" r="3"></circle>
+                                </svg>
+                            </div>
+                            <div class="casaclub-modal-info-content">
+                                <span class="casaclub-modal-info-label">Destino</span>
+                                <span class="casaclub-modal-info-value" title="${player.motivo || 'No especificado'}">${player.motivo || 'No especificado'}</span>
+                            </div>
+                        </div>
+                        <div class="casaclub-modal-info-item">
+                            <div class="casaclub-modal-info-icon casaclub-modal-info-icon-time">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <circle cx="12" cy="12" r="10"></circle>
+                                    <polyline points="12 6 12 12 16 14"></polyline>
+                                </svg>
+                            </div>
+                            <div class="casaclub-modal-info-content">
+                                <span class="casaclub-modal-info-label">Hora de Salida</span>
+                                <span class="casaclub-modal-info-value">${horaSalidaFormateadaModal}</span>
+                                ${tiempoDesdeSalidaModal ? `<span class="casaclub-modal-info-time">${tiempoDesdeSalidaModal}</span>` : ''}
+                            </div>
+                        </div>
+                        <div class="casaclub-modal-info-item">
+                            <div class="casaclub-modal-info-icon casaclub-modal-info-icon-date">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                                    <line x1="16" y1="2" x2="16" y2="6"></line>
+                                    <line x1="8" y1="2" x2="8" y2="6"></line>
+                                    <line x1="3" y1="10" x2="21" y2="10"></line>
+                                </svg>
+                            </div>
+                            <div class="casaclub-modal-info-content">
+                                <span class="casaclub-modal-info-label">Fecha</span>
+                                <span class="casaclub-modal-info-value">${fechaFormateadaModal}</span>
+                            </div>
+                        </div>
+                        ${player.celular ? `
+                        <div class="casaclub-modal-info-item">
+                            <div class="casaclub-modal-info-icon casaclub-modal-info-icon-phone">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
+                                </svg>
+                            </div>
+                            <div class="casaclub-modal-info-content">
+                                <span class="casaclub-modal-info-label">Contacto</span>
+                                <span class="casaclub-modal-info-value">${player.celular}</span>
+                            </div>
+                        </div>
+                        ` : ''}
                     </div>
-                    <div class="info-row">
-                        <span class="info-label">Hora de Salida:</span>
-                        <span class="info-value">${player.horaEntrada || 'N/A'}</span>
-                    </div>
-                    <div class="info-row">
-                        <span class="info-label">Estado:</span>
-                        <span class="status-badge" style="background: ${estadoBgCasaClubModal}; color: ${estadoColorCasaClubModal};">${estadoCasaClubModal}</span>
-                    </div>
-                    ${player.celular ? `
-                    <div class="info-row">
-                        <span class="info-label">Contacto:</span>
-                        <span class="info-value">${player.celular}</span>
-                    </div>
-                    ` : ''}
                 </div>
             `;
         default:
@@ -3131,6 +4348,16 @@ function configureModalActionButton(player, type) {
 // CERRAR MODAL
 // ========================================
 function closePlayerModal() {
+    // Si estamos en modo de edición, cancelar y volver a la vista de lectura
+    if (isEditMode && editingJugador) {
+        isEditMode = false;
+        const jugadorOriginal = editingJugador;
+        editingJugador = null;
+        openJugadorModal(jugadorOriginal);
+        return;
+    }
+
+    // Cerrar la modal normalmente
     playerModal.classList.remove('active');
     document.body.style.overflow = '';
     if (modalAvatarText) {
@@ -3138,7 +4365,15 @@ function closePlayerModal() {
     }
     modalBtnAction.style.display = '';
     modalBtnAction.onclick = null;
+    if (modalBtnEdit) {
+        modalBtnEdit.style.display = 'none';
+    }
+    if (modalBtnClose) {
+        modalBtnClose.textContent = 'Cerrar';
+    }
     currentJugador = null;
+    editingJugador = null;
+    isEditMode = false;
 }
 
 // ========================================
@@ -3557,6 +4792,20 @@ function showPageContent(page) {
                     updateBalanceUI();
                 }
             }
+        } else if (page === 'pagos') {
+            // Mostrar sección de Pagos
+            const sectionPagos = document.getElementById('section-pagos');
+            if (sectionPagos) {
+                sectionPagos.style.display = 'block';
+                console.log('📄 Navegando a: pagos');
+                if (!sectionPagos.dataset.loaded) {
+                    console.log('🔄 Cargando datos de Pagos...');
+                    loadAllPagos();
+                    sectionPagos.dataset.loaded = 'true';
+                } else {
+                    updatePagosUI();
+                }
+            }
         }
     }
 }
@@ -3606,6 +4855,10 @@ function navigateToPage(page) {
         mensualidades: {
             title: 'Mensualidades',
             subtitle: 'Control de pagos mensuales'
+        },
+        pagos: {
+            title: 'Pagos',
+            subtitle: 'Registro completo de todos los pagos'
         },
         altas: {
             title: 'Altas',
@@ -3694,16 +4947,21 @@ let comedorData = {
 };
 
 async function loadComedor() {
-    await initFirebase();
-    await initFirebaseComedor();
-
-    if (!db || !dbComedor) {
-        console.error('❌ Error: No se pudo inicializar Firebase');
-        return;
-    }
-
     try {
-        // Cargar jugadores registrados
+        await initFirebase();
+        await initFirebaseComedor();
+
+        if (!db || !dbComedor) {
+            console.error('❌ Error: No se pudo inicializar Firebase');
+            console.error('db:', !!db, 'dbComedor:', !!dbComedor);
+            throw new Error('Firebase no está inicializado correctamente');
+        }
+
+        // Importar funciones de Firestore (las funciones pueden usarse con cualquier instancia de Firestore)
+        const firestore = await import('https://www.gstatic.com/firebasejs/12.5.0/firebase-firestore.js');
+        const { collection, getDocs, query, orderBy, limit: limitFn } = firestore;
+        
+        // Cargar jugadores registrados desde la base de datos principal
         const jugadoresRef = collection(db, 'jugadores');
         const jugadoresSnapshot = await getDocs(jugadoresRef);
         
@@ -3733,15 +4991,20 @@ async function loadComedor() {
         let comedorSnapshot;
         
         try {
-            const { query, orderBy, limit: limitFn } = await import('https://www.gstatic.com/firebasejs/12.5.0/firebase-firestore.js');
+            // Intentar ordenar por timestamp
             const comedorQuery = query(comedorRef, orderBy('timestamp', 'desc'), limitFn(limit));
             comedorSnapshot = await getDocs(comedorQuery);
         } catch (orderError) {
             // Si falla el ordenamiento (puede ser que no haya índice), cargar sin ordenar
             console.warn('⚠️ No se pudo ordenar por timestamp, cargando sin orden:', orderError.message);
-            const { query, limit: limitFn } = await import('https://www.gstatic.com/firebasejs/12.5.0/firebase-firestore.js');
-            const comedorQuery = query(comedorRef, limitFn(limit));
-            comedorSnapshot = await getDocs(comedorQuery);
+            try {
+                const comedorQuery = query(comedorRef, limitFn(limit));
+                comedorSnapshot = await getDocs(comedorQuery);
+            } catch (limitError) {
+                // Si también falla con limit, cargar todos los registros
+                console.warn('⚠️ No se pudo aplicar límite, cargando todos los registros:', limitError.message);
+                comedorSnapshot = await getDocs(comedorRef);
+            }
         }
         
         const todosLosRegistros = [];
@@ -3954,20 +5217,51 @@ async function loadComedor() {
         console.error('❌ Error al cargar datos del comedor:', error);
         console.error('Detalles del error:', {
             message: error.message,
+            name: error.name,
             stack: error.stack,
             db: !!db,
             dbComedor: !!dbComedor
         });
         
-        // Mostrar mensaje de error en la UI
+        // Mostrar mensaje de error más descriptivo en la UI
         const carouselNoPasaron = document.getElementById('carousel-comedor-no-pasaron');
         const carouselPasaron = document.getElementById('carousel-comedor-pasaron');
+        const tableBody = document.getElementById('comedorTableBody');
+        
+        const errorMessage = error.message || 'Error desconocido';
+        const errorHTML = `
+            <div style="text-align: center; padding: 40px; color: var(--rojo);">
+                <p style="font-weight: 600; margin-bottom: 10px;">Error al cargar datos del comedor</p>
+                <p style="font-size: 0.9rem; color: var(--gris-label); margin-bottom: 5px;">${errorMessage}</p>
+                <p style="font-size: 0.85rem; color: var(--gris-label);">Verifica la consola para más detalles.</p>
+            </div>
+        `;
+        
         if (carouselNoPasaron) {
-            carouselNoPasaron.innerHTML = '<p style="text-align: center; color: var(--rojo); padding: 40px;">Error al cargar datos del comedor. Verifica la consola para más detalles.</p>';
+            carouselNoPasaron.innerHTML = errorHTML;
         }
         if (carouselPasaron) {
-            carouselPasaron.innerHTML = '<p style="text-align: center; color: var(--rojo); padding: 40px;">Error al cargar datos del comedor. Verifica la consola para más detalles.</p>';
+            carouselPasaron.innerHTML = errorHTML;
         }
+        if (tableBody) {
+            tableBody.innerHTML = `
+                <tr>
+                    <td colspan="4" style="text-align: center; padding: 40px; color: var(--rojo);">
+                        <p style="font-weight: 600; margin-bottom: 10px;">Error al cargar datos</p>
+                        <p style="font-size: 0.9rem; color: var(--gris-label);">${errorMessage}</p>
+                    </td>
+                </tr>
+            `;
+        }
+        
+        // Inicializar datos vacíos para evitar errores posteriores
+        comedorData = {
+            pasaron: [],
+            todosLosRegistros: [],
+            registrosAgrupados: [],
+            noPasaron: [],
+            pasaronPorCategoria: {}
+        };
     }
 }
 
@@ -4239,6 +5533,230 @@ async function loadMensualidades() {
     }
 }
 
+// ========================================
+// FUNCIONES DE PAGOS (TODOS LOS TIPOS)
+// ========================================
+let allPagosData = [];
+let currentPagosBusqueda = '';
+let currentPagosTipo = 'all';
+let currentPagosConcepto = 'all';
+let currentPagosMes = 'all';
+let currentPagosCategoria = 'all';
+
+async function loadAllPagos() {
+    await initFirebase();
+    await initFirebaseMensualidades();
+
+    if (!db || !dbMensualidades) {
+        console.error('❌ Error: No se pudo inicializar Firebase');
+        return;
+    }
+
+    try {
+        const { collection, getDocs } = await import('https://www.gstatic.com/firebasejs/12.5.0/firebase-firestore.js');
+        
+        // Cargar todos los pagos de la base de datos de mensualidades
+        const mensualidadesRef = collection(dbMensualidades, 'mensualidadesRegistros');
+        const mensualidadesSnapshot = await getDocs(mensualidadesRef);
+        
+        const todosLosPagos = [];
+        
+        mensualidadesSnapshot.forEach((doc) => {
+            const data = doc.data();
+            todosLosPagos.push({
+                id: doc.id,
+                nombreCompleto: data.nombreCompleto || 'Sin nombre',
+                categoria: data.categoria || 'Sin categoría',
+                mes: data.mes || 'N/A',
+                monto: data.monto || 0,
+                fechaPago: data.fechaPago || null,
+                tipoPago: data.tipoPago || 'N/A',
+                conceptoPago: data.conceptoPago || data.conceptoPagoOriginal || 'N/A',
+                recibio: data.recibio || 'N/A',
+                folioComprobante: data.folioComprobante || 'N/A',
+                timestamp: data.timestamp || null,
+                fechaCreacion: data.fechaCreacion || null
+            });
+        });
+
+        // Ordenar por fecha de pago (más reciente primero)
+        todosLosPagos.sort((a, b) => {
+            const fechaA = a.fechaPago ? new Date(a.fechaPago).getTime() : 0;
+            const fechaB = b.fechaPago ? new Date(b.fechaPago).getTime() : 0;
+            return fechaB - fechaA;
+        });
+
+        allPagosData = todosLosPagos;
+
+        console.log('📊 Pagos cargados:', {
+            totalPagos: todosLosPagos.length,
+            totalMonto: todosLosPagos.reduce((sum, p) => sum + (p.monto || 0), 0),
+            jugadoresUnicos: new Set(todosLosPagos.map(p => p.nombreCompleto)).size
+        });
+
+        updatePagosUI();
+        setupPagosFilters();
+
+    } catch (error) {
+        console.error('❌ Error al cargar datos de Pagos:', error);
+        const tbody = document.getElementById('pagosTableBody');
+        if (tbody) {
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="9" style="text-align: center; padding: 40px; color: var(--gris-label);">
+                        <p>Error al cargar los pagos. Por favor, intenta de nuevo.</p>
+                    </td>
+                </tr>
+            `;
+        }
+    }
+}
+
+function setupPagosFilters() {
+    const searchInput = document.getElementById('pagosSearchInput');
+    const tipoFilter = document.getElementById('pagosTipoFilter');
+    const conceptoFilter = document.getElementById('pagosConceptoFilter');
+    const mesFilter = document.getElementById('pagosMesFilter');
+    const categoriaFilter = document.getElementById('pagosCategoriaFilter');
+
+    if (searchInput) {
+        searchInput.addEventListener('input', (e) => {
+            currentPagosBusqueda = e.target.value.toLowerCase().trim();
+            updatePagosUI();
+        });
+    }
+
+    if (tipoFilter) {
+        tipoFilter.addEventListener('change', (e) => {
+            currentPagosTipo = e.target.value;
+            updatePagosUI();
+        });
+    }
+
+    if (conceptoFilter) {
+        conceptoFilter.addEventListener('change', (e) => {
+            currentPagosConcepto = e.target.value;
+            updatePagosUI();
+        });
+    }
+
+    if (mesFilter) {
+        mesFilter.addEventListener('change', (e) => {
+            currentPagosMes = e.target.value;
+            updatePagosUI();
+        });
+    }
+
+    if (categoriaFilter) {
+        categoriaFilter.addEventListener('change', (e) => {
+            currentPagosCategoria = e.target.value;
+            updatePagosUI();
+        });
+    }
+}
+
+function updatePagosUI() {
+    let pagosFiltrados = [...allPagosData];
+
+    // Aplicar filtros
+    if (currentPagosBusqueda) {
+        pagosFiltrados = pagosFiltrados.filter(pago => 
+            pago.nombreCompleto.toLowerCase().includes(currentPagosBusqueda)
+        );
+    }
+
+    if (currentPagosTipo !== 'all') {
+        pagosFiltrados = pagosFiltrados.filter(pago => 
+            (pago.tipoPago || '').toLowerCase().includes(currentPagosTipo.toLowerCase())
+        );
+    }
+
+    if (currentPagosConcepto !== 'all') {
+        pagosFiltrados = pagosFiltrados.filter(pago => 
+            (pago.conceptoPago || '').toLowerCase().includes(currentPagosConcepto.toLowerCase())
+        );
+    }
+
+    if (currentPagosMes !== 'all') {
+        pagosFiltrados = pagosFiltrados.filter(pago => 
+            (pago.mes || '') === currentPagosMes
+        );
+    }
+
+    if (currentPagosCategoria !== 'all') {
+        pagosFiltrados = pagosFiltrados.filter(pago => 
+            (pago.categoria || '') === currentPagosCategoria
+        );
+    }
+
+    // Actualizar resumen
+    const totalCount = pagosFiltrados.length;
+    const totalMonto = pagosFiltrados.reduce((sum, p) => sum + (p.monto || 0), 0);
+    const jugadoresUnicos = new Set(pagosFiltrados.map(p => p.nombreCompleto)).size;
+
+    const totalCountEl = document.getElementById('pagosTotalCount');
+    const totalMontoEl = document.getElementById('pagosTotalMonto');
+    const jugadoresUnicosEl = document.getElementById('pagosJugadoresUnicos');
+    const tableSubtitleEl = document.getElementById('pagosTableSubtitle');
+
+    if (totalCountEl) {
+        totalCountEl.textContent = totalCount;
+    }
+    if (totalMontoEl) {
+        totalMontoEl.textContent = `$${totalMonto.toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    }
+    if (jugadoresUnicosEl) {
+        jugadoresUnicosEl.textContent = jugadoresUnicos;
+    }
+    if (tableSubtitleEl) {
+        tableSubtitleEl.textContent = `Mostrando ${totalCount} de ${allPagosData.length} pagos registrados`;
+    }
+
+    // Renderizar tabla
+    renderPagosTable(pagosFiltrados);
+}
+
+function renderPagosTable(pagos) {
+    const tbody = document.getElementById('pagosTableBody');
+    if (!tbody) return;
+
+    if (pagos.length === 0) {
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="9" style="text-align: center; padding: 40px; color: var(--gris-label);">
+                    <p>No se encontraron pagos con los filtros seleccionados.</p>
+                </td>
+            </tr>
+        `;
+        return;
+    }
+
+    tbody.innerHTML = pagos.map(pago => {
+        const fechaPago = pago.fechaPago ? new Date(pago.fechaPago).toLocaleDateString('es-MX', { 
+            day: '2-digit', 
+            month: '2-digit', 
+            year: 'numeric' 
+        }) : 'N/A';
+        
+        const esEfectivo = (pago.tipoPago || '').toLowerCase().includes('efectivo') || (pago.tipoPago || '').toLowerCase() === 'efectivo';
+        const recibio = pago.recibio && pago.recibio !== 'N/A' ? pago.recibio : '—';
+        
+        return `
+            <tr>
+                <td>${fechaPago}</td>
+                <td style="font-weight: 600;">${pago.nombreCompleto}</td>
+                <td><span class="pago-badge-categoria">${pago.categoria}</span></td>
+                <td>${pago.mes || 'N/A'}</td>
+                <td><span class="pago-badge-concepto">${pago.conceptoPago}</span></td>
+                <td style="font-weight: 700; color: var(--naranja);">$${(pago.monto || 0).toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+                <td><span class="pago-badge-tipo">${pago.tipoPago}</span></td>
+                <td>${esEfectivo ? (recibio !== '—' ? `<span class="pago-badge-recibio">${recibio}</span>` : '<span style="color: var(--gris-label); font-style: italic;">N/A</span>') : '<span style="color: var(--gris-label); font-style: italic;">—</span>'}</td>
+                <td>${pago.folioComprobante !== 'N/A' ? pago.folioComprobante : '<span style="color: var(--gris-label); font-style: italic;">—</span>'}</td>
+            </tr>
+        `;
+    }).join('');
+}
+
 function updateMensualidadesUI() {
     console.log('🔄 Actualizando UI de Mensualidades...');
     applyMensualidadesFilters();
@@ -4267,8 +5785,17 @@ function applyMensualidadesFilters() {
             carouselAdeudos.innerHTML = '<p style="text-align: center; color: var(--gris-label); padding: 40px;">No se encontraron jugadores con adeudos con los filtros aplicados</p>';
             totalAdeudos.textContent = '0 jugadores';
         } else {
-            loadCarousel('adeudos', adeudosFiltrados);
+            // Usar 'adeudos-section' para el carrusel de la sección Mensualidades
+            loadCarousel('adeudos-section', adeudosFiltrados);
             totalAdeudos.textContent = `${adeudosFiltrados.length} ${adeudosFiltrados.length === 1 ? 'jugador' : 'jugadores'}`;
+            
+            // Asegurar que los botones del carrusel se inicialicen después de cargar
+            setTimeout(() => {
+                initCarouselButtons();
+                if (carouselIds['adeudos-section']) {
+                    initCarousel('adeudos-section');
+                }
+            }, 150);
         }
     }
     
@@ -4513,6 +6040,14 @@ function applyComedorFilters() {
             loadCarousel('comedor-no-pasaron', jugadoresNoPasaronFiltrados);
             // Actualizar el contador manualmente ya que loadCarousel no encontrará el elemento con ese ID
             totalNoPasaron.textContent = `${jugadoresNoPasaronFiltrados.length} ${jugadoresNoPasaronFiltrados.length === 1 ? 'jugador' : 'jugadores'}`;
+            
+            // Asegurar que los botones del carrusel se inicialicen después de cargar
+            setTimeout(() => {
+                initCarouselButtons();
+                if (carouselIds['comedor-no-pasaron']) {
+                    initCarousel('comedor-no-pasaron');
+                }
+            }, 150);
         }
     }
 }
@@ -4526,7 +6061,8 @@ function updateComedorPasaronUI(categoria) {
 // ELIMINAR REGISTRO DEL COMEDOR
 // ========================================
 async function deleteComedorRegistro(registroId) {
-    if (!confirm('¿Estás seguro de eliminar este registro del comedor?')) {
+    const confirmado = await mostrarConfirm('¿Estás seguro de eliminar este registro del comedor?', 'Eliminar Registro');
+    if (!confirmado) {
         return;
     }
     
@@ -4560,6 +6096,7 @@ async function deleteComedorRegistro(registroId) {
 // ========================================
 function createJugadorCard(jugador) {
     const nombreCompleto = jugador.nombreCompleto || `${jugador.nombres || ''} ${jugador.apellidoPaterno || ''} ${jugador.apellidoMaterno || ''}`.trim();
+    const nombreFormateado = formatearNombreDosLineas(jugador);
     const iniciales = nombreCompleto.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
     const categoria = jugador.categoria || 'Sin categoría';
     const posicion = jugador.posicion || 'Sin posición';
@@ -4567,40 +6104,66 @@ function createJugadorCard(jugador) {
     const telefono = jugador.telefono || 'Sin teléfono';
     const fotoUrl = jugador.fotoUrl || null;
     
+    // Formatear teléfono para mostrar
+    const telefonoFormateado = telefono && telefono !== 'Sin teléfono' && telefono.length === 10 
+        ? `${telefono.substring(0, 2)} ${telefono.substring(2, 6)} ${telefono.substring(6, 10)}` 
+        : telefono;
+    
     return `
         <div class="jugador-card" data-jugador-id="${jugador.id}">
             <div class="jugador-card-header">
-                <div class="jugador-card-avatar">
-                    ${fotoUrl ? `<img src="${fotoUrl}" alt="${nombreCompleto}">` : `<span>${iniciales}</span>`}
+                <div class="jugador-card-avatar-wrapper">
+                    <div class="jugador-card-avatar">
+                        ${fotoUrl ? `<img src="${fotoUrl}" alt="${nombreCompleto}" onerror="this.style.display='none'; this.parentElement.querySelector('span').style.display='flex';">
+                        <span style="display: none;">${iniciales}</span>` : `<span>${iniciales}</span>`}
+                    </div>
+                    ${jugador.activo !== false ? `<div class="jugador-card-avatar-badge"></div>` : ''}
                 </div>
                 <div class="jugador-card-info">
-                    <h3 class="jugador-card-nombre">${nombreCompleto}</h3>
-                    <p class="jugador-card-categoria">${categoria}</p>
+                    <h3 class="jugador-card-nombre">
+                        <span class="jugador-card-nombre-principal">${nombreFormateado.nombres}</span>
+                        ${nombreFormateado.apellidos ? `<span class="jugador-card-nombre-apellidos">${nombreFormateado.apellidos}</span>` : ''}
+                    </h3>
+                    <div class="jugador-card-categoria-badge">${categoria}</div>
                 </div>
             </div>
-            <div class="jugador-card-details">
-                <div class="jugador-card-detail-item">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <circle cx="12" cy="12" r="10"></circle>
-                        <path d="M8 6 L8 20 C8 20.5 8.5 21 9 21 H15 C15.5 21 16 20.5 16 20 V6"/>
-                    </svg>
-                    <span class="jugador-card-detail-label">Posición:</span>
-                    <span class="jugador-card-detail-value">${posicion}</span>
-                </div>
-                <div class="jugador-card-detail-item">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <circle cx="12" cy="12" r="10"></circle>
-                        <polyline points="12 6 12 12 16 14"></polyline>
-                    </svg>
-                    <span class="jugador-card-detail-label">Edad:</span>
-                    <span class="jugador-card-detail-value">${edad}</span>
-                </div>
-                <div class="jugador-card-detail-item">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
-                    </svg>
-                    <span class="jugador-card-detail-label">Teléfono:</span>
-                    <span class="jugador-card-detail-value">${telefono}</span>
+            <div class="jugador-card-body">
+                <div class="jugador-card-details">
+                    <div class="jugador-card-detail-item">
+                        <div class="jugador-card-detail-icon">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M12 2L2 7l10 5 10-5-10-5z"></path>
+                                <path d="M2 17l10 5 10-5M2 12l10 5 10-5"></path>
+                            </svg>
+                        </div>
+                        <div class="jugador-card-detail-content">
+                            <span class="jugador-card-detail-label">Posición</span>
+                            <span class="jugador-card-detail-value">${posicion}</span>
+                        </div>
+                    </div>
+                    <div class="jugador-card-detail-item">
+                        <div class="jugador-card-detail-icon">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <polyline points="12 6 12 12 16 14"></polyline>
+                            </svg>
+                        </div>
+                        <div class="jugador-card-detail-content">
+                            <span class="jugador-card-detail-label">Edad</span>
+                            <span class="jugador-card-detail-value">${edad}</span>
+                        </div>
+                    </div>
+                    <div class="jugador-card-detail-item">
+                        <div class="jugador-card-detail-icon">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
+                            </svg>
+                        </div>
+                        <div class="jugador-card-detail-content">
+                            <span class="jugador-card-detail-label">Teléfono</span>
+                            <span class="jugador-card-detail-value">${telefonoFormateado}</span>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -4612,6 +6175,9 @@ function createJugadorCard(jugador) {
 // ========================================
 function openJugadorModal(jugador) {
     currentJugador = { ...jugador };
+    // Asegurarse de que no estamos en modo de edición
+    isEditMode = false;
+    editingJugador = null;
 
     const nombreCompleto = jugador.nombreCompleto || `${jugador.nombres || ''} ${jugador.apellidoPaterno || ''} ${jugador.apellidoMaterno || ''}`.trim();
     const iniciales = nombreCompleto.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
@@ -4620,7 +6186,12 @@ function openJugadorModal(jugador) {
     modalPlayerCategory.textContent = jugador.categoria || 'Sin categoría';
     modalAvatarText.textContent = iniciales;
 
+    // Mantener el estilo del avatar (color de fondo) incluso con foto
     modalAvatar.className = 'modal-avatar';
+    
+    // El color de fondo se mantiene por defecto en CSS (var(--naranja))
+    // Esto asegura que el avatar tenga un color de fondo incluso con foto
+    
     const existingImg = modalAvatar.querySelector('img');
     if (existingImg) {
         existingImg.remove();
@@ -4630,8 +6201,14 @@ function openJugadorModal(jugador) {
         const img = document.createElement('img');
         img.src = jugador.fotoUrl;
         img.alt = nombreCompleto;
+        img.onerror = function() {
+            // Si la imagen falla al cargar, mostrar iniciales
+            this.style.display = 'none';
+            modalAvatarText.style.display = 'flex';
+        };
         modalAvatar.appendChild(img);
         modalAvatarText.style.display = 'none';
+        // El color de fondo se mantiene en CSS como respaldo visual
     } else {
         modalAvatarText.style.display = 'flex';
     }
@@ -4696,6 +6273,14 @@ function openJugadorModal(jugador) {
         </div>
     `;
 
+    // Configurar botón de editar (solo para la sección de Jugadores)
+    if (modalBtnEdit) {
+        modalBtnEdit.style.display = 'flex';
+        modalBtnEdit.onclick = () => {
+            openEditJugadorModal(jugador);
+        };
+    }
+
     // Configurar botones del modal
     if (modalBtnAction) {
         modalBtnAction.style.display = 'flex';
@@ -4708,7 +6293,8 @@ function openJugadorModal(jugador) {
         `;
         modalBtnAction.className = 'btn btn-danger';
         modalBtnAction.onclick = async () => {
-            if (confirm(`¿Estás seguro de que deseas dar de baja a ${jugador.nombreCompleto || 'este jugador'}?`)) {
+            const confirmado = await mostrarConfirm(`¿Estás seguro de que deseas dar de baja a ${jugador.nombreCompleto || 'este jugador'}?`, 'Dar de Baja');
+            if (confirmado) {
                 try {
                     await darDeBajaJugador(jugador.id, jugador);
                     closePlayerModal();
@@ -4721,6 +6307,8 @@ function openJugadorModal(jugador) {
     if (modalBtnClose) {
         modalBtnClose.style.display = 'block';
         modalBtnClose.textContent = 'Cerrar';
+        // Asegurarse de que el botón de cerrar funcione correctamente
+        // El event listener ya está configurado en setupEventListeners
     }
 
     playerModal.classList.add('active');
@@ -4728,10 +6316,229 @@ function openJugadorModal(jugador) {
 }
 
 // ========================================
+// ABRIR MODAL DE EDICIÓN DE JUGADOR
+// ========================================
+let isEditMode = false;
+let editingJugador = null;
+
+function openEditJugadorModal(jugador) {
+    // Guardar una copia del jugador original antes de editar
+    const jugadorOriginal = { ...jugador };
+    editingJugador = jugadorOriginal;
+    isEditMode = true;
+
+    const nombreCompleto = jugador.nombreCompleto || `${jugador.nombres || ''} ${jugador.apellidoPaterno || ''} ${jugador.apellidoMaterno || ''}`.trim();
+
+    // Extraer componentes del nombre
+    const nombres = jugador.nombres || '';
+    const apellidoPaterno = jugador.apellidoPaterno || '';
+    const apellidoMaterno = jugador.apellidoMaterno || '';
+
+    // Cambiar el contenido del body a modo de edición
+    modalBody.innerHTML = `
+        <div class="modal-section">
+            <h4 class="modal-section-title">Información Personal</h4>
+            <div class="modal-info-grid">
+                <div class="modal-info-item">
+                    <p class="modal-info-label">Nombres</p>
+                    <input type="text" id="editNombres" class="modal-edit-input" value="${nombres}" placeholder="Nombre(s)">
+                </div>
+                <div class="modal-info-item">
+                    <p class="modal-info-label">Apellido Paterno</p>
+                    <input type="text" id="editApellidoPaterno" class="modal-edit-input" value="${apellidoPaterno}" placeholder="Apellido paterno">
+                </div>
+                <div class="modal-info-item">
+                    <p class="modal-info-label">Apellido Materno</p>
+                    <input type="text" id="editApellidoMaterno" class="modal-edit-input" value="${apellidoMaterno}" placeholder="Apellido materno">
+                </div>
+                <div class="modal-info-item">
+                    <p class="modal-info-label">Teléfono</p>
+                    <input type="tel" id="editTelefono" class="modal-edit-input" value="${jugador.telefono || ''}" placeholder="10 dígitos" maxlength="10" pattern="[0-9]{10}">
+                </div>
+                <div class="modal-info-item">
+                    <p class="modal-info-label">Lugar de Nacimiento</p>
+                    <input type="text" id="editLugarNacimiento" class="modal-edit-input" value="${jugador.lugarNacimiento || ''}" placeholder="Ciudad, Estado">
+                </div>
+            </div>
+        </div>
+        <div class="modal-section">
+            <h4 class="modal-section-title">Información Deportiva</h4>
+            <div class="modal-info-grid">
+                <div class="modal-info-item">
+                    <p class="modal-info-label">Categoría</p>
+                    <select id="editCategoria" class="modal-edit-select">
+                        <option value="Sub-14" ${jugador.categoria === 'Sub-14' ? 'selected' : ''}>Sub-14</option>
+                        <option value="Sub-16" ${jugador.categoria === 'Sub-16' ? 'selected' : ''}>Sub-16</option>
+                        <option value="Sub-18" ${jugador.categoria === 'Sub-18' ? 'selected' : ''}>Sub-18</option>
+                        <option value="Soles TDP" ${jugador.categoria === 'Soles TDP' ? 'selected' : ''}>Soles TDP</option>
+                        <option value="Alebrijes TDP" ${jugador.categoria === 'Alebrijes TDP' ? 'selected' : ''}>Alebrijes TDP</option>
+                    </select>
+                </div>
+                <div class="modal-info-item">
+                    <p class="modal-info-label">Posición</p>
+                    <input type="text" id="editPosicion" class="modal-edit-input" value="${jugador.posicion || ''}" placeholder="Ej: Delantero, Medio, Defensa">
+                </div>
+            </div>
+        </div>
+        <div class="modal-section">
+            <h4 class="modal-section-title">Información Administrativa</h4>
+            <div class="modal-info-grid">
+                ${jugador.mensualidad ? `
+                <div class="modal-info-item">
+                    <p class="modal-info-label">Mensualidad</p>
+                    <input type="number" id="editMensualidad" class="modal-edit-input" value="${jugador.mensualidad.monto || 0}" step="0.01" min="0" placeholder="$0.00">
+                </div>
+                <div class="modal-info-item">
+                    <p class="modal-info-label">Día de Pago</p>
+                    <select id="editDiaPago" class="modal-edit-select">
+                        <option value="1" ${jugador.mensualidad.diaPago === 1 || jugador.mensualidad.diaPago === '1' ? 'selected' : ''}>Día 1 de cada mes</option>
+                        <option value="15" ${jugador.mensualidad.diaPago === 15 || jugador.mensualidad.diaPago === '15' ? 'selected' : ''}>Día 15 de cada mes</option>
+                    </select>
+                </div>
+                ` : ''}
+            </div>
+        </div>
+    `;
+
+    // Ocultar botón de editar y mostrar botones de guardar/cancelar
+    if (modalBtnEdit) {
+        modalBtnEdit.style.display = 'none';
+    }
+
+    // Modificar botones del footer
+    if (modalBtnAction) {
+        modalBtnAction.style.display = 'flex';
+        modalBtnAction.innerHTML = `
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
+                <polyline points="17 21 17 13 7 13 7 21"></polyline>
+                <polyline points="7 3 7 8 15 8"></polyline>
+            </svg>
+            <span>Guardar Cambios</span>
+        `;
+        modalBtnAction.className = 'btn btn-success';
+        modalBtnAction.onclick = async () => {
+            await saveJugadorChanges(jugador.id);
+        };
+    }
+
+    if (modalBtnClose) {
+        modalBtnClose.textContent = 'Cancelar';
+    }
+}
+
+// ========================================
+// GUARDAR CAMBIOS DE JUGADOR
+// ========================================
+async function saveJugadorChanges(jugadorId) {
+    await initFirebase();
+
+    if (!db) {
+        mostrarNotificacion('Error al conectar con la base de datos', 'error');
+        return;
+    }
+
+    try {
+        const nombres = document.getElementById('editNombres')?.value.trim() || '';
+        const apellidoPaterno = document.getElementById('editApellidoPaterno')?.value.trim() || '';
+        const apellidoMaterno = document.getElementById('editApellidoMaterno')?.value.trim() || '';
+        const telefono = document.getElementById('editTelefono')?.value || '';
+        const lugarNacimiento = document.getElementById('editLugarNacimiento')?.value || '';
+        const categoria = document.getElementById('editCategoria')?.value || '';
+        const posicion = document.getElementById('editPosicion')?.value || '';
+        const mensualidad = document.getElementById('editMensualidad')?.value ? parseFloat(document.getElementById('editMensualidad').value) : null;
+        const diaPago = document.getElementById('editDiaPago')?.value ? parseInt(document.getElementById('editDiaPago').value) : null;
+
+        // Validar que al menos haya un nombre
+        if (!nombres && !apellidoPaterno && !apellidoMaterno) {
+            mostrarNotificacion('Debe ingresar al menos un nombre o apellido', 'error');
+            return;
+        }
+
+        // Validar teléfono si se proporciona
+        if (telefono && !/^\d{10}$/.test(telefono)) {
+            mostrarNotificacion('El teléfono debe tener 10 dígitos', 'error');
+            return;
+        }
+
+        const { doc, updateDoc } = await import('https://www.gstatic.com/firebasejs/12.5.0/firebase-firestore.js');
+        const jugadorRef = doc(db, 'jugadores', jugadorId);
+
+        const updateData = {};
+        
+        // Actualizar nombre completo basado en los componentes
+        const nombreCompleto = `${nombres} ${apellidoPaterno} ${apellidoMaterno}`.trim();
+        if (nombreCompleto) {
+            updateData.nombreCompleto = nombreCompleto;
+        }
+        
+        // Actualizar componentes del nombre si existen
+        if (nombres !== (editingJugador.nombres || '')) updateData.nombres = nombres;
+        if (apellidoPaterno !== (editingJugador.apellidoPaterno || '')) updateData.apellidoPaterno = apellidoPaterno;
+        if (apellidoMaterno !== (editingJugador.apellidoMaterno || '')) updateData.apellidoMaterno = apellidoMaterno;
+        
+        if (telefono !== (editingJugador.telefono || '')) updateData.telefono = telefono;
+        if (lugarNacimiento !== (editingJugador.lugarNacimiento || '')) updateData.lugarNacimiento = lugarNacimiento;
+        if (categoria !== (editingJugador.categoria || '')) updateData.categoria = categoria;
+        if (posicion !== (editingJugador.posicion || '')) updateData.posicion = posicion;
+
+        // Actualizar mensualidad si existe
+        if (mensualidad !== null && editingJugador.mensualidad) {
+            if (!updateData.mensualidad) updateData.mensualidad = { ...editingJugador.mensualidad };
+            updateData.mensualidad.monto = mensualidad;
+            if (diaPago !== null) {
+                updateData.mensualidad.diaPago = diaPago;
+                updateData.mensualidad.diaPagoTexto = diaPago === 1 ? 'Día 1 de cada mes' : 'Día 15 de cada mes';
+            }
+        }
+
+        if (Object.keys(updateData).length === 0) {
+            mostrarNotificacion('No hay cambios para guardar', 'info');
+            openJugadorModal(editingJugador);
+            return;
+        }
+
+        await updateDoc(jugadorRef, updateData);
+
+        console.log('✅ Jugador actualizado:', jugadorId);
+        mostrarNotificacion('Cambios guardados exitosamente', 'success');
+
+        // Actualizar datos locales
+        const updatedJugador = { ...editingJugador, ...updateData };
+        // Asegurarse de que nombreCompleto esté actualizado
+        if (updateData.nombreCompleto) {
+            updatedJugador.nombreCompleto = updateData.nombreCompleto;
+        }
+        updateLocalJugadorData(updatedJugador);
+
+        // Recargar jugadores
+        const sectionJugadores = document.getElementById('section-jugadores');
+        if (sectionJugadores && sectionJugadores.style.display !== 'none') {
+            sectionJugadores.dataset.loaded = 'false';
+            loadJugadores();
+        }
+
+        // Resetear estado de edición
+        isEditMode = false;
+        editingJugador = null;
+
+        // Volver a la vista de lectura con los datos actualizados
+        setTimeout(() => {
+            openJugadorModal(updatedJugador);
+        }, 500);
+
+    } catch (error) {
+        console.error('❌ Error al guardar cambios:', error);
+        mostrarNotificacion('Error al guardar los cambios', 'error');
+    }
+}
+
+// ========================================
 // CERRAR SESIÓN
 // ========================================
-function handleLogout() {
-    if (confirm('¿Estás seguro que deseas cerrar sesión?')) {
+async function handleLogout() {
+    const confirmado = await mostrarConfirm('¿Estás seguro que deseas cerrar sesión?', 'Cerrar Sesión');
+    if (confirmado) {
         localStorage.removeItem('teotihuacan_session');
         window.location.href = 'index.html';
         console.log('👋 Sesión cerrada');
@@ -4800,6 +6607,425 @@ function mostrarNotificacion(mensaje, tipo = 'success') {
         notif.style.animation = 'slideOut 0.3s ease';
         setTimeout(() => notif.remove(), 300);
     }, 3500);
+}
+
+// ========================================
+// MODALES PERSONALIZADOS (ALERT Y CONFIRM)
+// ========================================
+
+/**
+ * Muestra un modal de alerta personalizado
+ * @param {string} mensaje - Mensaje a mostrar
+ * @param {string} titulo - Título del modal (opcional)
+ * @returns {Promise<void>}
+ */
+function mostrarAlert(mensaje, tipo = 'info') {
+    return new Promise((resolve) => {
+        // Determinar colores y icono según el tipo
+        let tipoLower = tipo.toLowerCase();
+        let colorPrincipal, colorGradiente, colorFondo, icono, titulo;
+        
+        switch(tipoLower) {
+            case 'error':
+                colorPrincipal = '#DC2626';
+                colorGradiente = '#EF4444';
+                colorFondo = '#FEE2E2';
+                titulo = 'Error';
+                icono = `<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <line x1="12" y1="8" x2="12" y2="12"></line>
+                    <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                </svg>`;
+                break;
+            case 'success':
+                colorPrincipal = '#10B981';
+                colorGradiente = '#059669';
+                colorFondo = '#D1FAE5';
+                titulo = 'Éxito';
+                icono = `<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                    <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                </svg>`;
+                break;
+            case 'warning':
+                colorPrincipal = '#F59E0B';
+                colorGradiente = '#D97706';
+                colorFondo = '#FEF3C7';
+                titulo = 'Advertencia';
+                icono = `<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+                    <line x1="12" y1="9" x2="12" y2="13"></line>
+                    <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                </svg>`;
+                break;
+            default: // info
+                colorPrincipal = '#3B82F6';
+                colorGradiente = '#2563EB';
+                colorFondo = '#DBEAFE';
+                titulo = 'Información';
+                icono = `<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <line x1="12" y1="16" x2="12" y2="12"></line>
+                    <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                </svg>`;
+        }
+        
+        // Crear overlay con animación mejorada
+        const overlay = document.createElement('div');
+        overlay.className = 'custom-modal-overlay';
+        overlay.style.cssText = `
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(8px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10001;
+            animation: modalFadeIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        `;
+        
+        // Crear modal con diseño mejorado
+        const modal = document.createElement('div');
+        modal.className = 'custom-modal';
+        modal.style.cssText = `
+            background: var(--blanco);
+            border-radius: 20px;
+            padding: 0;
+            max-width: 480px;
+            width: 90%;
+            box-shadow: 0 25px 70px rgba(0, 0, 0, 0.4), 0 10px 30px rgba(0, 0, 0, 0.2);
+            animation: modalSlideUp 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+            overflow: hidden;
+            border: 2px solid ${colorFondo};
+        `;
+        
+        modal.innerHTML = `
+            <div class="custom-modal-header" style="
+                padding: 28px 32px;
+                background: linear-gradient(135deg, ${colorFondo} 0%, rgba(255, 255, 255, 0.5) 100%);
+                border-bottom: 2px solid ${colorFondo};
+                display: flex;
+                align-items: center;
+                gap: 16px;
+            ">
+                <div style="
+                    width: 56px;
+                    height: 56px;
+                    border-radius: 50%;
+                    background: linear-gradient(135deg, ${colorPrincipal} 0%, ${colorGradiente} 100%);
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    color: white;
+                    flex-shrink: 0;
+                    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+                    animation: iconPulse 0.6s ease;
+                ">
+                    ${icono}
+                </div>
+                <h3 class="custom-modal-title" style="
+                    font-size: 1.5rem;
+                    font-weight: 700;
+                    color: var(--negro);
+                    margin: 0;
+                    letter-spacing: -0.02em;
+                ">
+                    ${titulo}
+                </h3>
+            </div>
+            <div class="custom-modal-body" style="
+                padding: 32px;
+                color: var(--negro);
+                font-size: 1.05rem;
+                line-height: 1.7;
+                text-align: left;
+            ">
+                ${typeof mensaje === 'string' ? mensaje.replace(/\n/g, '<br>') : mensaje}
+            </div>
+            <div class="custom-modal-footer" style="
+                padding: 24px 32px;
+                border-top: 1px solid var(--borde);
+                background: var(--gris-light);
+                display: flex;
+                justify-content: flex-end;
+                gap: 12px;
+            ">
+                <button class="custom-modal-btn custom-modal-btn-primary" style="
+                    padding: 14px 32px;
+                    background: linear-gradient(135deg, ${colorPrincipal} 0%, ${colorGradiente} 100%);
+                    color: white;
+                    border: none;
+                    border-radius: 12px;
+                    font-size: 1rem;
+                    font-weight: 600;
+                    cursor: pointer;
+                    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.15);
+                    min-width: 120px;
+                ">
+                    Aceptar
+                </button>
+            </div>
+        `;
+        
+        overlay.appendChild(modal);
+        document.body.appendChild(overlay);
+        document.body.style.overflow = 'hidden';
+        
+        // Event listeners
+        const btnAceptar = modal.querySelector('.custom-modal-btn-primary');
+        
+        // Efectos hover mejorados
+        btnAceptar.addEventListener('mouseenter', () => {
+            btnAceptar.style.transform = 'translateY(-2px) scale(1.02)';
+            btnAceptar.style.boxShadow = `0 6px 20px rgba(0, 0, 0, 0.2)`;
+        });
+        btnAceptar.addEventListener('mouseleave', () => {
+            btnAceptar.style.transform = 'translateY(0) scale(1)';
+            btnAceptar.style.boxShadow = '0 4px 14px rgba(0, 0, 0, 0.15)';
+        });
+        btnAceptar.addEventListener('mousedown', () => {
+            btnAceptar.style.transform = 'translateY(0) scale(0.98)';
+        });
+        btnAceptar.addEventListener('mouseup', () => {
+            btnAceptar.style.transform = 'translateY(-2px) scale(1.02)';
+        });
+        
+        const cerrarModal = () => {
+            overlay.style.animation = 'modalFadeOut 0.25s ease forwards';
+            modal.style.animation = 'modalSlideDown 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards';
+            document.body.style.overflow = '';
+            setTimeout(() => {
+                overlay.remove();
+                resolve();
+            }, 300);
+        };
+        
+        btnAceptar.addEventListener('click', cerrarModal);
+        
+        overlay.addEventListener('click', (e) => {
+            if (e.target === overlay) {
+                cerrarModal();
+            }
+        });
+        
+        // Cerrar con Escape
+        const handleEscape = (e) => {
+            if (e.key === 'Escape') {
+                cerrarModal();
+                document.removeEventListener('keydown', handleEscape);
+            }
+        };
+        document.addEventListener('keydown', handleEscape);
+    });
+}
+
+/**
+ * Muestra un modal de confirmación personalizado
+ * @param {string} mensaje - Mensaje a mostrar
+ * @param {string} titulo - Título del modal (opcional)
+ * @returns {Promise<boolean>} - true si acepta, false si cancela
+ */
+function mostrarConfirm(mensaje, titulo = 'Confirmar') {
+    return new Promise((resolve) => {
+        const colorPrincipal = '#F59E0B';
+        const colorGradiente = '#D97706';
+        const colorFondo = '#FEF3C7';
+        
+        // Crear overlay con animación mejorada
+        const overlay = document.createElement('div');
+        overlay.className = 'custom-modal-overlay';
+        overlay.style.cssText = `
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(8px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10001;
+            animation: modalFadeIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        `;
+        
+        // Crear modal con diseño mejorado
+        const modal = document.createElement('div');
+        modal.className = 'custom-modal';
+        modal.style.cssText = `
+            background: var(--blanco);
+            border-radius: 20px;
+            padding: 0;
+            max-width: 480px;
+            width: 90%;
+            box-shadow: 0 25px 70px rgba(0, 0, 0, 0.4), 0 10px 30px rgba(0, 0, 0, 0.2);
+            animation: modalSlideUp 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+            overflow: hidden;
+            border: 2px solid ${colorFondo};
+        `;
+        
+        modal.innerHTML = `
+            <div class="custom-modal-header" style="
+                padding: 28px 32px;
+                background: linear-gradient(135deg, ${colorFondo} 0%, rgba(255, 255, 255, 0.5) 100%);
+                border-bottom: 2px solid ${colorFondo};
+                display: flex;
+                align-items: center;
+                gap: 16px;
+            ">
+                <div style="
+                    width: 56px;
+                    height: 56px;
+                    border-radius: 50%;
+                    background: linear-gradient(135deg, ${colorPrincipal} 0%, ${colorGradiente} 100%);
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    color: white;
+                    flex-shrink: 0;
+                    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+                    animation: iconPulse 0.6s ease;
+                ">
+                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                        <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+                        <line x1="12" y1="9" x2="12" y2="13"></line>
+                        <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                    </svg>
+                </div>
+                <h3 class="custom-modal-title" style="
+                    font-size: 1.5rem;
+                    font-weight: 700;
+                    color: var(--negro);
+                    margin: 0;
+                    letter-spacing: -0.02em;
+                ">
+                    ${titulo}
+                </h3>
+            </div>
+            <div class="custom-modal-body" style="
+                padding: 32px;
+                color: var(--negro);
+                font-size: 1.05rem;
+                line-height: 1.7;
+                text-align: left;
+            ">
+                ${typeof mensaje === 'string' ? mensaje.replace(/\n/g, '<br>') : mensaje}
+            </div>
+            <div class="custom-modal-footer" style="
+                padding: 24px 32px;
+                border-top: 1px solid var(--borde);
+                background: var(--gris-light);
+                display: flex;
+                justify-content: flex-end;
+                gap: 12px;
+            ">
+                <button class="custom-modal-btn custom-modal-btn-cancel" style="
+                    padding: 14px 28px;
+                    background: var(--blanco);
+                    color: var(--negro);
+                    border: 2px solid var(--borde);
+                    border-radius: 12px;
+                    font-size: 1rem;
+                    font-weight: 600;
+                    cursor: pointer;
+                    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                    min-width: 120px;
+                ">
+                    Cancelar
+                </button>
+                <button class="custom-modal-btn custom-modal-btn-confirm" style="
+                    padding: 14px 28px;
+                    background: linear-gradient(135deg, ${colorPrincipal} 0%, ${colorGradiente} 100%);
+                    color: white;
+                    border: none;
+                    border-radius: 12px;
+                    font-size: 1rem;
+                    font-weight: 600;
+                    cursor: pointer;
+                    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.15);
+                    min-width: 120px;
+                ">
+                    Aceptar
+                </button>
+            </div>
+        `;
+        
+        overlay.appendChild(modal);
+        document.body.appendChild(overlay);
+        document.body.style.overflow = 'hidden';
+        
+        // Event listeners
+        const btnAceptar = modal.querySelector('.custom-modal-btn-confirm');
+        const btnCancelar = modal.querySelector('.custom-modal-btn-cancel');
+        
+        const cerrarModal = (resultado) => {
+            overlay.style.animation = 'modalFadeOut 0.25s ease forwards';
+            modal.style.animation = 'modalSlideDown 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards';
+            document.body.style.overflow = '';
+            setTimeout(() => {
+                overlay.remove();
+                resolve(resultado);
+            }, 300);
+        };
+        
+        btnAceptar.addEventListener('click', () => cerrarModal(true));
+        btnCancelar.addEventListener('click', () => cerrarModal(false));
+        
+        // Efectos hover mejorados para botón aceptar
+        btnAceptar.addEventListener('mouseenter', () => {
+            btnAceptar.style.transform = 'translateY(-2px) scale(1.02)';
+            btnAceptar.style.boxShadow = '0 6px 20px rgba(0, 0, 0, 0.2)';
+        });
+        btnAceptar.addEventListener('mouseleave', () => {
+            btnAceptar.style.transform = 'translateY(0) scale(1)';
+            btnAceptar.style.boxShadow = '0 4px 14px rgba(0, 0, 0, 0.15)';
+        });
+        btnAceptar.addEventListener('mousedown', () => {
+            btnAceptar.style.transform = 'translateY(0) scale(0.98)';
+        });
+        btnAceptar.addEventListener('mouseup', () => {
+            btnAceptar.style.transform = 'translateY(-2px) scale(1.02)';
+        });
+        
+        // Efectos hover mejorados para botón cancelar
+        btnCancelar.addEventListener('mouseenter', () => {
+            btnCancelar.style.background = '#F3F4F6';
+            btnCancelar.style.borderColor = '#9CA3AF';
+            btnCancelar.style.transform = 'translateY(-1px)';
+        });
+        btnCancelar.addEventListener('mouseleave', () => {
+            btnCancelar.style.background = 'var(--blanco)';
+            btnCancelar.style.borderColor = 'var(--borde)';
+            btnCancelar.style.transform = 'translateY(0)';
+        });
+        btnCancelar.addEventListener('mousedown', () => {
+            btnCancelar.style.transform = 'translateY(0) scale(0.98)';
+        });
+        btnCancelar.addEventListener('mouseup', () => {
+            btnCancelar.style.transform = 'translateY(-1px) scale(1)';
+        });
+        
+        overlay.addEventListener('click', (e) => {
+            if (e.target === overlay) {
+                cerrarModal(false);
+            }
+        });
+        
+        // Cerrar con Escape
+        const handleEscape = (e) => {
+            if (e.key === 'Escape') {
+                cerrarModal(false);
+                document.removeEventListener('keydown', handleEscape);
+            }
+        };
+        document.addEventListener('keydown', handleEscape);
+    });
 }
 
 // Validar teléfono
@@ -5340,7 +7566,8 @@ function applyCasaClubFilters() {
         tableBody.querySelectorAll('.btn-delete').forEach(btn => {
             btn.addEventListener('click', async (e) => {
                 const registroId = e.currentTarget.dataset.registroId;
-                if (confirm('¿Estás seguro de eliminar este registro?')) {
+                const confirmado = await mostrarConfirm('¿Estás seguro de eliminar este registro?', 'Eliminar Registro');
+                if (confirmado) {
                     await eliminarRegistroCasaClub(registroId);
                 }
             });
@@ -5360,7 +7587,7 @@ async function eliminarRegistroCasaClub(registroId) {
         console.log('✅ Registro eliminado correctamente');
     } catch (error) {
         console.error('❌ Error al eliminar registro:', error);
-        alert('Error al eliminar el registro. Intenta de nuevo.');
+        await mostrarAlert('Error al eliminar el registro. Intenta de nuevo.', 'Error');
     }
 }
 
@@ -5702,7 +7929,7 @@ async function actualizarAprobacionPermiso(permisoId, aprobado) {
         
     } catch (error) {
         console.error('❌ Error al actualizar aprobación del permiso:', error);
-        alert('Error al actualizar el permiso. Intenta de nuevo.');
+        await mostrarAlert('Error al actualizar el permiso. Intenta de nuevo.', 'Error');
     }
 }
 
@@ -5790,6 +8017,17 @@ async function loadLesionados() {
         snapshot.forEach((doc) => {
             const data = doc.data();
             
+            // Normalizar notas: si es array, asegurar que cada mensaje tenga vistoPor
+            let notas = data.notas || '';
+            if (Array.isArray(notas)) {
+                notas = notas.map(msg => {
+                    if (!msg.vistoPor) {
+                        msg.vistoPor = [];
+                    }
+                    return msg;
+                });
+            }
+            
             registros.push({
                 id: doc.id,
                 nombre: data.nombre || 'Sin nombre',
@@ -5802,11 +8040,12 @@ async function loadLesionados() {
                 descripcion: data.descripcion || '',
                 estado: data.estado || 'activa',
                 atendido: data.atendido !== undefined ? data.atendido : null, // null, true, o false
-                notas: data.notas || '',
+                notas: notas,
                 tratamiento: data.tratamiento || '',
                 fechaRecuperacion: data.fechaRecuperacion || null,
                 timestamp: data.timestamp || null,
-                fechaRegistro: data.fechaRegistro || null
+                fechaRegistro: data.fechaRegistro || null,
+                fechaLesion: data.fechaLesion || null
             });
         });
         
@@ -5954,9 +8193,87 @@ function applyLesionadosFilters() {
                 atencionBg = '#D1FAE5';
             }
             
-            // Mostrar comentarios (notas) truncados si son muy largos
-            const comentarios = lesion.notas || '';
-            const comentariosTruncados = comentarios.length > 50 ? comentarios.substring(0, 50) + '...' : comentarios;
+            // Mostrar comentarios (notas) - puede ser string antiguo o array nuevo
+            let comentariosHTML = '<span style="color: var(--gris-label); font-size: 0.9rem;">Sin comentarios</span>';
+            let comentariosTitle = 'Sin comentarios';
+            const usuarioActual = currentUser?.name || 'Usuario';
+            
+            if (lesion.notas) {
+                if (Array.isArray(lesion.notas)) {
+                    // Si es array de mensajes
+                    const numComentarios = lesion.notas.length;
+                    if (numComentarios > 0) {
+                        const ultimoMensaje = lesion.notas[lesion.notas.length - 1];
+                        const ultimoTexto = ultimoMensaje.mensaje || '';
+                        const ultimoUsuario = ultimoMensaje.usuario || 'Usuario';
+                        
+                        // Verificar si el usuario actual ha visto el último mensaje
+                        const vistoPor = ultimoMensaje.vistoPor || [];
+                        const haVisto = ultimoUsuario === usuarioActual || vistoPor.includes(usuarioActual);
+                        
+                        // Si el mensaje es del usuario actual, siempre está visto
+                        const esMensajePropio = ultimoUsuario === usuarioActual;
+                        const noVisto = !esMensajePropio && !haVisto;
+                        
+                        comentariosTitle = `${ultimoUsuario}: ${ultimoTexto.length > 100 ? ultimoTexto.substring(0, 100) + '...' : ultimoTexto}`;
+                        
+                        // Obtener iniciales del usuario
+                        const iniciales = ultimoUsuario.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase() || 'U';
+                        
+                        // Crear botón tipo usuario con avatar
+                        const estiloFondo = noVisto ? 'var(--naranja)' : '#E5E7EB';
+                        const estiloColor = noVisto ? 'var(--blanco)' : 'var(--gris-texto)';
+                        const estiloPeso = noVisto ? '700' : '500';
+                        const estiloBorde = noVisto ? '2px solid var(--naranja-dark)' : '1px solid var(--borde)';
+                        
+                        comentariosHTML = `
+                            <button class="usuario-comentario-btn" style="
+                                display: inline-flex;
+                                align-items: center;
+                                gap: 10px;
+                                padding: 8px 14px;
+                                background: var(--gris-light);
+                                border: ${estiloBorde};
+                                border-radius: 20px;
+                                cursor: pointer;
+                                transition: all 0.2s ease;
+                                font-family: inherit;
+                                font-size: 0.9rem;
+                            " onmouseover="this.style.background='#F3F4F6'; this.style.transform='translateY(-1px)';" onmouseout="this.style.background='var(--gris-light)'; this.style.transform='translateY(0)';" title="${comentariosTitle}">
+                                <div style="
+                                    width: 32px;
+                                    height: 32px;
+                                    border-radius: 50%;
+                                    background: ${estiloFondo};
+                                    color: ${estiloColor};
+                                    display: flex;
+                                    align-items: center;
+                                    justify-content: center;
+                                    font-weight: ${estiloPeso};
+                                    font-size: 0.85rem;
+                                    flex-shrink: 0;
+                                    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+                                ">
+                                    ${iniciales}
+                                </div>
+                                <span style="
+                                    font-weight: ${estiloPeso};
+                                    color: var(--negro);
+                                    white-space: nowrap;
+                                    overflow: hidden;
+                                    text-overflow: ellipsis;
+                                    max-width: 120px;
+                                ">${ultimoUsuario}</span>
+                            </button>
+                        `;
+                    }
+                } else if (typeof lesion.notas === 'string') {
+                    // Si es string antiguo (compatibilidad)
+                    const comentariosStr = lesion.notas;
+                    comentariosHTML = comentariosStr.length > 50 ? comentariosStr.substring(0, 50) + '...' : comentariosStr;
+                    comentariosTitle = comentariosStr;
+                }
+            }
             
             return `
                 <tr>
@@ -5982,8 +8299,8 @@ function applyLesionadosFilters() {
                             ${atencionTexto}
                         </span>
                     </td>
-                    <td style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${comentarios}">
-                        ${comentariosTruncados || 'Sin comentarios'}
+                    <td style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${comentariosTitle}">
+                        ${comentariosHTML}
                     </td>
                     <td>
                         <div style="display: flex; flex-direction: column; gap: 6px; align-items: stretch;">
@@ -6086,7 +8403,7 @@ async function actualizarAtencionLesion(lesionId, atendido) {
         
     } catch (error) {
         console.error('❌ Error al actualizar atención de la lesión:', error);
-        alert('Error al actualizar la lesión. Intenta de nuevo.');
+        await mostrarAlert('Error al actualizar la lesión. Intenta de nuevo.', 'Error');
     }
 }
 
@@ -6096,7 +8413,7 @@ async function marcarComoCurado(lesionId) {
         const lesionRef = doc(dbLesionados, 'lesiones', lesionId);
         
         // Confirmar acción
-        const confirmar = confirm('¿Estás seguro de marcar esta lesión como recuperada? El estado cambiará a "Recuperada".');
+        const confirmar = await mostrarConfirm('¿Estás seguro de marcar esta lesión como recuperada? El estado cambiará a "Recuperada".', 'Marcar como Recuperada');
         if (!confirmar) {
             return;
         }
@@ -6126,7 +8443,7 @@ async function marcarComoCurado(lesionId) {
         
     } catch (error) {
         console.error('❌ Error al marcar lesión como recuperada:', error);
-        alert('Error al actualizar la lesión. Intenta de nuevo.');
+        await mostrarAlert('Error al actualizar la lesión. Intenta de nuevo.', 'Error');
     }
 }
 
@@ -6140,7 +8457,7 @@ async function eliminarLesion(lesionId) {
         const nombreLesion = lesion ? lesion.nombre : 'esta lesión';
         
         // Confirmar acción
-        const confirmar = confirm(`¿Estás seguro de eliminar la lesión de ${nombreLesion}? Esta acción no se puede deshacer.`);
+        const confirmar = await mostrarConfirm(`¿Estás seguro de eliminar la lesión de ${nombreLesion}? Esta acción no se puede deshacer.`, 'Eliminar Lesión');
         if (!confirmar) {
             return;
         }
@@ -6160,12 +8477,35 @@ async function eliminarLesion(lesionId) {
         
     } catch (error) {
         console.error('❌ Error al eliminar lesión:', error);
-        alert('Error al eliminar la lesión. Intenta de nuevo.');
+        await mostrarAlert('Error al eliminar la lesión. Intenta de nuevo.', 'Error');
     }
 }
 
 function abrirModalComentarios(lesion) {
-    // Crear modal para comentarios
+    // Obtener nombre del usuario actual
+    const usuarioActual = currentUser?.name || 'Usuario';
+    
+    // Obtener comentarios existentes (pueden ser string antiguo o array nuevo)
+    let comentarios = [];
+    if (lesion.notas) {
+        if (typeof lesion.notas === 'string') {
+            // Si es string antiguo, convertir a array con un mensaje
+            if (lesion.notas.trim()) {
+                comentarios = [{
+                    usuario: 'Sistema',
+                    mensaje: lesion.notas,
+                    fecha: lesion.fechaLesion || new Date().toISOString(),
+                    timestamp: new Date(),
+                    vistoPor: []
+                }];
+            }
+        } else if (Array.isArray(lesion.notas)) {
+            // Si ya es array, usarlo directamente
+            comentarios = lesion.notas;
+        }
+    }
+    
+    // Crear modal para comentarios tipo chat
     const modal = document.createElement('div');
     modal.className = 'modal-overlay';
     modal.style.cssText = `
@@ -6181,19 +8521,50 @@ function abrirModalComentarios(lesion) {
         z-index: 10000;
     `;
     
+    // Renderizar mensajes
+    const mensajesHTML = comentarios.map(msg => {
+        const fecha = msg.timestamp ? (msg.timestamp.toDate ? msg.timestamp.toDate() : new Date(msg.timestamp)) : new Date(msg.fecha || Date.now());
+        const fechaFormateada = fecha.toLocaleDateString('es-MX', { 
+            day: '2-digit', 
+            month: '2-digit', 
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+        });
+        const esUsuarioActual = msg.usuario === usuarioActual;
+        
+        return `
+            <div class="chat-message ${esUsuarioActual ? 'chat-message-own' : ''}">
+                <div class="chat-message-header">
+                    <span class="chat-message-user">${msg.usuario}</span>
+                    <span class="chat-message-time">${fechaFormateada}</span>
+                </div>
+                <div class="chat-message-bubble">
+                    <p class="chat-message-text">${msg.mensaje}</p>
+                </div>
+            </div>
+        `;
+    }).join('');
+    
     modal.innerHTML = `
-        <div class="modal-content" style="background: white; border-radius: 12px; padding: 30px; max-width: 600px; width: 90%; max-height: 80vh; overflow-y: auto;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                <h3 style="font-size: 1.5rem; font-weight: 700; color: var(--negro);">Comentarios - ${lesion.nombre}</h3>
-                <button class="btn-close-modal" style="background: transparent; border: none; font-size: 1.5rem; cursor: pointer; color: var(--gris-label);">×</button>
+        <div class="modal-content chat-modal-content">
+            <div class="chat-modal-header">
+                <h3 class="chat-modal-title">Comentarios - ${lesion.nombre}</h3>
+                <button class="btn-close-modal">×</button>
             </div>
-            <div style="margin-bottom: 20px;">
-                <label style="display: block; font-size: 0.9rem; font-weight: 600; color: var(--negro); margin-bottom: 8px;">Comentarios/Notas:</label>
-                <textarea id="modalComentariosText" style="width: 100%; padding: 12px; border: 1px solid var(--borde); border-radius: 8px; font-size: 0.95rem; font-family: inherit; min-height: 150px; resize: vertical;" placeholder="Agrega comentarios sobre el seguimiento de la lesión...">${lesion.notas || ''}</textarea>
+            <div class="chat-messages-container" id="chatMessagesContainer">
+                ${comentarios.length > 0 ? mensajesHTML : '<div class="chat-empty"><p>No hay comentarios aún. Sé el primero en comentar.</p></div>'}
             </div>
-            <div style="display: flex; gap: 12px; justify-content: flex-end;">
-                <button class="btn-cancel-comment" style="padding: 10px 20px; background: var(--gris-light); color: var(--negro); border: none; border-radius: 8px; font-size: 0.9rem; font-weight: 600; cursor: pointer;">Cancelar</button>
-                <button class="btn-save-comment" data-lesion-id="${lesion.id}" style="padding: 10px 20px; background: #3B82F6; color: white; border: none; border-radius: 8px; font-size: 0.9rem; font-weight: 600; cursor: pointer;">Guardar</button>
+            <div class="chat-input-container">
+                <div class="chat-input-wrapper">
+                    <textarea id="chatMessageInput" class="chat-input" placeholder="Escribe un comentario..." rows="2"></textarea>
+                    <button class="chat-send-btn" data-lesion-id="${lesion.id}">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="22" y1="2" x2="11" y2="13"></line>
+                            <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                        </svg>
+                    </button>
+                </div>
             </div>
         </div>
     `;
@@ -6205,15 +8576,26 @@ function abrirModalComentarios(lesion) {
         modal.remove();
     });
     
-    modal.querySelector('.btn-cancel-comment').addEventListener('click', () => {
-        modal.remove();
-    });
+    // Enviar mensaje
+    const sendBtn = modal.querySelector('.chat-send-btn');
+    const messageInput = document.getElementById('chatMessageInput');
     
-    modal.querySelector('.btn-save-comment').addEventListener('click', async () => {
-        const comentarios = document.getElementById('modalComentariosText').value.trim();
-        const lesionId = modal.querySelector('.btn-save-comment').dataset.lesionId;
-        await guardarComentariosLesion(lesionId, comentarios);
-        modal.remove();
+    const enviarMensaje = async () => {
+        const mensaje = messageInput.value.trim();
+        if (!mensaje) return;
+        
+        const lesionId = sendBtn.dataset.lesionId;
+        await guardarComentarioLesion(lesionId, mensaje, usuarioActual);
+        messageInput.value = '';
+    };
+    
+    sendBtn.addEventListener('click', enviarMensaje);
+    
+    messageInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            enviarMensaje();
+        }
     });
     
     // Cerrar al hacer clic fuera del modal
@@ -6222,13 +8604,101 @@ function abrirModalComentarios(lesion) {
             modal.remove();
         }
     });
+    
+    // Auto-scroll al final
+    const messagesContainer = document.getElementById('chatMessagesContainer');
+    if (messagesContainer) {
+        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    }
+    
+    // Marcar todos los mensajes como vistos por el usuario actual al abrir el modal
+    marcarComentariosComoVistos(lesion.id, usuarioActual);
 }
 
-async function guardarComentariosLesion(lesionId, comentarios) {
+async function marcarComentariosComoVistos(lesionId, usuario) {
     try {
-        const { doc, updateDoc } = await import('https://www.gstatic.com/firebasejs/12.5.0/firebase-firestore.js');
+        const { doc, updateDoc, getDoc } = await import('https://www.gstatic.com/firebasejs/12.5.0/firebase-firestore.js');
         const lesionRef = doc(dbLesionados, 'lesiones', lesionId);
         
+        // Obtener datos actuales de la lesión
+        const lesionDoc = await getDoc(lesionRef);
+        const lesionData = lesionDoc.data();
+        
+        if (!lesionData.notas || !Array.isArray(lesionData.notas)) {
+            return; // No hay comentarios o no son array
+        }
+        
+        // Marcar todos los mensajes como vistos por el usuario actual
+        const comentariosActualizados = lesionData.notas.map(msg => {
+            const vistoPor = msg.vistoPor || [];
+            if (!vistoPor.includes(usuario)) {
+                vistoPor.push(usuario);
+            }
+            return {
+                ...msg,
+                vistoPor: vistoPor
+            };
+        });
+        
+        // Guardar en Firebase (solo si hay cambios)
+        await updateDoc(lesionRef, {
+            notas: comentariosActualizados
+        });
+        
+        // Actualizar el dato local
+        const lesionIndex = lesionadosData.registros.findIndex(l => l.id === lesionId);
+        if (lesionIndex !== -1) {
+            lesionadosData.registros[lesionIndex].notas = comentariosActualizados;
+        }
+        
+        // Actualizar la UI de la tabla
+        updateLesionadosUI();
+        
+    } catch (error) {
+        console.error('❌ Error al marcar comentarios como vistos:', error);
+    }
+}
+
+async function guardarComentarioLesion(lesionId, mensaje, usuario) {
+    try {
+        const { doc, updateDoc, getDoc, Timestamp } = await import('https://www.gstatic.com/firebasejs/12.5.0/firebase-firestore.js');
+        const lesionRef = doc(dbLesionados, 'lesiones', lesionId);
+        
+        // Obtener datos actuales de la lesión
+        const lesionDoc = await getDoc(lesionRef);
+        const lesionData = lesionDoc.data();
+        
+        // Obtener comentarios existentes
+        let comentarios = [];
+        if (lesionData.notas) {
+            if (typeof lesionData.notas === 'string') {
+                // Si es string antiguo, convertir a array
+                if (lesionData.notas.trim()) {
+                    comentarios = [{
+                        usuario: 'Sistema',
+                        mensaje: lesionData.notas,
+                        fecha: lesionData.fechaLesion || new Date().toISOString(),
+                        timestamp: Timestamp.now(),
+                        vistoPor: []
+                    }];
+                }
+            } else if (Array.isArray(lesionData.notas)) {
+                comentarios = lesionData.notas;
+            }
+        }
+        
+        // Agregar nuevo mensaje
+        const nuevoMensaje = {
+            usuario: usuario,
+            mensaje: mensaje,
+            fecha: new Date().toISOString(),
+            timestamp: Timestamp.now(),
+            vistoPor: [usuario] // El usuario que envía el mensaje ya lo ha visto
+        };
+        
+        comentarios.push(nuevoMensaje);
+        
+        // Guardar en Firebase
         await updateDoc(lesionRef, {
             notas: comentarios
         });
@@ -6239,15 +8709,49 @@ async function guardarComentariosLesion(lesionId, comentarios) {
             lesionadosData.registros[lesionIndex].notas = comentarios;
         }
         
+        // Actualizar el chat en el modal
+        const messagesContainer = document.getElementById('chatMessagesContainer');
+        if (messagesContainer) {
+            const fecha = new Date();
+            const fechaFormateada = fecha.toLocaleDateString('es-MX', { 
+                day: '2-digit', 
+                month: '2-digit', 
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+            
+            const mensajeHTML = `
+                <div class="chat-message chat-message-own">
+                    <div class="chat-message-header">
+                        <span class="chat-message-user">${usuario}</span>
+                        <span class="chat-message-time">${fechaFormateada}</span>
+                    </div>
+                    <div class="chat-message-bubble">
+                        <p class="chat-message-text">${mensaje}</p>
+                    </div>
+                </div>
+            `;
+            
+            // Remover mensaje de "no hay comentarios" si existe
+            const emptyMsg = messagesContainer.querySelector('.chat-empty');
+            if (emptyMsg) {
+                emptyMsg.remove();
+            }
+            
+            messagesContainer.insertAdjacentHTML('beforeend', mensajeHTML);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+        
         // Recargar la UI
         updateLesionadosUI();
         
-        console.log('✅ Comentarios guardados correctamente');
-        mostrarNotificacionLesionado('Comentarios guardados correctamente', 'success');
+        console.log('✅ Comentario guardado correctamente');
+        mostrarNotificacionLesionado('Comentario enviado', 'success');
         
     } catch (error) {
-        console.error('❌ Error al guardar comentarios:', error);
-        alert('Error al guardar los comentarios. Intenta de nuevo.');
+        console.error('❌ Error al guardar comentario:', error);
+        await mostrarAlert('Error al guardar el comentario. Intenta de nuevo.', 'Error');
     }
 }
 
@@ -6452,10 +8956,11 @@ async function loadBajas() {
             });
         });
         
+        // Ordenar por nombre completo (construyendo correctamente si no existe)
         bajasData.sort((a, b) => {
-            const nombreA = (a.nombreCompleto || '').toLowerCase();
-            const nombreB = (b.nombreCompleto || '').toLowerCase();
-            return nombreA.localeCompare(nombreB);
+            const nombreA = a.nombreCompleto || `${a.nombres || ''} ${a.apellidoPaterno || ''} ${a.apellidoMaterno || ''}`.trim() || 'Sin nombre';
+            const nombreB = b.nombreCompleto || `${b.nombres || ''} ${b.apellidoPaterno || ''} ${b.apellidoMaterno || ''}`.trim() || 'Sin nombre';
+            return nombreA.toLowerCase().localeCompare(nombreB.toLowerCase());
         });
         
         populateBajasCategoryFilter();
@@ -6476,7 +8981,11 @@ function populateBajasCategoryFilter() {
     const bajasCategoryFilter = document.getElementById('bajasCategoryFilter');
     if (!bajasCategoryFilter) return;
     
-    const todasLasCategorias = [
+    // Obtener categorías únicas de los jugadores dados de baja
+    const categoriasUnicas = [...new Set(bajasData.map(j => j.categoria).filter(c => c))].sort();
+    
+    // Si no hay categorías, usar las categorías por defecto
+    const todasLasCategorias = categoriasUnicas.length > 0 ? categoriasUnicas : [
         'Alebrijes TDP',
         'Soles TDP',
         'Sub-18',
@@ -6511,7 +9020,22 @@ function applyBajasFilters() {
     
     bajasFiltered = bajasData.filter(jugador => {
         const matchesCategory = category === 'all' || (jugador.categoria && jugador.categoria === category);
-        const matchesSearch = !searchTerm || (jugador.nombreCompleto && jugador.nombreCompleto.toLowerCase().includes(searchTerm));
+        
+        // Buscar en nombre completo y también en nombres y apellidos separados
+        let matchesSearch = true;
+        if (searchTerm) {
+            const nombreCompleto = jugador.nombreCompleto || `${jugador.nombres || ''} ${jugador.apellidoPaterno || ''} ${jugador.apellidoMaterno || ''}`.trim();
+            const nombres = (jugador.nombres || '').toLowerCase();
+            const apellidoPaterno = (jugador.apellidoPaterno || '').toLowerCase();
+            const apellidoMaterno = (jugador.apellidoMaterno || '').toLowerCase();
+            const nombreCompletoLower = nombreCompleto.toLowerCase();
+            
+            matchesSearch = nombreCompletoLower.includes(searchTerm) ||
+                           nombres.includes(searchTerm) ||
+                           apellidoPaterno.includes(searchTerm) ||
+                           apellidoMaterno.includes(searchTerm);
+        }
+        
         return matchesCategory && matchesSearch;
     });
     
@@ -6544,6 +9068,7 @@ function renderBajas(list) {
             if (btnRecuperar) {
                 btnRecuperar.addEventListener('click', (e) => {
                     e.stopPropagation();
+                    e.preventDefault();
                     recuperarJugador(jugador);
                 });
             }
@@ -6553,13 +9078,16 @@ function renderBajas(list) {
             if (btnEliminar) {
                 btnEliminar.addEventListener('click', (e) => {
                     e.stopPropagation();
+                    e.preventDefault();
                     eliminarPermanentemente(jugador);
                 });
             }
             
-            // Click en la tarjeta para ver detalles
-            card.addEventListener('click', () => {
-                openJugadorModal(jugador);
+            // Click en la tarjeta para ver detalles (excluyendo botones)
+            card.addEventListener('click', (e) => {
+                if (!e.target.closest('.baja-card-actions') && !e.target.closest('button')) {
+                    openJugadorModal(jugador);
+                }
             });
         }
     });
@@ -6567,37 +9095,42 @@ function renderBajas(list) {
 
 // Crear tarjeta de jugador dado de baja
 function createBajaCard(jugador) {
-    const nombreCompleto = jugador.nombreCompleto || `${jugador.nombres || ''} ${jugador.apellidoPaterno || ''} ${jugador.apellidoMaterno || ''}`.trim();
-    const iniciales = nombreCompleto.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+    // Formatear nombre correctamente usando la función existente
+    const nombreFormateado = formatearNombreDosLineas(jugador);
+    const nombreCompleto = nombreFormateado.nombreCompleto;
+    const nombres = nombreFormateado.nombres;
+    const apellidos = nombreFormateado.apellidos;
+    
+    // Generar iniciales de forma segura
+    const iniciales = nombreCompleto.split(' ').map(n => n && n[0] ? n[0] : '').filter(n => n).join('').substring(0, 2).toUpperCase() || '??';
     const categoria = jugador.categoria || 'Sin categoría';
     
     return `
-        <div class="jugador-card baja-card" data-jugador-id="${jugador.id}">
-            <div class="jugador-card-header">
-                <div class="jugador-card-avatar" style="background: #FEE2E2; color: #DC2626;">
+        <div class="baja-card" data-jugador-id="${jugador.id}">
+            <div class="baja-card-header">
+                <div class="baja-card-avatar">
                     <span>${iniciales}</span>
                 </div>
-                <div class="jugador-card-info">
-                    <h3 class="jugador-card-nombre">${nombreCompleto}</h3>
-                    <p class="jugador-card-categoria">${categoria}</p>
+                <div class="baja-card-info">
+                    <h3 class="baja-card-nombre">${nombres}</h3>
+                    ${apellidos ? `<p class="baja-card-apellidos">${apellidos}</p>` : ''}
+                    <p class="baja-card-categoria">${categoria}</p>
                 </div>
             </div>
-            <div class="jugador-card-details">
-                <div class="baja-actions" style="display: flex; gap: 10px; margin-top: 12px;">
-                    <button class="btn btn-success btn-recuperar" style="flex: 1; padding: 10px; font-size: 14px; display: flex; align-items: center; justify-content: center; gap: 6px;">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <polyline points="20 6 9 17 4 12"></polyline>
-                        </svg>
-                        <span>Recuperar</span>
-                    </button>
-                    <button class="btn btn-danger btn-eliminar" style="flex: 1; padding: 10px; font-size: 14px; display: flex; align-items: center; justify-content: center; gap: 6px;">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <polyline points="3 6 5 6 21 6"></polyline>
-                            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-                        </svg>
-                        <span>Eliminar</span>
-                    </button>
-                </div>
+            <div class="baja-card-actions">
+                <button class="btn btn-recuperar">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="20 6 9 17 4 12"></polyline>
+                    </svg>
+                    <span>Recuperar</span>
+                </button>
+                <button class="btn btn-eliminar">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="3 6 5 6 21 6"></polyline>
+                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                    </svg>
+                    <span>Eliminar</span>
+                </button>
             </div>
         </div>
     `;
@@ -6652,7 +9185,9 @@ async function darDeBajaJugador(jugadorId, jugadorData) {
 
 // Recuperar jugador (cambiar activo: true)
 async function recuperarJugador(jugador) {
-    if (!confirm(`¿Estás seguro de que deseas recuperar a ${jugador.nombreCompleto || 'este jugador'}?`)) {
+    const nombreCompleto = jugador.nombreCompleto || `${jugador.nombres || ''} ${jugador.apellidoPaterno || ''} ${jugador.apellidoMaterno || ''}`.trim() || 'este jugador';
+    const confirmado = await mostrarConfirm(`¿Estás seguro de que deseas recuperar a ${nombreCompleto}?`, 'Recuperar Jugador');
+    if (!confirmado) {
         return;
     }
     
@@ -6673,13 +9208,13 @@ async function recuperarJugador(jugador) {
         });
         
         console.log('✅ Jugador recuperado:', jugador.id);
-        mostrarNotificacion('Jugador recuperado exitosamente', 'success');
+        await mostrarAlert('Jugador recuperado exitosamente', 'success');
         
         // Recargar bajas
         const sectionBajas = document.getElementById('section-bajas');
-        if (sectionBajas) {
+        if (sectionBajas && sectionBajas.style.display !== 'none') {
             sectionBajas.dataset.loaded = 'false';
-            loadBajas();
+            await loadBajas();
         }
         
         // Recargar jugadores si estamos en esa vista
@@ -6690,46 +9225,75 @@ async function recuperarJugador(jugador) {
         }
     } catch (error) {
         console.error('❌ Error al recuperar jugador:', error);
-        mostrarNotificacion('Error al recuperar al jugador', 'error');
+        await mostrarAlert('Error al recuperar al jugador', 'error');
     }
 }
 
 // Eliminar permanentemente
 async function eliminarPermanentemente(jugador) {
-    if (!confirm(`¿Estás SEGURO de que deseas ELIMINAR PERMANENTEMENTE a ${jugador.nombreCompleto || 'este jugador'}?\n\nEsta acción NO se puede deshacer.`)) {
+    const nombreCompleto = jugador.nombreCompleto || `${jugador.nombres || ''} ${jugador.apellidoPaterno || ''} ${jugador.apellidoMaterno || ''}`.trim() || 'este jugador';
+    const confirmado1 = await mostrarConfirm(`¿Estás SEGURO de que deseas ELIMINAR PERMANENTEMENTE a ${nombreCompleto}?<br><br>Esta acción NO se puede deshacer.`, 'Eliminar Permanentemente');
+    if (!confirmado1) {
         return;
     }
     
     // Confirmación adicional
-    if (!confirm('Esta es tu última oportunidad. ¿Realmente deseas eliminar este jugador de forma permanente?')) {
+    const confirmado2 = await mostrarConfirm('Esta es tu última oportunidad. ¿Realmente deseas eliminar este jugador de forma permanente?', 'Confirmar Eliminación');
+    if (!confirmado2) {
         return;
     }
     
     await initFirebase();
     
     if (!db) {
-        mostrarNotificacion('Error al conectar con la base de datos', 'error');
+        await mostrarAlert('Error al conectar con la base de datos', 'error');
         return;
     }
     
     try {
-        const { doc, deleteDoc } = await import('https://www.gstatic.com/firebasejs/12.5.0/firebase-firestore.js');
+        // Verificar que el jugador esté dado de baja antes de eliminar
+        // Esto es necesario porque las reglas de Firestore solo permiten eliminar si activo == false
+        if (jugador.activo !== false) {
+            await mostrarAlert('Solo se pueden eliminar permanentemente jugadores que estén dados de baja (activo: false).', 'warning');
+            return;
+        }
+        
+        const { doc, deleteDoc, getDoc } = await import('https://www.gstatic.com/firebasejs/12.5.0/firebase-firestore.js');
         const jugadorRef = doc(db, 'jugadores', jugador.id);
+        
+        // Verificar nuevamente el estado antes de eliminar (doble verificación)
+        const jugadorDoc = await getDoc(jugadorRef);
+        if (jugadorDoc.exists()) {
+            const datosJugador = jugadorDoc.data();
+            if (datosJugador.activo !== false) {
+                await mostrarAlert('El jugador debe estar dado de baja antes de poder eliminarlo permanentemente.', 'warning');
+                return;
+            }
+        }
         
         await deleteDoc(jugadorRef);
         
         console.log('✅ Jugador eliminado permanentemente:', jugador.id);
-        mostrarNotificacion('Jugador eliminado permanentemente', 'success');
+        await mostrarAlert('Jugador eliminado permanentemente', 'success');
         
         // Recargar bajas
         const sectionBajas = document.getElementById('section-bajas');
-        if (sectionBajas) {
+        if (sectionBajas && sectionBajas.style.display !== 'none') {
             sectionBajas.dataset.loaded = 'false';
-            loadBajas();
+            await loadBajas();
         }
     } catch (error) {
         console.error('❌ Error al eliminar jugador:', error);
-        mostrarNotificacion('Error al eliminar al jugador', 'error');
+        let errorMessage = error.message || 'Error desconocido al eliminar al jugador';
+        let errorDetail = error.code ? ` (Código: ${error.code})` : '';
+        
+        // Mensaje más específico para errores de permisos
+        if (error.code === 'permission-denied' || errorMessage.includes('permission')) {
+            errorMessage = 'No se pudo eliminar el jugador. Verifica que el jugador esté dado de baja (activo: false) y que las reglas de seguridad de Firestore permitan la eliminación.';
+            errorDetail = '<br><br><strong>Nota:</strong> Las reglas de Firestore deben permitir la eliminación de documentos donde <code>activo == false</code>.';
+        }
+        
+        await mostrarAlert(`Error al eliminar al jugador: ${errorMessage}${errorDetail}`, 'error');
     }
 }
 
@@ -8083,22 +10647,22 @@ function renderBalanceTipoPago() {
         const color = colores[index % colores.length];
         
         html += `
-            <div style="background: linear-gradient(135deg, ${color}15 0%, ${color}05 100%); border-radius: var(--radius); padding: 24px; border: 2px solid ${color}30; transition: all 0.3s ease; box-shadow: 0 2px 8px rgba(0,0,0,0.04);">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
-                    <div style="display: flex; align-items: center; gap: 12px;">
-                        <div style="width: 12px; height: 12px; border-radius: 50%; background: ${color};"></div>
-                        <h4 style="font-size: 1.15rem; font-weight: 700; color: var(--negro); margin: 0;">${tipoPago}</h4>
+            <div class="balance-detail-item" style="background: linear-gradient(135deg, ${color}15 0%, ${color}05 100%); border: 2px solid ${color}30;">
+                <div class="balance-detail-header">
+                    <div class="balance-detail-title-wrapper">
+                        <div class="balance-detail-dot" style="background: ${color};"></div>
+                        <h4 class="balance-detail-title">${tipoPago}</h4>
                     </div>
-                    <span style="font-size: 0.9rem; font-weight: 700; color: ${color}; background: ${color}15; padding: 6px 14px; border-radius: 20px; border: 1px solid ${color}30;">${porcentaje}%</span>
+                    <span class="balance-detail-percentage" style="color: ${color}; background: ${color}15; border: 1px solid ${color}30;">${porcentaje}%</span>
                 </div>
-                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; margin-top: 16px;">
-                    <div style="background: var(--blanco); border-radius: var(--radius-sm); padding: 16px; border-left: 3px solid ${color};">
-                        <p style="font-size: 0.8rem; color: var(--gris-label); margin: 0 0 8px 0; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Total</p>
-                        <p style="font-size: 1.6rem; font-weight: 800; color: var(--negro); margin: 0;">$${data.total.toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+                <div class="balance-detail-stats">
+                    <div class="balance-detail-stat-box" style="border-left-color: ${color};">
+                        <p class="balance-detail-stat-label">Total</p>
+                        <p class="balance-detail-stat-value">$${data.total.toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
                     </div>
-                    <div style="background: var(--blanco); border-radius: var(--radius-sm); padding: 16px; border-left: 3px solid ${color};">
-                        <p style="font-size: 0.8rem; color: var(--gris-label); margin: 0 0 8px 0; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Registros</p>
-                        <p style="font-size: 1.6rem; font-weight: 800; color: var(--negro); margin: 0;">${data.cantidad.toLocaleString('es-MX')}</p>
+                    <div class="balance-detail-stat-box" style="border-left-color: ${color};">
+                        <p class="balance-detail-stat-label">Registros</p>
+                        <p class="balance-detail-stat-value">${data.cantidad.toLocaleString('es-MX')}</p>
                     </div>
                 </div>
             </div>
@@ -8125,7 +10689,7 @@ function renderBalanceConceptoPago() {
     
     const colores = ['#10B981', '#3B82F6', '#F59E0B', '#8B5CF6', '#EC4899', '#06B6D4', '#f26522'];
     
-    let html = '<div style="display: grid; gap: 16px;">';
+    let html = '<div class="balance-detail-list">';
     
     conceptosPago.forEach((conceptoPago, index) => {
         const data = balanceData.porConceptoPago[conceptoPago];
@@ -8133,22 +10697,22 @@ function renderBalanceConceptoPago() {
         const color = colores[index % colores.length];
         
         html += `
-            <div style="background: linear-gradient(135deg, ${color}15 0%, ${color}05 100%); border-radius: var(--radius); padding: 24px; border: 2px solid ${color}30; transition: all 0.3s ease; box-shadow: 0 2px 8px rgba(0,0,0,0.04);">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
-                    <div style="display: flex; align-items: center; gap: 12px;">
-                        <div style="width: 12px; height: 12px; border-radius: 50%; background: ${color};"></div>
-                        <h4 style="font-size: 1.15rem; font-weight: 700; color: var(--negro); margin: 0;">${conceptoPago}</h4>
+            <div class="balance-detail-item" style="background: linear-gradient(135deg, ${color}15 0%, ${color}05 100%); border: 2px solid ${color}30;">
+                <div class="balance-detail-header">
+                    <div class="balance-detail-title-wrapper">
+                        <div class="balance-detail-dot" style="background: ${color};"></div>
+                        <h4 class="balance-detail-title">${conceptoPago}</h4>
                     </div>
-                    <span style="font-size: 0.9rem; font-weight: 700; color: ${color}; background: ${color}15; padding: 6px 14px; border-radius: 20px; border: 1px solid ${color}30;">${porcentaje}%</span>
+                    <span class="balance-detail-percentage" style="color: ${color}; background: ${color}15; border: 1px solid ${color}30;">${porcentaje}%</span>
                 </div>
-                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; margin-top: 16px;">
-                    <div style="background: var(--blanco); border-radius: var(--radius-sm); padding: 16px; border-left: 3px solid ${color};">
-                        <p style="font-size: 0.8rem; color: var(--gris-label); margin: 0 0 8px 0; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Total</p>
-                        <p style="font-size: 1.6rem; font-weight: 800; color: var(--negro); margin: 0;">$${data.total.toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+                <div class="balance-detail-stats">
+                    <div class="balance-detail-stat-box" style="border-left-color: ${color};">
+                        <p class="balance-detail-stat-label">Total</p>
+                        <p class="balance-detail-stat-value">$${data.total.toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
                     </div>
-                    <div style="background: var(--blanco); border-radius: var(--radius-sm); padding: 16px; border-left: 3px solid ${color};">
-                        <p style="font-size: 0.8rem; color: var(--gris-label); margin: 0 0 8px 0; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Registros</p>
-                        <p style="font-size: 1.6rem; font-weight: 800; color: var(--negro); margin: 0;">${data.cantidad.toLocaleString('es-MX')}</p>
+                    <div class="balance-detail-stat-box" style="border-left-color: ${color};">
+                        <p class="balance-detail-stat-label">Registros</p>
+                        <p class="balance-detail-stat-value">${data.cantidad.toLocaleString('es-MX')}</p>
                     </div>
                 </div>
             </div>
@@ -8175,7 +10739,7 @@ function renderBalanceCategorias() {
     
     const colores = ['#3B82F6', '#10B981', '#F59E0B', '#8B5CF6', '#EC4899', '#06B6D4', '#f26522', '#EF4444'];
     
-    let html = '<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px;">';
+    let html = '<div class="balance-detail-grid-categorias">';
     
     categorias.forEach((categoria, index) => {
         const data = balanceData.porCategoria[categoria];
@@ -8183,22 +10747,22 @@ function renderBalanceCategorias() {
         const color = colores[index % colores.length];
         
         html += `
-            <div style="background: linear-gradient(135deg, ${color}15 0%, ${color}05 100%); border-radius: var(--radius); padding: 24px; border: 2px solid ${color}30; transition: all 0.3s ease; box-shadow: 0 2px 8px rgba(0,0,0,0.04);">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
-                    <div style="display: flex; align-items: center; gap: 12px;">
-                        <div style="width: 12px; height: 12px; border-radius: 50%; background: ${color};"></div>
-                        <h4 style="font-size: 1.1rem; font-weight: 700; color: var(--negro); margin: 0;">${categoria}</h4>
+            <div class="balance-detail-item balance-detail-item-categoria" style="background: linear-gradient(135deg, ${color}15 0%, ${color}05 100%); border: 2px solid ${color}30;">
+                <div class="balance-detail-header">
+                    <div class="balance-detail-title-wrapper">
+                        <div class="balance-detail-dot" style="background: ${color};"></div>
+                        <h4 class="balance-detail-title balance-detail-title-categoria">${categoria}</h4>
                     </div>
-                    <span style="font-size: 0.85rem; font-weight: 700; color: ${color}; background: ${color}15; padding: 5px 12px; border-radius: 20px; border: 1px solid ${color}30;">${porcentaje}%</span>
+                    <span class="balance-detail-percentage balance-detail-percentage-categoria" style="color: ${color}; background: ${color}15; border: 1px solid ${color}30;">${porcentaje}%</span>
                 </div>
-                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; margin-top: 16px;">
-                    <div style="background: var(--blanco); border-radius: var(--radius-sm); padding: 14px; border-left: 3px solid ${color};">
-                        <p style="font-size: 0.75rem; color: var(--gris-label); margin: 0 0 6px 0; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Total</p>
-                        <p style="font-size: 1.4rem; font-weight: 800; color: var(--negro); margin: 0;">$${data.total.toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+                <div class="balance-detail-stats balance-detail-stats-categoria">
+                    <div class="balance-detail-stat-box balance-detail-stat-box-categoria" style="border-left-color: ${color};">
+                        <p class="balance-detail-stat-label balance-detail-stat-label-categoria">Total</p>
+                        <p class="balance-detail-stat-value balance-detail-stat-value-categoria">$${data.total.toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
                     </div>
-                    <div style="background: var(--blanco); border-radius: var(--radius-sm); padding: 14px; border-left: 3px solid ${color};">
-                        <p style="font-size: 0.75rem; color: var(--gris-label); margin: 0 0 6px 0; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Registros</p>
-                        <p style="font-size: 1.4rem; font-weight: 800; color: var(--negro); margin: 0;">${data.cantidad.toLocaleString('es-MX')}</p>
+                    <div class="balance-detail-stat-box balance-detail-stat-box-categoria" style="border-left-color: ${color};">
+                        <p class="balance-detail-stat-label balance-detail-stat-label-categoria">Registros</p>
+                        <p class="balance-detail-stat-value balance-detail-stat-value-categoria">${data.cantidad.toLocaleString('es-MX')}</p>
                     </div>
                 </div>
             </div>
@@ -8403,25 +10967,30 @@ const carousels = {
     casaclub: { currentIndex: 0, cardsPerView: 0, totalSlides: 0 },
     permisos: { currentIndex: 0, cardsPerView: 0, totalSlides: 0 },
     lesionados: { currentIndex: 0, cardsPerView: 0, totalSlides: 0 },
-    adeudos: { currentIndex: 0, cardsPerView: 0, totalSlides: 0 }
+    adeudos: { currentIndex: 0, cardsPerView: 0, totalSlides: 0 },
+    'adeudos-section': { currentIndex: 0, cardsPerView: 0, totalSlides: 0 }
 };
 
 // Mapeo de IDs de carruseles a IDs de contenedores
 const carouselIds = {
     comedor: 'summaryComedorCards',
+    'comedor-no-pasaron': 'carousel-comedor-no-pasaron',
     casaclub: 'summaryCasaClubCards',
     permisos: 'summaryPermisosCards',
     lesionados: 'summaryLesionadosCards',
-    adeudos: 'summaryAdeudosCards'
+    adeudos: 'summaryAdeudosCards',
+    'adeudos-section': 'carousel-adeudos' // Carrusel de la sección Mensualidades
 };
 
 // Mapeo de IDs de carruseles a IDs de dots
 const carouselDotsIds = {
     comedor: 'carouselDotsComedor',
+    'comedor-no-pasaron': 'indicators-comedor-no-pasaron',
     casaclub: 'carouselDotsCasaClub',
     permisos: 'carouselDotsPermisos',
     lesionados: 'carouselDotsLesionados',
-    adeudos: 'carouselDotsAdeudos'
+    adeudos: 'carouselDotsAdeudos',
+    'adeudos-section': 'indicators-adeudos' // Dots del carrusel de la sección Mensualidades
 };
 
 // Calcular cuántas tarjetas caben en pantalla
@@ -8539,6 +11108,17 @@ function scrollToSlide(carouselId, slideIndex) {
     const grid = document.getElementById(gridId);
     if (!grid) return;
     
+    // Buscar el contenedor con overflow (puede ser el grid mismo o un wrapper)
+    let scrollContainer = grid;
+    // Si el grid está dentro de un carousel-wrapper, usar ese
+    const wrapper = grid.closest('.carousel-wrapper');
+    if (wrapper) {
+        scrollContainer = wrapper;
+    } else if (grid.classList.contains('summary-cards-grid')) {
+        // Para los carruseles del dashboard, el grid es el contenedor
+        scrollContainer = grid;
+    }
+    
     const carousel = carousels[carouselId];
     const cards = grid.querySelectorAll('.player-card');
     if (cards.length === 0) return;
@@ -8547,7 +11127,7 @@ function scrollToSlide(carouselId, slideIndex) {
     const gap = 20;
     const scrollAmount = slideIndex * (cardWidth + gap) * carousel.cardsPerView;
     
-    grid.scrollTo({
+    scrollContainer.scrollTo({
         left: scrollAmount,
         behavior: 'smooth'
     });
@@ -8602,20 +11182,42 @@ function updateActiveDot(carouselId, slideIndex) {
 function initCarouselButtons() {
     document.querySelectorAll('.carousel-btn-prev, .carousel-btn-next').forEach(btn => {
         // Evitar agregar múltiples listeners usando atributo data
-        if (btn.hasAttribute('data-carousel-initialized')) return;
-        btn.setAttribute('data-carousel-initialized', 'true');
+        if (btn.hasAttribute('data-carousel-listener')) return;
+        btn.setAttribute('data-carousel-listener', 'true');
         
         // Agregar listener con máxima prioridad en capture phase
         btn.addEventListener('click', function(e) {
+            // Prevenir todo comportamiento por defecto y propagación
             e.preventDefault();
             e.stopPropagation();
             e.stopImmediatePropagation();
             
-            if (this.disabled) return false;
+            if (this.disabled) {
+                return false;
+            }
             
-            const carouselId = this.getAttribute('data-carousel');
-            if (!carouselId) return false;
+            let carouselId = this.getAttribute('data-carousel');
+            if (!carouselId) {
+                return false;
+            }
             
+            // Si el botón está en la sección Mensualidades, usar 'adeudos-section'
+            if (carouselId === 'adeudos' && this.closest('#section-adeudos')) {
+                carouselId = 'adeudos-section';
+            }
+            
+            // Verificar que el carrusel existe, si no, intentar inicializarlo
+            if (!carousels[carouselId]) {
+                const gridId = carouselIds[carouselId];
+                if (gridId) {
+                    initCarousel(carouselId);
+                } else {
+                    console.warn('⚠️ Carrusel no encontrado:', carouselId);
+                    return false;
+                }
+            }
+            
+            // Mover el carrusel
             if (this.classList.contains('carousel-btn-prev')) {
                 prevSlide(carouselId);
             } else if (this.classList.contains('carousel-btn-next')) {
@@ -8624,6 +11226,13 @@ function initCarouselButtons() {
             
             return false;
         }, true); // Capture phase para máxima prioridad
+        
+        // También prevenir navegación en bubble phase
+        btn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            e.stopImmediatePropagation();
+            return false;
+        }, false);
     });
 }
 
