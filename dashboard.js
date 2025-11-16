@@ -6125,6 +6125,7 @@ function createJugadorCard(jugador) {
                         ${nombreFormateado.apellidos ? `<span class="jugador-card-nombre-apellidos">${nombreFormateado.apellidos}</span>` : ''}
                     </h3>
                     <div class="jugador-card-categoria-badge">${categoria}</div>
+                    ${jugador.becado ? `<div class="jugador-card-becado-badge">Becado</div>` : ''}
                 </div>
             </div>
             <div class="jugador-card-body">
@@ -6271,7 +6272,45 @@ function openJugadorModal(jugador) {
                 ` : ''}
             </div>
         </div>
+        ${currentUser && currentUser.username === 'Juan' ? `
+        <div class="modal-section">
+            <div class="modal-becado-section">
+                <button class="btn btn-becado ${jugador.becado ? 'active' : ''}" id="btnBecado">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M12 2L2 7l10 5 10-5-10-5z"></path>
+                        <path d="M2 17l10 5 10-5M2 12l10 5 10-5"></path>
+                    </svg>
+                    <span>${jugador.becado ? 'Becado' : 'Marcar como Becado'}</span>
+                </button>
+            </div>
+        </div>
+        ` : ''}
     `;
+
+    // Configurar botón de becado (solo para Juan)
+    if (currentUser && currentUser.username === 'Juan') {
+        const btnBecado = document.getElementById('btnBecado');
+        if (btnBecado) {
+            btnBecado.onclick = async () => {
+                const nuevoEstado = !jugador.becado;
+                try {
+                    await toggleBecadoJugador(jugador.id, nuevoEstado);
+                    // Actualizar el estado local
+                    jugador.becado = nuevoEstado;
+                    currentJugador.becado = nuevoEstado;
+                    // Actualizar el botón
+                    btnBecado.classList.toggle('active', nuevoEstado);
+                    btnBecado.querySelector('span').textContent = nuevoEstado ? 'Becado' : 'Marcar como Becado';
+                    // Actualizar datos locales y recargar
+                    updateLocalJugadorData({ ...jugador, becado: nuevoEstado });
+                    mostrarNotificacion(nuevoEstado ? 'Jugador marcado como becado' : 'Jugador desmarcado como becado', 'success');
+                } catch (error) {
+                    console.error('Error al actualizar estado de becado:', error);
+                    mostrarNotificacion('Error al actualizar el estado de becado', 'error');
+                }
+            };
+        }
+    }
 
     // Configurar botón de editar (solo para la sección de Jugadores)
     if (modalBtnEdit) {
@@ -9142,6 +9181,38 @@ function updateBajasUI() {
 }
 
 // Dar de baja a un jugador (cambiar activo: false)
+// ========================================
+// TOGGLE BECADO JUGADOR
+// ========================================
+async function toggleBecadoJugador(jugadorId, esBecado) {
+    await initFirebase();
+    
+    if (!db) {
+        throw new Error('Firebase no está inicializado');
+    }
+    
+    try {
+        const { doc, updateDoc } = await import('https://www.gstatic.com/firebasejs/12.5.0/firebase-firestore.js');
+        const jugadorRef = doc(db, 'jugadores', jugadorId);
+        
+        await updateDoc(jugadorRef, {
+            becado: esBecado
+        });
+        
+        console.log(`✅ Estado de becado actualizado: ${esBecado ? 'Becado' : 'No becado'}`, jugadorId);
+        
+        // Recargar jugadores si estamos en esa vista
+        const sectionJugadores = document.getElementById('section-jugadores');
+        if (sectionJugadores && sectionJugadores.style.display !== 'none') {
+            sectionJugadores.dataset.loaded = 'false';
+            loadJugadores();
+        }
+    } catch (error) {
+        console.error('❌ Error al actualizar estado de becado:', error);
+        throw error;
+    }
+}
+
 async function darDeBajaJugador(jugadorId, jugadorData) {
     await initFirebase();
     
