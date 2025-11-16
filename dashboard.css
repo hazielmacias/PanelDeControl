@@ -2197,6 +2197,12 @@ body {
     margin-bottom: 0;
 }
 
+.modal-becado-section {
+    display: flex;
+    justify-content: center;
+    padding: 16px 0;
+}
+
 .modal-section-title {
     font-size: 14px;
     font-weight: 700;
@@ -2338,7 +2344,42 @@ body {
 
 .btn-edit:hover {
     background: #0056b3;
-    box-shadow: var(--shadow-lg);
+}
+
+.btn-becado {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: var(--blanco);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 24px;
+    border-radius: var(--radius-sm);
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition-fast);
+    border: none;
+    box-shadow: 0 2px 6px rgba(16, 185, 129, 0.2);
+}
+
+.btn-becado:hover {
+    background: linear-gradient(135deg, #059669 0%, #047857 100%);
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+    transform: translateY(-1px);
+}
+
+.btn-becado:active {
+    transform: translateY(0);
+}
+
+.btn-becado.active {
+    background: linear-gradient(135deg, #059669 0%, #047857 100%);
+    box-shadow: 0 2px 8px rgba(16, 185, 129, 0.4);
+}
+
+.btn-becado svg {
+    width: 18px;
+    height: 18px;
 }
 
 .btn-danger:hover {
@@ -3271,6 +3312,21 @@ body {
     text-transform: uppercase;
     letter-spacing: 0.5px;
     box-shadow: 0 2px 6px rgba(242, 101, 34, 0.2);
+    margin-bottom: 8px;
+}
+
+.jugador-card-becado-badge {
+    display: inline-block;
+    padding: 6px 14px;
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: var(--blanco);
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    box-shadow: 0 2px 6px rgba(16, 185, 129, 0.2);
+    margin-top: 8px;
 }
 
 .jugador-card-body {
