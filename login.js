@@ -36,6 +36,17 @@ const USERS = [
             menu: ['dashboard', 'jugadores', 'comedor', 'casaclub', 'permisos', 'lesionados', 'mensualidades', 'altas'],
             exportar: ['jugadores', 'comedor', 'casaclub', 'permisos', 'lesionados', 'mensualidades', 'altas']
         }
+    },
+    {
+        username: 'Hector',
+        password: 'hector123',
+        name: 'Héctor',
+        role: 'limited',
+        permissions: {
+            dashboard: ['jugadores', 'comedor', 'casaclub', 'permisos', 'lesionados'],
+            menu: ['dashboard', 'jugadores', 'comedor', 'casaclub', 'permisos', 'lesionados'],
+            exportar: ['jugadores', 'comedor', 'casaclub', 'permisos', 'lesionados']
+        }
     }
 ];
 
@@ -126,6 +137,7 @@ function createDefaultUser() {
     console.log('📧 Usuario 1: Juan / Password: juan123 (Acceso completo)');
     console.log('📧 Usuario 2: Charly / Password: charly123 (Acceso limitado)');
     console.log('📧 Usuario 3: Amelia / Password: amelia123 (Acceso limitado)');
+    console.log('📧 Usuario 4: Héctor / Password: hector123 (Acceso limitado)');
 }
 
 function getStoredUsers() {
@@ -321,3 +333,4 @@ console.log('%c👤 Credenciales de acceso', 'color: #1c1c1c; font-weight: bold;
 console.log('%cUsuario: Juan / Password: juan123 (Acceso completo)', 'color: #28a745; font-size: 13px;');
 console.log('%cUsuario: Charly / Password: charly123 (Acceso limitado)', 'color: #ffc107; font-size: 13px;');
 console.log('%cUsuario: Amelia / Password: amelia123 (Acceso limitado)', 'color: #ffc107; font-size: 13px;');
+console.log('%cUsuario: Héctor / Password: hector123 (Acceso limitado)', 'color: #ffc107; font-size: 13px;');
